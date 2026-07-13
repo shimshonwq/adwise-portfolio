@@ -1,95 +1,87 @@
-# Adwise Portfolio - Next.js
+# Adwise Portfolio - Next.js + Cloudflare
 
 A modern, responsive portfolio website for Adwise Media - showcasing marketing, content creation, and graphic design work.
 
 ## 🚀 Features
 
-- ⚡ Built with **Next.js 14** + **React 18**
-- 🎨 Styled with **Tailwind CSS**
+- ⚡ Built with **Next.js 15** + **React 19**
+- 🎨 Styled with **Tailwind CSS 4**
 - ✨ Smooth animations with **Framer Motion**
 - 📱 Fully responsive mobile-first design
 - 🔍 SEO optimized
-- 🎯 Contact form integration
-- 🌙 Dark/Light mode ready
-- 📊 Analytics ready
+- 🎯 Contact form ready
+- 🌙 Dark/Light mode support
+- ☁️ Deployed on **Cloudflare Pages**
 
-## 📁 Project Structure
+## 📋 Prerequisites
 
-```
-adwise-portfolio/
-├── pages/               # Next.js pages/routes
-├── components/          # Reusable React components
-├── public/              # Static assets
-├── styles/              # Global styles
-├── data/                # Portfolio data & content
-├── lib/                 # Utility functions
-└── config/              # Configuration files
-```
+- Node.js 18+
+- npm or bun
+- Cloudflare account (for deployment)
 
-## 🛠️ Getting Started
+## 🛠️ Local Development
 
-### Prerequisites
-- Node.js 16+ and npm/yarn
-
-### Installation
-
+### Install Dependencies
 ```bash
-# Clone the repository
-git clone https://github.com/shimshonwq/adwise-portfolio.git
-cd adwise-portfolio
-
-# Install dependencies
 npm install
+# or
+bun install
+```
 
-# Create .env.local from example
-cp .env.example .env.local
-
-# Run development server
+### Run Development Server
+```bash
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## 📝 Customization
+## 🏗️ Build for Production
 
-1. **Update Colors**: Edit `tailwind.config.js`
-2. **Add Projects**: Update `data/projects.ts`
-3. **Modify Content**: Edit component files in `components/`
-4. **Configure Domain**: Update `config/site.config.ts`
+```bash
+npm run build
+npm start
+```
 
-## 🚀 Deployment
+## ☁️ Deploy to Cloudflare Pages
 
-### Deploy on Vercel (Recommended)
+### Option 1: Direct GitHub Integration
 
 1. Push your code to GitHub
-2. Go to [vercel.com](https://vercel.com)
-3. Import your repository
-4. Configure environment variables
-5. Deploy!
+2. Go to [Cloudflare Pages](https://pages.cloudflare.com/)
+3. Select **Create a project** > **Connect to Git**
+4. Select your repository
+5. Configure build settings:
+   - **Build command**: `npm run build`
+   - **Build output directory**: `.next`
+   - **Node version**: 18.17.0 or higher
+6. Click **Save and Deploy**
 
-### Connect Custom Domain (Cloudflare)
+### Option 2: Wrangler CLI
 
-1. In Vercel dashboard, go to Settings > Domains
-2. Add your domain from Cloudflare
-3. Update Cloudflare nameservers if needed
+```bash
+npm install -g wrangler
+wrangler pages deploy .next
+```
 
-## 📞 Contact Form Setup
+## 🔗 Connect Custom Domain
 
-For contact form functionality:
+1. In Cloudflare Pages dashboard
+2. Go to **Settings** > **Custom domains**
+3. Add your domain (e.g., yoursite.com)
+4. Update your domain's DNS to point to Cloudflare
+5. Done! Your site is live 🎉
 
-1. Sign up at [formspree.io](https://formspree.io)
-2. Create a new form
-3. Add the form ID to `.env.local`
+## 📝 Customization
 
-## 📊 Analytics Setup
+### Update Site Content
+- **Hero section**: `components/Hero.tsx`
+- **About section**: `components/About.tsx`
+- **Contact form**: `components/Contact.tsx`
+- **Projects**: `data/projects.ts`
+- **Site config**: `config/site.config.ts`
 
-1. Set up Google Analytics
-2. Add your GA ID to `.env.local`
-3. Analytics will be tracked automatically
-
-## 🎨 Customizing Brand Colors
-
-Edit `tailwind.config.js`:
+### Customize Colors
+Edit `tailwind.config.mjs`:
 
 ```javascript
 colors: {
@@ -100,20 +92,32 @@ colors: {
 }
 ```
 
+## 📊 Environment Variables
+
+Create `.env.local` for development:
+
+```env
+NEXT_PUBLIC_EMAIL=your-email@example.com
+NEXT_PUBLIC_GA_ID=your-google-analytics-id
+```
+
+## 🚀 Performance
+
+- ✅ Image optimization
+- ✅ Code splitting
+- ✅ Static generation
+- ✅ SEO-friendly
+
 ## 📚 Resources
 
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Tailwind CSS](https://tailwindcss.com)
 - [Framer Motion](https://www.framer.com/motion/)
-- [React Icons](https://react-icons.github.io/react-icons/)
+- [Cloudflare Pages](https://pages.cloudflare.com/)
 
 ## 📄 License
 
 MIT - Feel free to use this template for your portfolio!
-
-## 🤝 Support
-
-For questions or issues, please open an issue on GitHub.
 
 ---
 

@@ -1,0 +1,13 @@
+[env.production]
+name = "adwise-portfolio"
+main = "dist/index.js"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+[env.production.build]
+command = "npm run build"
+cwd = "./"
+watch_paths = ["src/**/*.ts"]
+
+[env.production.env]
+VARIABLES = {}
