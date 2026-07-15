@@ -1,38 +1,92 @@
 @import 'tailwindcss';
 
-* {
-  margin: 0;
-  padding: 0;
+/*
+ * Tailwind CSS v4 – CSS-first configuration.
+ * Design tokens live here (no tailwind.config.js needed).
+ */
+@theme {
+  --font-heading: 'MuseoModerno', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  /* Brand palette */
+  --color-ink: #0f1115;
+  --color-ink-soft: #1a1d24;
+  --color-cream: #fbfaf7;
+  --color-brand: #ff6b35;
+  --color-brand-dark: #e6531d;
+  --color-amber: #f7931e;
+
+  --shadow-glow: 0 20px 60px -15px rgb(255 107 53 / 0.35);
+  --shadow-card: 0 10px 40px -12px rgb(15 17 21 / 0.15);
+}
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  font-family: 'Inter', sans-serif;
-  @apply bg-white dark:bg-primary text-primary dark:text-light;
+  margin: 0;
+  font-family: var(--font-body);
+  background-color: var(--color-cream);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Museo Moderno', sans-serif;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: var(--color-brand);
+  color: #fff;
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
 }
-
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #efece6;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: #ff6b35;
-  border-radius: 5px;
+  background: var(--color-brand);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand-dark);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #f7931e;
+/* Reusable brand gradient text */
+.text-gradient {
+  background: linear-gradient(120deg, var(--color-brand), var(--color-amber));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-18px);
+  }
+}
+.animate-float-slow {
+  animation: float-slow 7s ease-in-out infinite;
 }
