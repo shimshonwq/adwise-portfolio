@@ -117,7 +117,7 @@ export default function ProjectPage({ project }: ProjectPageProps) {
             </p>
             <Link
               href="/#contact"
-              className="mt-6 inline-flex items-center gap-2 rounded-full bg-brand px-7 py-3.5 font-semibold text-white transition-transform hover:-translate-y-0.5"
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-brand px-7 py-3.5 font-semibold text-ink transition-transform hover:-translate-y-0.5"
             >
               Start a project <FiArrowUpRight />
             </Link>

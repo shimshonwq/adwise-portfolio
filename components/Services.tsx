@@ -60,8 +60,8 @@ export default function Services() {
                 viewport={{ once: true, margin: '-60px' }}
                 className="group relative overflow-hidden rounded-3xl border border-black/5 bg-white p-8 shadow-card transition-all duration-300 hover:-translate-y-1.5"
               >
-                <div className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-gradient-to-r from-brand to-amber transition-transform duration-300 group-hover:scale-x-100" />
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/10 text-2xl text-brand transition-colors group-hover:bg-brand group-hover:text-white">
+                <div className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-gradient-to-r from-brand to-brand-dark transition-transform duration-300 group-hover:scale-x-100" />
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/20 text-2xl text-ink transition-colors group-hover:bg-brand group-hover:text-ink">
                   <Icon />
                 </div>
                 <h3 className="mt-6 font-heading text-2xl font-bold text-ink">{service.title}</h3>

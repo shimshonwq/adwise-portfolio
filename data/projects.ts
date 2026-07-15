@@ -26,7 +26,7 @@ export const projects: Project[] = [
     fullDescription:
       'We crafted a distinctive brand identity for Adwise Media — from the core logomark and typography to a flexible color system and usage guidelines. The result is a confident, energetic look that works everywhere from social avatars to billboards.',
     category: 'Logo Design',
-    gradient: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)',
+    gradient: 'linear-gradient(135deg, #fdc621 0%, #e5ad0d 100%)',
     tags: ['Logo Design', 'Brand Identity', 'Art Direction'],
     results: [
       { label: 'Brand assets', value: '40+' },
@@ -44,7 +44,7 @@ export const projects: Project[] = [
     fullDescription:
       'A full-funnel social strategy across Instagram, TikTok, and Facebook — combining a content calendar, short-form video, and paid amplification. We focused on hooks, consistency, and community, driving a 250% jump in engagement in three months.',
     category: 'Marketing',
-    gradient: 'linear-gradient(135deg, #1a1d24 0%, #ff6b35 120%)',
+    gradient: 'linear-gradient(135deg, #1a1a1a 0%, #fdc621 130%)',
     tags: ['Social Strategy', 'Paid Ads', 'Community'],
     results: [
       { label: 'Engagement', value: '+250%' },
@@ -62,7 +62,7 @@ export const projects: Project[] = [
     fullDescription:
       'We documented a comprehensive brand system: color palettes, typographic scale, imagery direction, iconography, and logo usage rules. The living guideline empowers internal teams and partners to ship consistent, high-quality work fast.',
     category: 'Branding',
-    gradient: 'linear-gradient(135deg, #f7931e 0%, #ff6b35 60%, #1a1d24 130%)',
+    gradient: 'linear-gradient(135deg, #fdc621 0%, #e5ad0d 55%, #1a1a1a 130%)',
     tags: ['Design System', 'Guidelines', 'Typography'],
     results: [
       { label: 'Consistency', value: '100%' },
@@ -80,7 +80,7 @@ export const projects: Project[] = [
     fullDescription:
       'A repeatable content engine covering short-form video, editorial blog posts, and shareable infographics. Every piece maps back to brand pillars and business goals, keeping the audience engaged and the pipeline full.',
     category: 'Content',
-    gradient: 'linear-gradient(135deg, #ff6b35 0%, #ffb347 100%)',
+    gradient: 'linear-gradient(135deg, #fdc621 0%, #ffe066 100%)',
     tags: ['Content Creation', 'Video', 'Copywriting'],
     results: [
       { label: 'Reach', value: '1.2M' },
@@ -98,7 +98,7 @@ export const projects: Project[] = [
     fullDescription:
       'From business cards and brochures to pitch decks and promotional graphics, we designed a cohesive suite of marketing collateral that maintains brand consistency across every customer touchpoint — online and in print.',
     category: 'Marketing',
-    gradient: 'linear-gradient(135deg, #1a1d24 0%, #3a2a1a 60%, #f7931e 140%)',
+    gradient: 'linear-gradient(135deg, #1a1a1a 0%, #3a3218 55%, #fdc621 140%)',
     tags: ['Print Design', 'Brochures', 'Pitch Decks'],
     results: [
       { label: 'Touchpoints', value: '12+' },
@@ -116,7 +116,7 @@ export const projects: Project[] = [
     fullDescription:
       'We designed multiple high-fidelity website concepts focused on user experience, clarity, and conversion. Clean layouts, strong visual hierarchy, and thoughtful motion combine into a modern, trustworthy digital presence.',
     category: 'Branding',
-    gradient: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #1a1d24 130%)',
+    gradient: 'linear-gradient(135deg, #fdc621 0%, #e5ad0d 50%, #1a1a1a 130%)',
     tags: ['Web Design', 'UI/UX', 'Prototyping'],
     results: [
       { label: 'Prototypes', value: '3' },

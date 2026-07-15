@@ -45,7 +45,7 @@ export default function Navigation() {
           ))}
           <a
             href="/#contact"
-            className="rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand hover:shadow-glow"
+            className="rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand hover:text-ink hover:shadow-glow"
           >
             Get in touch
           </a>
@@ -84,7 +84,7 @@ export default function Navigation() {
               <a
                 href="/#contact"
                 onClick={() => setIsOpen(false)}
-                className="mt-2 rounded-full bg-ink px-5 py-3 text-center text-base font-semibold text-white transition-colors hover:bg-brand"
+                className="mt-2 rounded-full bg-brand px-5 py-3 text-center text-base font-semibold text-ink transition-colors hover:bg-brand-dark"
               >
                 Get in touch
               </a>

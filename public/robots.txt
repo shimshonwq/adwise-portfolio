@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://adwisemedia.com/sitemap.xml
+Sitemap: https://adwisemedia.co/sitemap.xml

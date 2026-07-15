@@ -5,15 +5,14 @@
 export const siteConfig = {
   name: 'Adwise Media',
   shortName: 'Adwise',
-  tagline: 'Marketing · Content Creation · Graphic Design',
+  tagline: 'Thinkink Your Next Thing',
   description:
     'Adwise Media is a creative studio helping brands grow through strategic marketing, scroll-stopping content, and standout graphic design.',
-  // Update this to your live Cloudflare domain (used for SEO / social tags).
-  url: 'https://adwisemedia.com',
+  url: 'https://adwisemedia.co',
 
-  // Contact details — update these.
-  email: 'hello@adwisemedia.com',
-  phone: '',
+  email: 'adwisecreativity@gmail.com',
+  phone: '8455515506',
+  phoneDisplay: '(845) 551-5506',
   location: 'Available worldwide · Remote',
 
   socialLinks: {

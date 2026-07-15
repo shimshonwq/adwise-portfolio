@@ -28,7 +28,7 @@ export default function Footer() {
                 <li key={item.href}>
                   <a
                     href={`/${item.href}`}
-                    className="text-ink/60 transition-colors hover:text-brand"
+                    className="text-ink/60 transition-colors hover:text-brand-dark"
                   >
                     {item.label}
                   </a>
@@ -41,9 +41,15 @@ export default function Footer() {
             <h4 className="font-heading text-lg font-bold text-ink">Get in touch</h4>
             <a
               href={`mailto:${siteConfig.email}`}
-              className="mt-4 block text-sm text-ink/60 transition-colors hover:text-brand"
+              className="mt-4 block text-sm text-ink/60 transition-colors hover:text-brand-dark"
             >
               {siteConfig.email}
+            </a>
+            <a
+              href={`tel:+1${siteConfig.phone}`}
+              className="mt-1 block text-sm text-ink/60 transition-colors hover:text-brand-dark"
+            >
+              {siteConfig.phoneDisplay}
             </a>
             <p className="mt-1 text-sm text-ink/60">{siteConfig.location}</p>
             {socials.length > 0 && (
@@ -57,7 +63,7 @@ export default function Footer() {
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={s.label}
-                      className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 text-ink/70 transition-colors hover:border-brand hover:bg-brand hover:text-white"
+                      className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 text-ink/70 transition-colors hover:border-brand hover:bg-brand hover:text-ink"
                     >
                       <Icon />
                     </a>
@@ -72,7 +78,11 @@ export default function Footer() {
           <p>
             &copy; {year} {siteConfig.name}. All rights reserved.
           </p>
-          <p>Crafted with care.</p>
+          <p>
+            <a href={siteConfig.url} className="hover:text-ink">
+              adwisemedia.co
+            </a>
+          </p>
         </div>
       </div>
     </footer>

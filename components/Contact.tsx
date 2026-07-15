@@ -1,12 +1,10 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { FiMail, FiMapPin, FiSend } from 'react-icons/fi'
+import { FiMail, FiMapPin, FiPhone, FiSend } from 'react-icons/fi'
 import { FaInstagram, FaLinkedinIn, FaXTwitter, FaBehance } from 'react-icons/fa6'
 import { siteConfig } from '../config/site.config'
 
 type Status = 'idle' | 'submitting' | 'success' | 'error'
-
-const formspreeId = process.env.NEXT_PUBLIC_FORMSPREE_ID
 
 export default function Contact() {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' })
@@ -22,31 +20,34 @@ export default function Contact() {
     e.preventDefault()
     setStatus('submitting')
 
-    // If a Formspree form ID is configured, submit via their API.
-    if (formspreeId) {
-      try {
-        const res = await fetch(`https://formspree.io/f/${formspreeId}`, {
-          method: 'POST',
-          headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData),
-        })
-        if (res.ok) {
-          setStatus('success')
-          setFormData({ name: '', email: '', message: '' })
-        } else {
-          setStatus('error')
-        }
-      } catch {
+    // FormSubmit delivers messages straight to the inbox — no backend required.
+    // First-time use: FormSubmit sends a confirmation email to activate the form.
+    try {
+      const res = await fetch(`https://formsubmit.co/ajax/${siteConfig.email}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+          _subject: `New inquiry from ${formData.name} — Adwise Media`,
+          _template: 'table',
+          _captcha: 'false',
+        }),
+      })
+
+      if (res.ok) {
+        setStatus('success')
+        setFormData({ name: '', email: '', message: '' })
+      } else {
         setStatus('error')
       }
-      return
+    } catch {
+      setStatus('error')
     }
-
-    // Fallback: open the visitor's email client with the message pre-filled.
-    const subject = encodeURIComponent(`New project inquiry from ${formData.name}`)
-    const body = encodeURIComponent(`${formData.message}\n\nFrom: ${formData.name} <${formData.email}>`)
-    window.location.href = `mailto:${siteConfig.email}?subject=${subject}&body=${body}`
-    setStatus('success')
   }
 
   const socials = [
@@ -55,6 +56,8 @@ export default function Contact() {
     { icon: FaXTwitter, href: siteConfig.socialLinks.twitter, label: 'Twitter / X' },
     { icon: FaBehance, href: siteConfig.socialLinks.behance, label: 'Behance' },
   ].filter((s) => s.href)
+
+  const phoneHref = `tel:+1${siteConfig.phone}`
 
   return (
     <section id="contact" className="scroll-mt-24 px-5 py-24">
@@ -81,6 +84,15 @@ export default function Contact() {
                 </span>
                 {siteConfig.email}
               </a>
+              <a
+                href={phoneHref}
+                className="flex items-center gap-3 text-white/80 transition-colors hover:text-white"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
+                  <FiPhone />
+                </span>
+                {siteConfig.phoneDisplay}
+              </a>
               <div className="flex items-center gap-3 text-white/80">
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
                   <FiMapPin />
@@ -100,7 +112,7 @@ export default function Contact() {
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={s.label}
-                      className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-lg transition-colors hover:bg-brand"
+                      className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-lg transition-colors hover:bg-brand hover:text-ink"
                     >
                       <Icon />
                     </a>
@@ -169,20 +181,26 @@ export default function Contact() {
             <button
               type="submit"
               disabled={status === 'submitting'}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand px-8 py-3.5 text-base font-semibold text-white transition-all hover:bg-brand-dark disabled:opacity-60 sm:w-auto"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand px-8 py-3.5 text-base font-semibold text-ink transition-all hover:bg-brand-dark disabled:opacity-60 sm:w-auto"
             >
               {status === 'submitting' ? 'Sending...' : 'Send message'}
               <FiSend />
             </button>
 
             {status === 'success' && (
-              <p className="text-sm font-medium text-green-400">
+              <p className="text-sm font-medium text-brand">
                 Thanks! Your message is on its way — we'll be in touch shortly.
+                {` `}(If this is the first message ever, check {siteConfig.email} for a
+                one-time FormSubmit confirmation link.)
               </p>
             )}
             {status === 'error' && (
               <p className="text-sm font-medium text-red-400">
-                Something went wrong. Please email us directly at {siteConfig.email}.
+                Something went wrong. Please email us directly at{' '}
+                <a className="underline" href={`mailto:${siteConfig.email}`}>
+                  {siteConfig.email}
+                </a>{' '}
+                or call {siteConfig.phoneDisplay}.
               </p>
             )}
           </motion.form>

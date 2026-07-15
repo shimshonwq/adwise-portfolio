@@ -20,10 +20,11 @@ export default function Home() {
         <meta property="og:description" content={siteConfig.description} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={siteConfig.url} />
-        <meta property="og:image" content="/logo-mark.svg" />
+        <meta property="og:image" content={`${siteConfig.url}/logo.png`} />
         <meta name="twitter:card" content="summary" />
         <meta name="twitter:title" content={`${siteConfig.name} — Marketing & Design Studio`} />
         <meta name="twitter:description" content={siteConfig.description} />
+        <meta name="twitter:image" content={`${siteConfig.url}/logo.png`} />
       </Head>
 
       <Navigation />

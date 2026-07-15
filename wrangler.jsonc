@@ -1,0 +1,14 @@
+{
+  // Cloudflare Workers (static assets) — required because Cloudflare runs
+  // `npx wrangler versions upload` after the build.
+  // Build with Next.js static export into ./out, then Wrangler uploads it.
+  "name": "adwise-portfolio",
+  "compatibility_date": "2026-07-15",
+  "assets": {
+    "directory": "./out",
+    // Serve our custom /404.html for unknown routes
+    "not_found_handling": "404-page",
+    // Matches next.config.mjs trailingSlash: true
+    "html_handling": "auto-trailing-slash"
+  }
+}

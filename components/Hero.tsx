@@ -5,15 +5,14 @@ import { siteConfig } from '../config/site.config'
 export default function Hero() {
   return (
     <section id="top" className="relative overflow-hidden px-5 pt-36 pb-24 md:pt-44 md:pb-32">
-      {/* Decorative background */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-24 -right-16 h-80 w-80 rounded-full bg-brand/25 blur-3xl animate-float-slow" />
-        <div className="absolute top-40 -left-24 h-96 w-96 rounded-full bg-amber/20 blur-3xl" />
+        <div className="absolute -top-24 -right-16 h-80 w-80 rounded-full bg-brand/40 blur-3xl animate-float-slow" />
+        <div className="absolute top-40 -left-24 h-96 w-96 rounded-full bg-brand/25 blur-3xl" />
         <div
           className="absolute inset-0 opacity-[0.04]"
           style={{
             backgroundImage:
-              'linear-gradient(#0f1115 1px, transparent 1px), linear-gradient(90deg, #0f1115 1px, transparent 1px)',
+              'linear-gradient(#1a1a1a 1px, transparent 1px), linear-gradient(90deg, #1a1a1a 1px, transparent 1px)',
             backgroundSize: '48px 48px',
           }}
         />
@@ -45,9 +44,8 @@ export default function Hero() {
           transition={{ duration: 0.7, delay: 0.15 }}
           className="mx-auto mt-6 max-w-2xl text-lg text-ink/60 md:text-xl"
         >
-          {siteConfig.name} is a creative studio for marketing, content creation, and graphic
-          design. We help brands tell their story and grow with work that looks good and performs
-          even better.
+          {siteConfig.name} — {siteConfig.tagline}. We help brands grow with
+          strategic marketing, scroll-stopping content, and standout graphic design.
         </motion.p>
 
         <motion.div
@@ -58,7 +56,7 @@ export default function Hero() {
         >
           <a
             href="#work"
-            className="inline-flex items-center gap-2 rounded-full bg-brand px-7 py-3.5 text-base font-semibold text-white shadow-glow transition-transform hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 rounded-full bg-brand px-7 py-3.5 text-base font-semibold text-ink shadow-glow transition-transform hover:-translate-y-0.5"
           >
             View our work
             <FiArrowUpRight />
