@@ -10,6 +10,8 @@ node_modules/
 .next/
 out/
 dist/
+next-env.d.ts
+*.tsbuildinfo
 
 # Production
 build/
@@ -40,4 +42,3 @@ bun-debug.log*
 
 # Cloudflare
 .wrangler/
-wrangler.toml
