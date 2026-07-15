@@ -1,124 +1,91 @@
-# Adwise Portfolio - Next.js + Cloudflare
+# Adwise Media — Portfolio Website
 
-A modern, responsive portfolio website for Adwise Media - showcasing marketing, content creation, and graphic design work.
+A modern, fast, fully responsive portfolio for **Adwise Media** — marketing, content creation, and graphic design. Built with Next.js 15, React 19, and Tailwind CSS v4, and deployed to **Cloudflare Pages** as a static site.
 
-## 🚀 Features
+## Tech stack
 
-- ⚡ Built with **Next.js 15** + **React 19**
-- 🎨 Styled with **Tailwind CSS 4**
-- ✨ Smooth animations with **Framer Motion**
-- 📱 Fully responsive mobile-first design
-- 🔍 SEO optimized
-- 🎯 Contact form ready
-- 🌙 Dark/Light mode support
-- ☁️ Deployed on **Cloudflare Pages**
+- **Next.js 15** (Pages Router) with **static export** (`output: 'export'`)
+- **React 19**
+- **Tailwind CSS v4** (CSS-first config — no `tailwind.config.js`)
+- **Framer Motion** for animation
+- **react-icons**
 
-## 📋 Prerequisites
+## Local development
 
-- Node.js 18+
-- npm or bun
-- Cloudflare account (for deployment)
-
-## 🛠️ Local Development
-
-### Install Dependencies
 ```bash
 npm install
-# or
-bun install
-```
-
-### Run Development Server
-```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000).
 
-## 🏗️ Build for Production
+## Build
 
 ```bash
 npm run build
-npm start
 ```
 
-## ☁️ Deploy to Cloudflare Pages
-
-### Option 1: Direct GitHub Integration
-
-1. Push your code to GitHub
-2. Go to [Cloudflare Pages](https://pages.cloudflare.com/)
-3. Select **Create a project** > **Connect to Git**
-4. Select your repository
-5. Configure build settings:
-   - **Build command**: `npm run build`
-   - **Build output directory**: `.next`
-   - **Node version**: 18.17.0 or higher
-6. Click **Save and Deploy**
-
-### Option 2: Wrangler CLI
-
-```bash
-npm install -g wrangler
-wrangler pages deploy .next
-```
-
-## 🔗 Connect Custom Domain
-
-1. In Cloudflare Pages dashboard
-2. Go to **Settings** > **Custom domains**
-3. Add your domain (e.g., yoursite.com)
-4. Update your domain's DNS to point to Cloudflare
-5. Done! Your site is live 🎉
-
-## 📝 Customization
-
-### Update Site Content
-- **Hero section**: `components/Hero.tsx`
-- **About section**: `components/About.tsx`
-- **Contact form**: `components/Contact.tsx`
-- **Projects**: `data/projects.ts`
-- **Site config**: `config/site.config.ts`
-
-### Customize Colors
-Edit `tailwind.config.mjs`:
-
-```javascript
-colors: {
-  primary: '#1a1a1a',      // Main brand color
-  secondary: '#ff6b35',    // Accent color
-  accent: '#f7931e',       // Highlight color
-  light: '#f5f5f5',        // Light background
-}
-```
-
-## 📊 Environment Variables
-
-Create `.env.local` for development:
-
-```env
-NEXT_PUBLIC_EMAIL=your-email@example.com
-NEXT_PUBLIC_GA_ID=your-google-analytics-id
-```
-
-## 🚀 Performance
-
-- ✅ Image optimization
-- ✅ Code splitting
-- ✅ Static generation
-- ✅ SEO-friendly
-
-## 📚 Resources
-
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Tailwind CSS](https://tailwindcss.com)
-- [Framer Motion](https://www.framer.com/motion/)
-- [Cloudflare Pages](https://pages.cloudflare.com/)
-
-## 📄 License
-
-MIT - Feel free to use this template for your portfolio!
+This generates a fully static site in the **`out/`** folder (HTML/CSS/JS). No server is required to host it.
 
 ---
 
-**Made with ❤️ for Adwise Media**
+## Deploy to Cloudflare Pages (from GitHub)
+
+This project is configured for Cloudflare Pages' **"Next.js (Static HTML Export)"** preset.
+
+1. Push this repo to GitHub (already done).
+2. In the Cloudflare dashboard, go to **Workers & Pages → Create → Pages → Connect to Git**.
+3. Select this repository.
+4. Set the build configuration:
+
+   | Setting                    | Value                              |
+   | -------------------------- | ---------------------------------- |
+   | Framework preset           | **Next.js (Static HTML Export)**   |
+   | Build command              | `npm run build`                    |
+   | Build output directory     | `out`                              |
+   | Node version (env var)     | `NODE_VERSION` = `20`              |
+
+   > The build output directory **must be `out`** (not `.next`). Using `.next` is the most common cause of failed Cloudflare deployments for a static Next.js site.
+
+5. Click **Save and Deploy**.
+
+Every push to your production branch will automatically rebuild and deploy.
+
+### Custom domain (Cloudflare)
+
+1. In your Pages project → **Custom domains → Set up a custom domain**.
+2. Enter your domain (e.g. `adwisemedia.com`).
+3. Because your domain is already on Cloudflare, DNS records are added automatically.
+
+---
+
+## Customizing the site
+
+Everything is content-driven — edit these files, no component surgery needed:
+
+- **Site info, contact, socials, stats** → `config/site.config.ts`
+- **Projects / case studies** → `data/projects.ts`
+- **Services** → `components/Services.tsx`
+- **Colors & fonts** → `styles/globals.css` (the `@theme` block)
+
+### Your logo
+
+A placeholder brand mark lives at **`public/logo-mark.svg`** (and `public/favicon.svg`).
+To use your own logo, replace those two files (keep the same file names). SVG is
+recommended for crispness; PNG also works if you update the references in
+`components/Logo.tsx` and `pages/_document.tsx`.
+
+### Contact form
+
+The contact form works with no backend:
+
+- **Recommended:** create a free form at [Formspree](https://formspree.io), then set
+  `NEXT_PUBLIC_FORMSPREE_ID` (in Cloudflare → Settings → Environment variables) to your form ID.
+- **Fallback:** if that variable is empty, the form opens the visitor's email app
+  pre-addressed to the email in `config/site.config.ts`.
+
+See `.env.example` for details.
+
+---
+
+Made for Adwise Media.
