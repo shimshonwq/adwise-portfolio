@@ -1,78 +1,45 @@
-# Adwise Media — Portfolio Website
+# Adwise Media — adwisemedia.co
 
-Modern portfolio for **Adwise Media** (`adwisemedia.co`) — marketing, content creation, and graphic design.
+Premium portfolio for **Adwise Media**: marketing, content creation, and graphic design.
 
-Built with Next.js 15 (static export) + Tailwind CSS v4 + Framer Motion, deployed to **Cloudflare Workers (Static Assets)**.
+## Stack
 
-## Local development
+- Next.js 15 static export → `out/`
+- Tailwind CSS v4 + Framer Motion
+- Cloudflare Workers Static Assets via `wrangler.jsonc`
+
+## Local
 
 ```bash
 npm install
 npm run dev
+npm run build   # writes out/
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+## Cloudflare deploy
 
-## Build
+This repo is already set up for Cloudflare’s Workers pipeline:
 
-```bash
-npm run build
-```
+1. Build: `npm run build`
+2. Publish: `npx wrangler versions upload` (uses `wrangler.jsonc` → `./out`)
 
-Outputs a fully static site into **`out/`**.
+**Production branch should be `main`.**
 
----
+Optional env var: `NODE_VERSION=20`
 
-## Cloudflare deploy (important)
+Custom domain: attach **adwisemedia.co** in the Cloudflare dashboard.
 
-Your Cloudflare project runs this pipeline:
+> Connecting a Cloudflare account inside Cursor is not available from this agent environment. Deploy works through GitHub → Cloudflare once the project is linked and pointed at `main`.
 
-1. `npm run build` → produces `out/`
-2. `npx wrangler versions upload` → uploads the Worker / assets
+## Content
 
-That is why this repo includes **`wrangler.jsonc`**, which tells Wrangler:
-
-```jsonc
-{
-  "name": "adwise-portfolio",
-  "assets": { "directory": "./out" }
-}
-```
-
-Without that file, the **build succeeds** but **deploy fails** with:
-
-> Missing entry-point to Worker script or to assets directory
-
-### Dashboard settings
-
-| Setting | Value |
+| File | What to edit |
 | --- | --- |
-| Build command | `npm run build` |
-| Deploy / publish command | `npx wrangler versions upload` (Cloudflare default for Workers) |
-| Node version | `20` (`NODE_VERSION=20`) |
-
-If your Cloudflare project name is **not** `adwise-portfolio`, change the `"name"` field in `wrangler.jsonc` to match the name shown in the Cloudflare dashboard.
-
-### Custom domain
-
-Attach `adwisemedia.co` under your Worker/Pages project → **Custom domains**.
-
----
-
-## Customizing
-
-- **Contact / domain / phone** → `config/site.config.ts`
-- **Projects** → `data/projects.ts`
-- **Logo** → `public/logo.png` (nav) + `public/favicon.png`
-- **Tagline art** → `public/tagline.png` (optional use)
-- **Colors** → `styles/globals.css` (`@theme` block)
+| `config/site.config.ts` | Name, email, phone, domain, socials |
+| `data/projects.ts` | Case studies |
+| `public/logo.png` | Brand logo |
+| `styles/globals.css` | Colors & type tokens |
 
 ## Contact form
 
-The contact form emails **adwisecreativity@gmail.com** via [FormSubmit](https://formsubmit.co).
-
-**One-time setup:** after the site is live, submit a test message once. FormSubmit will send a confirmation email to that inbox — click **Confirm** and every future submission will land in your Gmail automatically.
-
----
-
-Made for Adwise Media.
+Messages go to **adwisecreativity@gmail.com** via FormSubmit. After the first live submission, confirm the email FormSubmit sends — then every inquiry arrives in Gmail.

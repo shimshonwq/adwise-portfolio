@@ -1,87 +1,68 @@
-import { useState } from 'react'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'framer-motion'
-import { FiArrowUpRight } from 'react-icons/fi'
-import { projects, categories } from '../data/projects'
+import { motion } from 'framer-motion'
+import { projects } from '../data/projects'
 
 export default function Portfolio() {
-  const [activeCategory, setActiveCategory] = useState<string>('All')
-
-  const filteredProjects =
-    activeCategory === 'All'
-      ? projects
-      : projects.filter((p) => p.category === activeCategory)
-
   return (
-    <section id="work" className="scroll-mt-24 bg-ink px-5 py-24 text-white">
-      <div className="mx-auto max-w-6xl">
-        <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
-          <div className="max-w-2xl">
-            <p className="text-sm font-semibold uppercase tracking-widest text-brand">Selected work</p>
-            <h2 className="mt-3 font-heading text-4xl font-bold md:text-5xl">
-              Projects we're proud of
+    <section id="work" className="scroll-mt-24 bg-paper py-24 md:py-32">
+      <div className="site-shell">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="eyebrow">Selected work</p>
+            <h2 className="mt-3 font-display text-4xl font-bold tracking-tight text-ink md:text-5xl">
+              Projects that earn attention
             </h2>
           </div>
+          <p className="max-w-sm text-ink/55 md:text-right">
+            Brand systems, campaigns, and content built to look sharp and perform.
+          </p>
         </div>
 
-        <div className="mt-10 flex flex-wrap gap-3">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`rounded-full px-5 py-2 text-sm font-semibold transition-all ${
-                activeCategory === cat
-                  ? 'bg-brand text-ink'
-                  : 'border border-white/15 text-white/70 hover:border-white/40 hover:text-white'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
+        <hr className="rule mt-12" />
 
-        <motion.div layout className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <AnimatePresence mode="popLayout">
-            {filteredProjects.map((project) => (
-              <motion.div
-                key={project.id}
-                layout
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.96 }}
-                transition={{ duration: 0.35 }}
-              >
-                <Link href={`/projects/${project.slug}`} className="group block">
+        <ul className="divide-y divide-line">
+          {projects.map((project, index) => (
+            <li key={project.id}>
+              <Link href={`/projects/${project.slug}`} className="group block py-8 md:py-10">
+                <motion.div
+                  initial={{ y: 18 }}
+                  whileInView={{ y: 0 }}
+                  viewport={{ once: true, margin: '-40px' }}
+                  transition={{ duration: 0.5, delay: Math.min(index * 0.04, 0.2) }}
+                  className="grid items-center gap-6 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1.35fr)_auto]"
+                >
                   <div
-                    className="relative flex h-72 flex-col justify-between overflow-hidden rounded-3xl p-6 transition-transform duration-300 group-hover:-translate-y-1.5"
+                    className="relative aspect-[16/10] overflow-hidden transition-transform duration-500 group-hover:-translate-y-1 md:aspect-[5/3]"
                     style={{ background: project.gradient }}
                   >
-                    <div
-                      className="absolute inset-0 opacity-20 mix-blend-overlay"
-                      style={{
-                        backgroundImage:
-                          'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.8) 0, transparent 40%)',
-                      }}
-                    />
-                    <div className="relative flex items-center justify-between">
-                      <span className="rounded-full bg-black/25 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white/90 backdrop-blur">
-                        {project.category}
-                      </span>
-                      <span className="text-xs font-medium text-white/70">{project.year}</span>
-                    </div>
-                    <div className="relative">
-                      <h3 className="font-heading text-2xl font-bold text-white">{project.title}</h3>
-                      <p className="mt-2 text-sm text-white/80">{project.description}</p>
-                      <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                        View case study <FiArrowUpRight />
-                      </span>
-                    </div>
+                    <div className="absolute inset-0 opacity-30 mix-blend-overlay" style={{
+                      backgroundImage: 'radial-gradient(circle at 20% 20%, #fff 0, transparent 45%)',
+                    }} />
+                    <span className="absolute left-4 top-4 text-xs font-semibold uppercase tracking-widest text-white/85">
+                      {project.category}
+                    </span>
                   </div>
-                </Link>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
+
+                  <div>
+                    <div className="flex flex-wrap items-center gap-3 text-sm text-muted">
+                      <span>{project.client}</span>
+                      <span aria-hidden>·</span>
+                      <span>{project.year}</span>
+                    </div>
+                    <h3 className="mt-2 font-display text-2xl font-bold tracking-tight text-ink transition-colors group-hover:text-brand-deep md:text-3xl">
+                      {project.title}
+                    </h3>
+                    <p className="mt-3 max-w-md text-ink/60">{project.description}</p>
+                  </div>
+
+                  <span className="hidden text-sm font-semibold tracking-wide text-ink/40 transition-colors group-hover:text-ink md:inline">
+                    View case →
+                  </span>
+                </motion.div>
+              </Link>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   )
