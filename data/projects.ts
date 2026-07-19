@@ -9,6 +9,10 @@ export interface Project {
   description: string
   fullDescription: string
   category: Category
+  /** Stage background behind the artwork */
+  surface: string
+  /** Text color on the stage */
+  theme: 'light' | 'dark'
   gradient: string
   tags: string[]
   coverImage: string
@@ -38,6 +42,8 @@ export const projects: Project[] = [
     fullDescription:
       'A complete identity system for Gebecks Heimische Bakery. We designed a high-contrast serif wordmark with a custom wheat mark growing from the “K,” plus supporting iconography and brand language — Fresh. Heimish. Geshmak. — that feels artisanal, premium, and rooted in tradition.',
     category: 'Branding',
+    surface: '#f3efe6',
+    theme: 'dark',
     gradient: 'linear-gradient(145deg, #f4f1ea 0%, #ebe6db 55%, #121212 140%)',
     tags: ['Logo Design', 'Brand System', 'Typography'],
     coverImage: '/projects/gebecks-bakery/cover.png',
@@ -58,6 +64,8 @@ export const projects: Project[] = [
     fullDescription:
       'Planit needed an identity that felt architectural without feeling cold. We built a bold PI monogram with subtle drafting-grid texture inside the letterforms, paired with a clean, widely tracked “Architecture & Design” lockup — precise, modern, and built to last.',
     category: 'Logos',
+    surface: '#f7f5f0',
+    theme: 'dark',
     gradient: 'linear-gradient(145deg, #f4f1ea 0%, #d9d3c6 60%, #2a2a2a 130%)',
     tags: ['Logo Design', 'Monogram', 'Architecture'],
     coverImage: '/projects/planit-architecture/cover.png',
@@ -73,6 +81,8 @@ export const projects: Project[] = [
     fullDescription:
       'Identity work for Shloimy Friedlander Productions — a distinctive abstract mark, a strong squared display wordmark, and a campaign poster line: “Playing a role in your next event.” Clean, high-contrast, and built for stages and screens.',
     category: 'Branding',
+    surface: '#2b2b2b',
+    theme: 'light',
     gradient: 'linear-gradient(145deg, #2a2a2a 0%, #121212 50%, #fdc621 140%)',
     tags: ['Logo Design', 'Poster', 'Event Branding'],
     coverImage: '/projects/shloimy-friedlander/cover.png',
@@ -89,6 +99,8 @@ export const projects: Project[] = [
     fullDescription:
       'Brand identity for iContact Studio spanning logo design and promotional collateral. A golden wordmark with a lens/eye detail on the “i,” deep teal photography lockups, and a “we tell your product’s story” business card concept with QR and contact paths.',
     category: 'Branding',
+    surface: '#ffffff',
+    theme: 'dark',
     gradient: 'linear-gradient(145deg, #004d54 0%, #0a2f33 55%, #d99d3b 130%)',
     tags: ['Logo Design', 'Photography', 'Collateral'],
     coverImage: '/projects/icontact-studio/cover.png',
@@ -108,6 +120,8 @@ export const projects: Project[] = [
     fullDescription:
       'A confident identity for Green Power Electric Inc. We paired a sharp lightning bolt with a circular circuit swoosh and a clear GREEN / POWER / ELECTRIC INC. stack — energetic, trustworthy, and instantly readable on trucks, signs, and social.',
     category: 'Logos',
+    surface: '#d7ef7a',
+    theme: 'dark',
     gradient: 'linear-gradient(145deg, #c8e86c 0%, #5aa83a 50%, #121212 125%)',
     tags: ['Logo Design', 'Trade Branding', 'Iconography'],
     coverImage: '/projects/green-power-electric/cover.png',
@@ -123,6 +137,8 @@ export const projects: Project[] = [
     fullDescription:
       'Full-bleed signage design for Vish Vash Car Wash and Detailing — bold stacked wordmark, bubble-and-vehicle icon system, and a cinematic luxury-vehicle presentation with water and reflection. Built to stop traffic and feel premium from across the lot.',
     category: 'Signage',
+    surface: '#0b1a2e',
+    theme: 'light',
     gradient: 'linear-gradient(145deg, #0a1628 0%, #1565c0 55%, #4fc3f7 120%)',
     tags: ['Signage', 'Graphic Design', 'Outdoor'],
     coverImage: '/projects/vish-vash-carwash/cover.jpg',
@@ -138,6 +154,8 @@ export const projects: Project[] = [
     fullDescription:
       'A custom Hebrew wordmark with soft, rounded letterforms in burnt orange, an illustrated portrait nestled in the letterforms, and supporting steam and wheat motifs. Friendly, cultural, and full of craft — designed to feel handmade without losing polish.',
     category: 'Logos',
+    surface: '#fffaf5',
+    theme: 'dark',
     gradient: 'linear-gradient(145deg, #ffffff 0%, #ffe8d6 50%, #e07a2f 130%)',
     tags: ['Custom Lettering', 'Illustration', 'Logo Design'],
     coverImage: '/projects/artisan-hebrew-wordmark/cover.png',
@@ -153,6 +171,8 @@ export const projects: Project[] = [
     fullDescription:
       'A cozy illustrated identity moment for Coffee Break — steaming cup, scattered beans, coffee-ring framing, and soft bokeh depth. Designed to feel inviting and instantly recognizable for café and lifestyle use.',
     category: 'Print',
+    surface: '#f3e4d2',
+    theme: 'dark',
     gradient: 'linear-gradient(145deg, #f5e6d3 0%, #c4a484 50%, #5c3d2e 125%)',
     tags: ['Illustration', 'Logo Design', 'Lifestyle'],
     coverImage: '/projects/coffee-break/cover.png',
