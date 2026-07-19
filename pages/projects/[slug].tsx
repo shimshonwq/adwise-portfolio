@@ -65,7 +65,7 @@ export default function ProjectPage({ project, nextSlug }: Props) {
             className="site-shell relative z-10 flex flex-1 items-center justify-center"
           >
             <div
-              className={`relative w-full ${
+              className={`relative w-full overflow-hidden rounded-[2rem] ${
                 isWide ? 'aspect-[16/9] max-w-6xl' : 'aspect-square max-w-2xl md:max-w-3xl'
               }`}
             >
@@ -84,17 +84,17 @@ export default function ProjectPage({ project, nextSlug }: Props) {
 
           <div className={`site-shell relative z-10 mt-14 md:mt-20 ${onDark ? 'text-white' : 'text-ink'}`}>
             <p
-              className={`text-[0.7rem] font-bold uppercase tracking-[0.24em] ${
-                onDark ? 'text-brand' : 'text-brand-deep'
+              className={`inline-flex rounded-full px-3 py-1 text-[0.7rem] font-bold uppercase tracking-[0.24em] ${
+                onDark ? 'bg-brand text-ink' : 'bg-ink text-brand'
               }`}
             >
               {project.category}
             </p>
-            <h1 className="mt-3 max-w-4xl font-display text-[clamp(2.4rem,6vw,4.5rem)] font-bold leading-[1.02] tracking-tight">
+            <h1 className="mt-4 max-w-4xl font-display text-[clamp(2.4rem,6vw,4.5rem)] font-bold leading-[1.05] tracking-tight">
               {project.title}
             </h1>
-            <p className={`mt-4 text-sm ${onDark ? 'text-white/45' : 'text-ink/40'}`}>
-              {project.client} · {project.year}
+            <p className={`mt-4 text-sm font-semibold ${onDark ? 'text-white/50' : 'text-ink/45'}`}>
+              {project.client}
             </p>
           </div>
         </section>
@@ -123,14 +123,10 @@ export default function ProjectPage({ project, nextSlug }: Props) {
             </div>
 
             <aside className="md:col-span-4 md:col-start-9">
-              <dl className="space-y-8 border-t border-line pt-8 text-sm">
+              <dl className="soft-panel space-y-7 border border-line bg-white p-7 text-sm">
                 <div>
                   <dt className="text-ink/35">Client</dt>
                   <dd className="mt-1.5 font-semibold text-ink">{project.client}</dd>
-                </div>
-                <div>
-                  <dt className="text-ink/35">Year</dt>
-                  <dd className="mt-1.5 font-semibold text-ink">{project.year}</dd>
                 </div>
                 <div>
                   <dt className="text-ink/35">Category</dt>
@@ -138,9 +134,12 @@ export default function ProjectPage({ project, nextSlug }: Props) {
                 </div>
                 <div>
                   <dt className="text-ink/35">Focus</dt>
-                  <dd className="mt-3 flex flex-wrap gap-x-3 gap-y-2">
+                  <dd className="mt-3 flex flex-wrap gap-2">
                     {project.tags.map((tag) => (
-                      <span key={tag} className="text-ink/60">
+                      <span
+                        key={tag}
+                        className="rounded-full bg-paper-deep px-3 py-1 text-xs font-semibold text-ink/60"
+                      >
                         {tag}
                       </span>
                     ))}
@@ -167,7 +166,7 @@ export default function ProjectPage({ project, nextSlug }: Props) {
                   whileInView={{ y: 0, opacity: 1 }}
                   viewport={{ once: true, margin: '-80px' }}
                   transition={{ duration: 0.6, delay: i * 0.04 }}
-                  className="flex min-h-[50vh] items-center justify-center px-6 py-16 md:min-h-[70vh] md:px-16 md:py-24"
+                  className="soft-panel mx-auto flex min-h-[50vh] max-w-6xl items-center justify-center px-6 py-16 md:min-h-[70vh] md:px-16 md:py-24"
                   style={{ background: i % 2 === 0 ? project.surface : '#ffffff' }}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -184,7 +183,7 @@ export default function ProjectPage({ project, nextSlug }: Props) {
 
         {project.videoUrl && (
           <section className="bg-ink py-16">
-            <div className="site-shell overflow-hidden">
+            <div className="site-shell overflow-hidden rounded-[2rem]">
               {embedSrc ? (
                 <div className="aspect-video w-full">
                   <iframe

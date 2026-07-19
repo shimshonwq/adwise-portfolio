@@ -1,4 +1,6 @@
+import { motion } from 'framer-motion'
 import { siteConfig } from '../config/site.config'
+import AnimatedText from './AnimatedText'
 
 const marqueeItems = [
   'Logo Design',
@@ -27,46 +29,58 @@ export default function Hero() {
       </div>
 
       <div className="site-shell relative flex min-h-[100svh] flex-col justify-end pb-28 pt-28 md:justify-center md:pb-32 md:pt-32">
-        <div className="reveal max-w-2xl">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+        <div className="max-w-2xl">
+          <motion.img
             src="/logo.png"
             alt={siteConfig.name}
             width={420}
             height={130}
             className="mb-9 h-14 w-auto md:mb-11 md:h-20"
+            initial={{ opacity: 0, y: 18, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           />
 
-          <h1 className="font-display text-[clamp(2.6rem,6.8vw,4.8rem)] font-bold leading-[1.02] tracking-tight text-ink">
-            Logos & graphics
-            <br />
-            <span className="text-brand-deep">for businesses.</span>
-          </h1>
+          <AnimatedText
+            as="h1"
+            text="Logos & graphics for businesses."
+            className="font-display text-[clamp(2.6rem,6.8vw,4.8rem)] font-bold leading-[1.05] tracking-tight text-ink"
+          />
 
-          <p className="mt-6 max-w-md text-lg leading-relaxed text-ink/60 md:text-xl">
+          <motion.p
+            className="mt-6 max-w-md text-lg leading-relaxed text-ink/60 md:text-xl"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45, duration: 0.6 }}
+          >
             We design logos, brand graphics, and visuals that help companies look sharp, stand out,
             and get remembered.
-          </p>
+          </motion.p>
 
-          <div className="mt-9 flex flex-wrap items-center gap-3">
+          <motion.div
+            className="mt-9 flex flex-wrap items-center gap-3"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.55 }}
+          >
             <a href="#work" className="btn btn-primary">
               See our logos
             </a>
             <a href="#contact" className="btn btn-secondary">
               Start a project
             </a>
-          </div>
+          </motion.div>
         </div>
       </div>
 
       <div className="absolute inset-x-0 bottom-0 overflow-hidden border-t border-ink/10 bg-ink py-3.5 text-brand">
-        <div className="marquee-track flex gap-12 whitespace-nowrap px-6 text-xs font-semibold tracking-[0.22em] uppercase md:text-sm">
+        <div className="marquee-track flex gap-12 whitespace-nowrap px-6 text-xs font-extrabold tracking-[0.22em] uppercase md:text-sm">
           {Array.from({ length: 2 }).map((_, loop) => (
             <div key={loop} className="flex gap-12">
               {marqueeItems.map((label) => (
                 <span key={`${loop}-${label}`} className="inline-flex items-center gap-12">
                   {label}
-                  <span className="inline-block h-1.5 w-1.5 bg-brand" aria-hidden />
+                  <span className="inline-block h-2 w-2 rounded-full bg-brand" aria-hidden />
                 </span>
               ))}
             </div>

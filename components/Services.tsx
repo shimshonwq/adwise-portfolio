@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import AnimatedText from './AnimatedText'
 
 const services = [
   {
@@ -29,22 +30,29 @@ export default function Services() {
     <section id="services" className="scroll-mt-24 ink-field py-24 md:py-32">
       <div className="site-shell">
         <p className="eyebrow !text-brand">What we do</p>
-        <h2 className="mt-3 max-w-2xl font-display text-4xl font-bold tracking-tight text-white md:text-5xl">
-          What we make for businesses
-        </h2>
-        <p className="mt-5 max-w-xl text-lg text-white/60">
+        <AnimatedText
+          as="h2"
+          text="What we make for businesses"
+          className="mt-3 max-w-2xl font-display text-4xl font-bold tracking-tight text-white md:text-5xl"
+        />
+        <motion.p
+          className="mt-5 max-w-xl text-lg text-white/60"
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
           Logos, graphics, and marketing creatives — from first impression to full campaigns.
-        </p>
+        </motion.p>
 
-        <div className="mt-16 grid gap-0 border-t border-white/10 md:grid-cols-3">
+        <div className="mt-14 grid gap-5 md:grid-cols-3 md:gap-6">
           {services.map((service, index) => (
             <motion.article
               key={service.num}
-              initial={{ y: 16 }}
-              whileInView={{ y: 0 }}
+              initial={{ y: 24, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
               viewport={{ once: true, margin: '-60px' }}
               transition={{ duration: 0.5, delay: index * 0.08 }}
-              className="border-b border-white/10 py-10 md:border-b-0 md:border-r md:px-8 md:py-12 md:first:pl-0 md:last:border-r-0 md:last:pr-0"
+              className="soft-panel border border-white/10 bg-white/5 p-8 md:p-9"
             >
               <span className="font-display text-sm font-semibold tracking-[0.2em] text-brand">
                 {service.num}
@@ -56,7 +64,7 @@ export default function Services() {
               <ul className="mt-8 space-y-2">
                 {service.points.map((point) => (
                   <li key={point} className="flex items-center gap-3 text-sm text-white/80">
-                    <span className="h-px w-5 bg-brand" aria-hidden />
+                    <span className="h-2 w-2 rounded-full bg-brand" aria-hidden />
                     {point}
                   </li>
                 ))}

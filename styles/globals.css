@@ -1,12 +1,12 @@
 @import 'tailwindcss';
 
 /*
- * Adwise Media — brand system
- * Type: Fredoka (display — matches logo) + DM Sans (body)
+ * Adwise Media — soft, rounded brand system
+ * Display: Fredoka (logo match) · Body: Nunito
  */
 @theme {
-  --font-display: var(--font-logo), ui-sans-serif, system-ui, sans-serif;
-  --font-body: var(--font-dm), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-logo-stack), var(--font-logo), 'Fredoka', ui-rounded, sans-serif;
+  --font-body: var(--font-body-stack), var(--font-body-face), 'Nunito', ui-sans-serif, sans-serif;
 
   --color-ink: #0e0e0e;
   --color-ink-soft: #1c1c1c;
@@ -16,6 +16,8 @@
   --color-brand-deep: #e0ad00;
   --color-muted: #5c5c5c;
   --color-line: rgb(14 14 14 / 0.1);
+  --radius-soft: 1.75rem;
+  --radius-pill: 999px;
 }
 
 *,
@@ -44,9 +46,10 @@ body {
 h1,
 h2,
 h3,
-h4 {
-  font-family: var(--font-display);
-  letter-spacing: -0.02em;
+h4,
+.font-display {
+  font-family: var(--font-logo-stack), var(--font-logo), 'Fredoka', ui-rounded, sans-serif !important;
+  letter-spacing: -0.01em;
   font-weight: 700;
 }
 
@@ -68,7 +71,7 @@ video {
 
 .eyebrow {
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--color-muted);
@@ -85,17 +88,18 @@ video {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.9rem 1.7rem;
-  font-size: 0.875rem;
-  font-weight: 650;
+  padding: 0.95rem 1.85rem;
+  font-size: 0.9rem;
+  font-weight: 700;
   letter-spacing: 0.01em;
   border: 1px solid transparent;
+  border-radius: var(--radius-pill);
   transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
   cursor: pointer;
 }
 
 .btn:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
 .btn-primary {
@@ -109,7 +113,7 @@ video {
 
 .btn-secondary {
   background: transparent;
-  border-color: rgb(14 14 14 / 0.25);
+  border-color: rgb(14 14 14 / 0.22);
   color: #0e0e0e !important;
 }
 .btn-secondary:hover {
@@ -151,29 +155,59 @@ video {
   overflow: hidden;
   background: #fff;
   aspect-ratio: 1;
-  border: 1px solid var(--color-line);
+  border-radius: var(--radius-soft);
+  border: 1px solid rgb(14 14 14 / 0.06);
+  box-shadow: 0 18px 40px -28px rgb(14 14 14 / 0.35);
   transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s ease;
 }
 .logo-tile:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 28px 50px -28px rgb(14 14 14 / 0.35);
+  transform: translateY(-8px) scale(1.015);
+  box-shadow: 0 34px 60px -28px rgb(14 14 14 / 0.4);
 }
 .logo-tile img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  padding: 12%;
-  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  padding: 14%;
+  transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .logo-tile:hover img {
-  transform: scale(1.04);
+  transform: scale(1.07);
 }
 .logo-tile.wide {
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 16 / 10;
 }
 .logo-tile.wide img {
   object-fit: cover;
   padding: 0;
+}
+
+.chip {
+  border-radius: var(--radius-pill);
+  padding: 0.55rem 1.15rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+.chip:hover {
+  transform: translateY(-1px);
+}
+.chip-active {
+  background: #0e0e0e;
+  color: #fff;
+}
+.chip-idle {
+  background: #fff;
+  color: rgb(14 14 14 / 0.55);
+  border: 1px solid var(--color-line);
+}
+.chip-idle:hover {
+  color: #0e0e0e;
+  border-color: #0e0e0e;
+}
+
+.soft-panel {
+  border-radius: var(--radius-soft);
 }
 
 @keyframes marquee {
@@ -213,6 +247,25 @@ video {
   }
 }
 
+@keyframes shimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.brand-shimmer {
+  background: linear-gradient(90deg, #0e0e0e 0%, #e0ad00 35%, #fdc621 50%, #e0ad00 65%, #0e0e0e 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 5s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -220,8 +273,13 @@ video {
   .marquee-track,
   .reveal,
   .logo-tile,
-  .logo-tile img {
+  .logo-tile img,
+  .brand-shimmer {
     animation: none !important;
     transition: none !important;
+  }
+  .brand-shimmer {
+    color: var(--color-brand-deep);
+    background: none;
   }
 }

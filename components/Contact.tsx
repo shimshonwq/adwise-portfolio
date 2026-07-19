@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { siteConfig } from '../config/site.config'
 import ContactChannels from './ContactChannels'
+import AnimatedText from './AnimatedText'
 
 type Status = 'idle' | 'submitting' | 'success' | 'error'
 
@@ -46,15 +47,17 @@ export default function Contact() {
     <section id="contact" className="scroll-mt-24 bg-brand py-24 md:py-32">
       <div className="site-shell grid gap-14 md:grid-cols-2 md:items-start">
         <motion.div
-          initial={{ y: 14 }}
-          whileInView={{ y: 0 }}
+          initial={{ y: 18, opacity: 0 }}
+          whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
           <p className="eyebrow !text-ink/55">Contact</p>
-          <h2 className="mt-3 font-display text-4xl font-bold tracking-tight text-ink md:text-5xl">
-            Let’s make something people can’t ignore.
-          </h2>
+          <AnimatedText
+            as="h2"
+            text="Let’s make something people can’t ignore."
+            className="mt-3 font-display text-4xl font-bold tracking-tight text-ink md:text-5xl"
+          />
           <p className="mt-5 max-w-md text-lg text-ink/70">
             Tell us about your project — or reach out right now on WhatsApp, email, call, or text.
           </p>
@@ -73,12 +76,12 @@ export default function Contact() {
         </motion.div>
 
         <motion.form
-          initial={{ y: 14 }}
-          whileInView={{ y: 0 }}
+          initial={{ y: 18, opacity: 0 }}
+          whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.08 }}
           onSubmit={onSubmit}
-          className="space-y-5 bg-ink p-8 text-white md:p-10"
+          className="soft-panel space-y-5 bg-ink p-8 text-white md:p-10"
         >
           <div className="grid gap-5 sm:grid-cols-2">
             <label className="block text-sm">
@@ -88,7 +91,7 @@ export default function Contact() {
                 required
                 value={formData.name}
                 onChange={onChange}
-                className="w-full border-0 border-b border-white/20 bg-transparent px-0 py-3 text-white outline-none transition focus:border-brand"
+                className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-brand"
                 placeholder="Your name"
               />
             </label>
@@ -100,7 +103,7 @@ export default function Contact() {
                 required
                 value={formData.email}
                 onChange={onChange}
-                className="w-full border-0 border-b border-white/20 bg-transparent px-0 py-3 text-white outline-none transition focus:border-brand"
+                className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-brand"
                 placeholder="you@company.com"
               />
             </label>
@@ -113,7 +116,7 @@ export default function Contact() {
               rows={5}
               value={formData.message}
               onChange={onChange}
-              className="w-full resize-none border-0 border-b border-white/20 bg-transparent px-0 py-3 text-white outline-none transition focus:border-brand"
+              className="w-full resize-none rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-brand"
               placeholder="What are we building?"
             />
           </label>

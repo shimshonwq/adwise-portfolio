@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { siteConfig } from '../config/site.config'
+import AnimatedText from './AnimatedText'
 
 const principles = [
   {
@@ -21,41 +22,43 @@ export default function About() {
     <section id="about" className="scroll-mt-24 bg-paper-deep py-24 md:py-32">
       <div className="site-shell grid gap-14 md:grid-cols-[1.1fr_0.9fr] md:items-start">
         <motion.div
-          initial={{ y: 14 }}
-          whileInView={{ y: 0 }}
+          initial={{ y: 18, opacity: 0 }}
+          whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
           <p className="eyebrow">About {siteConfig.shortName}</p>
-          <h2 className="mt-3 font-display text-4xl font-bold tracking-tight text-ink md:text-5xl">
-            Logos & graphics
-            <br />
-            that work for business.
-          </h2>
+          <AnimatedText
+            as="h2"
+            text="Logos & graphics that work for business."
+            className="mt-3 font-display text-4xl font-bold tracking-tight text-ink md:text-5xl"
+          />
           <p className="mt-6 text-lg leading-relaxed text-ink/65">
             {siteConfig.name} designs logos, brand graphics, and marketing visuals for companies that
             want to look professional and memorable. From first sketch to finished signage, we blend
             strategy with craft.
           </p>
           <p className="mt-4 text-lg leading-relaxed text-ink/65">
-            {siteConfig.tagline} isn’t just a line — it’s how we work.
+            <span className="brand-shimmer font-display font-bold">{siteConfig.tagline}</span> isn’t
+            just a line — it’s how we work.
           </p>
         </motion.div>
 
-        <motion.div
-          initial={{ y: 14 }}
-          whileInView={{ y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.08 }}
-          className="border-t border-line"
-        >
-          {principles.map((item) => (
-            <div key={item.title} className="border-b border-line py-7">
+        <div className="space-y-4">
+          {principles.map((item, index) => (
+            <motion.div
+              key={item.title}
+              initial={{ y: 16, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.45, delay: index * 0.07 }}
+              className="soft-panel border border-line bg-white p-6 md:p-7"
+            >
               <h3 className="font-display text-xl font-bold text-ink">{item.title}</h3>
               <p className="mt-2 text-ink/60">{item.body}</p>
-            </div>
+            </motion.div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   )
