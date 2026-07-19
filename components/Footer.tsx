@@ -1,4 +1,5 @@
 import Logo from './Logo'
+import ContactChannels from './ContactChannels'
 import { siteConfig } from '../config/site.config'
 
 export default function Footer() {
@@ -10,6 +11,7 @@ export default function Footer() {
         <div>
           <Logo href="/#top" size="sm" />
           <p className="mt-4 max-w-xs text-sm text-ink/55">{siteConfig.tagline}</p>
+          <ContactChannels className="mt-6" />
         </div>
 
         <div className="flex flex-wrap gap-12 text-sm">
@@ -29,13 +31,18 @@ export default function Footer() {
             <p className="font-semibold text-ink">Contact</p>
             <ul className="mt-3 space-y-2 text-ink/55">
               <li>
-                <a href={`mailto:${siteConfig.email}`} className="hover:text-ink">
+                <a href={siteConfig.contactChannels.email} className="hover:text-ink">
                   {siteConfig.email}
                 </a>
               </li>
               <li>
-                <a href={`tel:+1${siteConfig.phone}`} className="hover:text-ink">
+                <a href={siteConfig.contactChannels.call} className="hover:text-ink">
                   {siteConfig.phoneDisplay}
+                </a>
+              </li>
+              <li>
+                <a href={siteConfig.contactChannels.whatsapp} className="hover:text-ink" target="_blank" rel="noopener noreferrer">
+                  WhatsApp
                 </a>
               </li>
               <li>

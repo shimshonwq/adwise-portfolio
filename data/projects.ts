@@ -9,10 +9,19 @@ export interface Project {
   description: string
   fullDescription: string
   category: Category
-  /** CSS gradient used as the project visual plane */
+  /** Fallback visual when no cover image is set */
   gradient: string
-  accent: string
   tags: string[]
+  /**
+   * Media — drop files in public/projects/{slug}/ then set paths here.
+   * Example: coverImage: '/projects/my-project/cover.jpg'
+   */
+  coverImage?: string
+  gallery?: string[]
+  /** YouTube / Vimeo URL, or a local file like '/projects/my-project/demo.mp4' */
+  videoUrl?: string
+  /** Live site or external case-study link */
+  link?: string
   results?: { label: string; value: string }[]
   deliverables?: string[]
 }
@@ -29,8 +38,9 @@ export const projects: Project[] = [
       'We crafted a distinctive brand identity for Adwise Media — from the core logomark and typography to a flexible color system and usage guidelines. The result is a confident, energetic look that works everywhere from social avatars to billboards.',
     category: 'Logo Design',
     gradient: 'linear-gradient(145deg, #fdc621 0%, #f0b400 45%, #121212 120%)',
-    accent: '#fdc621',
     tags: ['Logo Design', 'Brand Identity', 'Art Direction'],
+    // coverImage: '/projects/adwise-brand-identity/cover.jpg',
+    // gallery: ['/projects/adwise-brand-identity/1.jpg', '/projects/adwise-brand-identity/2.jpg'],
     results: [
       { label: 'Brand assets', value: '40+' },
       { label: 'Recognition lift', value: '3×' },
@@ -48,7 +58,6 @@ export const projects: Project[] = [
       'A full-funnel social strategy across Instagram, TikTok, and Facebook — combining a content calendar, short-form video, and paid amplification. Focused on hooks, consistency, and community, driving a 250% jump in engagement in three months.',
     category: 'Marketing',
     gradient: 'linear-gradient(145deg, #1a1a1a 0%, #3d3420 55%, #fdc621 130%)',
-    accent: '#fdc621',
     tags: ['Social Strategy', 'Paid Ads', 'Community'],
     results: [
       { label: 'Engagement', value: '+250%' },
@@ -67,7 +76,6 @@ export const projects: Project[] = [
       'We documented a comprehensive brand system: color palettes, typographic scale, imagery direction, iconography, and logo usage rules. The living guideline empowers teams and partners to ship consistent, high-quality work fast.',
     category: 'Branding',
     gradient: 'linear-gradient(145deg, #fdc621 0%, #fff3b0 50%, #2a2a2a 125%)',
-    accent: '#e0ad00',
     tags: ['Design System', 'Guidelines', 'Typography'],
     results: [
       { label: 'Consistency', value: '100%' },
@@ -86,7 +94,6 @@ export const projects: Project[] = [
       'A repeatable content engine covering short-form video, editorial posts, and shareable graphics. Every piece maps back to brand pillars and business goals, keeping the audience engaged and the pipeline full.',
     category: 'Content',
     gradient: 'linear-gradient(145deg, #ffe066 0%, #fdc621 40%, #121212 120%)',
-    accent: '#fdc621',
     tags: ['Content Creation', 'Video', 'Copywriting'],
     results: [
       { label: 'Reach', value: '1.2M' },
@@ -105,7 +112,6 @@ export const projects: Project[] = [
       'From business cards and brochures to pitch decks and promotional graphics, we designed a cohesive suite of marketing collateral that maintains brand consistency across every customer touchpoint.',
     category: 'Marketing',
     gradient: 'linear-gradient(145deg, #121212 0%, #2c2410 50%, #fdc621 140%)',
-    accent: '#fdc621',
     tags: ['Print Design', 'Brochures', 'Pitch Decks'],
     results: [
       { label: 'Touchpoints', value: '12+' },
@@ -124,7 +130,6 @@ export const projects: Project[] = [
       'We designed high-fidelity website concepts focused on clarity, hierarchy, and conversion. Clean layouts and thoughtful motion combine into a modern, trustworthy digital presence.',
     category: 'Branding',
     gradient: 'linear-gradient(145deg, #fdc621 0%, #e0ad00 40%, #121212 115%)',
-    accent: '#fdc621',
     tags: ['Web Design', 'UI/UX', 'Prototyping'],
     results: [
       { label: 'Prototypes', value: '3' },

@@ -1,12 +1,13 @@
 import type { AppProps } from 'next/app'
-import { Syne, DM_Sans } from 'next/font/google'
+import { Fredoka, DM_Sans } from 'next/font/google'
 import '../styles/globals.css'
 
-const syne = Syne({
+/** Fredoka matches the rounded, chunky letterforms in the Adwise logo */
+const logoFont = Fredoka({
   subsets: ['latin'],
-  variable: '--font-syne',
+  variable: '--font-logo',
   display: 'swap',
-  weight: ['500', '600', '700', '800'],
+  weight: ['500', '600', '700'],
 })
 
 const dm = DM_Sans({
@@ -18,7 +19,7 @@ const dm = DM_Sans({
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <div className={`${syne.variable} ${dm.variable} font-body`}>
+    <div className={`${logoFont.variable} ${dm.variable} font-body`}>
       <Component {...pageProps} />
     </div>
   )

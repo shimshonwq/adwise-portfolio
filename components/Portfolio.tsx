@@ -2,6 +2,44 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { projects } from '../data/projects'
 
+function ProjectVisual({
+  gradient,
+  coverImage,
+  title,
+  category,
+}: {
+  gradient: string
+  coverImage?: string
+  title: string
+  category: string
+}) {
+  return (
+    <div
+      className="relative aspect-[16/10] overflow-hidden transition-transform duration-500 group-hover:-translate-y-1 md:aspect-[5/3]"
+      style={{ background: gradient }}
+    >
+      {coverImage ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={coverImage}
+          alt={title}
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+      ) : (
+        <div
+          className="absolute inset-0 opacity-30 mix-blend-overlay"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 20% 20%, #fff 0, transparent 45%)',
+          }}
+        />
+      )}
+      <span className="absolute left-4 top-4 bg-ink/50 px-2.5 py-1 text-xs font-semibold uppercase tracking-widest text-white backdrop-blur-sm">
+        {category}
+      </span>
+    </div>
+  )
+}
+
 export default function Portfolio() {
   return (
     <section id="work" className="scroll-mt-24 bg-paper py-24 md:py-32">
@@ -31,17 +69,12 @@ export default function Portfolio() {
                   transition={{ duration: 0.5, delay: Math.min(index * 0.04, 0.2) }}
                   className="grid items-center gap-6 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1.35fr)_auto]"
                 >
-                  <div
-                    className="relative aspect-[16/10] overflow-hidden transition-transform duration-500 group-hover:-translate-y-1 md:aspect-[5/3]"
-                    style={{ background: project.gradient }}
-                  >
-                    <div className="absolute inset-0 opacity-30 mix-blend-overlay" style={{
-                      backgroundImage: 'radial-gradient(circle at 20% 20%, #fff 0, transparent 45%)',
-                    }} />
-                    <span className="absolute left-4 top-4 text-xs font-semibold uppercase tracking-widest text-white/85">
-                      {project.category}
-                    </span>
-                  </div>
+                  <ProjectVisual
+                    gradient={project.gradient}
+                    coverImage={project.coverImage}
+                    title={project.title}
+                    category={project.category}
+                  />
 
                   <div>
                     <div className="flex flex-wrap items-center gap-3 text-sm text-muted">

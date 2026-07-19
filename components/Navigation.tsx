@@ -40,10 +40,7 @@ export default function Navigation() {
               {item.label}
             </a>
           ))}
-          <a
-            href="/#contact"
-            className="bg-ink px-5 py-2.5 text-sm font-semibold text-paper transition-colors hover:bg-brand hover:text-ink"
-          >
+          <a href="/#contact" className="btn btn-primary !py-2.5 !px-5">
             Start a project
           </a>
         </div>
@@ -86,7 +83,7 @@ export default function Navigation() {
               <a
                 href="/#contact"
                 onClick={() => setOpen(false)}
-                className="mt-8 inline-flex w-fit bg-brand px-6 py-3 font-semibold text-ink"
+                className="btn btn-brand mt-8 w-fit"
               >
                 Start a project
               </a>

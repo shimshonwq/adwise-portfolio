@@ -6,12 +6,16 @@ import Navigation from '../../components/Navigation'
 import Footer from '../../components/Footer'
 import { projects, type Project } from '../../data/projects'
 import { siteConfig } from '../../config/site.config'
+import { getVideoEmbedSrc } from '../../lib/media'
 
 interface Props {
   project: Project
 }
 
 export default function ProjectPage({ project }: Props) {
+  const embedSrc = project.videoUrl ? getVideoEmbedSrc(project.videoUrl) : null
+  const isLocalVideo = project.videoUrl?.startsWith('/')
+
   return (
     <>
       <Head>
@@ -24,9 +28,19 @@ export default function ProjectPage({ project }: Props) {
 
       <main>
         <section
-          className="relative flex min-h-[58vh] items-end px-0 pb-14 pt-32 md:min-h-[68vh]"
+          className="relative flex min-h-[58vh] items-end overflow-hidden px-0 pb-14 pt-32 md:min-h-[68vh]"
           style={{ background: project.gradient }}
         >
+          {project.coverImage && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={project.coverImage}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover opacity-50"
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-transparent" />
+
           <div className="site-shell relative w-full text-white">
             <Link
               href="/#work"
@@ -35,8 +49,8 @@ export default function ProjectPage({ project }: Props) {
               ← Back to work
             </Link>
             <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ y: 24 }}
+              animate={{ y: 0 }}
               transition={{ duration: 0.7 }}
               className="mt-8"
             >
@@ -47,6 +61,16 @@ export default function ProjectPage({ project }: Props) {
                 {project.title}
               </h1>
               <p className="mt-5 max-w-2xl text-lg text-white/85">{project.description}</p>
+              {project.link && (
+                <a
+                  href={project.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-on-dark mt-8"
+                >
+                  View live project →
+                </a>
+              )}
             </motion.div>
           </div>
         </section>
@@ -69,6 +93,45 @@ export default function ProjectPage({ project }: Props) {
                     ))}
                   </ul>
                 </>
+              )}
+
+              {/* Video */}
+              {project.videoUrl && (
+                <div className="mt-12 overflow-hidden border border-line bg-ink">
+                  {embedSrc ? (
+                    <div className="aspect-video w-full">
+                      <iframe
+                        src={embedSrc}
+                        title={`${project.title} video`}
+                        className="h-full w-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                  ) : isLocalVideo ? (
+                    <video controls className="aspect-video w-full" src={project.videoUrl}>
+                      Your browser does not support the video tag.
+                    </video>
+                  ) : null}
+                </div>
+              )}
+
+              {/* Gallery */}
+              {project.gallery && project.gallery.length > 0 && (
+                <div className="mt-12">
+                  <h3 className="font-display text-xl font-bold text-ink">Gallery</h3>
+                  <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                    {project.gallery.map((src) => (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        key={src}
+                        src={src}
+                        alt=""
+                        className="w-full border border-line object-cover"
+                      />
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
 
@@ -103,15 +166,12 @@ export default function ProjectPage({ project }: Props) {
             </aside>
           </div>
 
-          <div className="site-shell mt-20 bg-ink px-8 py-14 text-center text-paper md:px-16">
+          <div className="site-shell mt-20 bg-ink px-8 py-14 text-center text-white md:px-16">
             <h2 className="font-display text-3xl font-bold md:text-4xl">Have a project like this?</h2>
-            <p className="mx-auto mt-4 max-w-md text-paper/60">
+            <p className="mx-auto mt-4 max-w-md text-white/60">
               Let’s create something your audience won’t scroll past.
             </p>
-            <Link
-              href="/#contact"
-              className="mt-8 inline-flex bg-brand px-7 py-3.5 text-sm font-semibold text-ink transition-opacity hover:opacity-90"
-            >
+            <Link href="/#contact" className="btn btn-on-dark mt-8">
               Start a project
             </Link>
           </div>
