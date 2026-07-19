@@ -1,12 +1,11 @@
 @import 'tailwindcss';
 
 /*
- * Adwise Media — design system
- * Direction: typography-led creative studio. Gold brand on ink / warm paper.
- * Tokens matched to the official logo (#fdc621 gold, #545454 media gray).
+ * Adwise Media design system
+ * Display type: Fredoka — rounded, bold, close to the logo letterforms.
  */
 @theme {
-  --font-display: var(--font-syne), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-logo), ui-rounded, ui-sans-serif, system-ui, sans-serif;
   --font-body: var(--font-dm), ui-sans-serif, system-ui, sans-serif;
 
   --color-ink: #121212;
@@ -51,7 +50,7 @@ h2,
 h3,
 h4 {
   font-family: var(--font-display);
-  letter-spacing: -0.035em;
+  letter-spacing: -0.03em;
   font-weight: 700;
 }
 
@@ -60,7 +59,8 @@ a {
   text-decoration: none;
 }
 
-img {
+img,
+video {
   max-width: 100%;
   display: block;
 }
@@ -85,7 +85,63 @@ img {
   border: 0;
 }
 
-/* Soft gold atmosphere — used as full-bleed hero plane */
+/* Bulletproof CTAs — white label on ink (fixes invisible button text) */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: #121212;
+  color: #ffffff !important;
+}
+
+.btn-primary:hover {
+  background: #fdc621;
+  color: #121212 !important;
+}
+
+.btn-secondary {
+  background: transparent;
+  border-color: rgb(18 18 18 / 0.28);
+  color: #121212 !important;
+}
+
+.btn-secondary:hover {
+  background: #121212;
+  border-color: #121212;
+  color: #ffffff !important;
+}
+
+.btn-brand {
+  background: #fdc621;
+  color: #121212 !important;
+}
+
+.btn-brand:hover {
+  background: #e0ad00;
+  color: #121212 !important;
+}
+
+.btn-on-dark {
+  background: #fdc621;
+  color: #121212 !important;
+}
+
+.btn-on-dark:hover {
+  background: #ffffff;
+  color: #121212 !important;
+}
+
 .gold-field {
   background:
     radial-gradient(ellipse 80% 60% at 70% 40%, rgb(253 198 33 / 0.55), transparent 60%),
@@ -98,7 +154,6 @@ img {
   color: #f7f3e8;
 }
 
-/* Marquee for presence without clutter */
 @keyframes marquee {
   from {
     transform: translateX(0);

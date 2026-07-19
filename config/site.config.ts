@@ -1,5 +1,6 @@
 /**
- * Single source of truth for site-wide content.
+ * Site content — edit this file to update contact details.
+ * Phone is used for WhatsApp, SMS, and Call links.
  */
 export const siteConfig = {
   name: 'Adwise Media',
@@ -13,11 +14,12 @@ export const siteConfig = {
   phoneDisplay: '(845) 551-5506',
   location: 'Available worldwide',
 
-  socialLinks: {
-    instagram: 'https://instagram.com/',
-    linkedin: 'https://linkedin.com/',
-    twitter: 'https://twitter.com/',
-    behance: '',
+  /** Direct contact channels (shown as icons sitewide) */
+  contactChannels: {
+    whatsapp: 'https://wa.me/18455515506',
+    email: 'mailto:adwisecreativity@gmail.com',
+    call: 'tel:+18455515506',
+    sms: 'sms:+18455515506',
   },
 
   nav: [

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { siteConfig } from '../config/site.config'
+import ContactChannels from './ContactChannels'
 
 type Status = 'idle' | 'submitting' | 'success' | 'error'
 
@@ -55,18 +56,20 @@ export default function Contact() {
             Let’s make something people can’t ignore.
           </h2>
           <p className="mt-5 max-w-md text-lg text-ink/70">
-            Tell us about your project. We typically reply within one business day.
+            Tell us about your project — or reach out right now on WhatsApp, email, call, or text.
           </p>
 
-          <div className="mt-10 space-y-3 text-ink">
-            <a href={`mailto:${siteConfig.email}`} className="block font-semibold hover:underline">
+          <div className="mt-8 space-y-2 text-ink">
+            <a href={siteConfig.contactChannels.email} className="block font-semibold hover:underline">
               {siteConfig.email}
             </a>
-            <a href={`tel:+1${siteConfig.phone}`} className="block font-semibold hover:underline">
+            <a href={siteConfig.contactChannels.call} className="block font-semibold hover:underline">
               {siteConfig.phoneDisplay}
             </a>
             <p className="text-ink/60">{siteConfig.location}</p>
           </div>
+
+          <ContactChannels variant="light" className="mt-8" />
         </motion.div>
 
         <motion.form
@@ -75,63 +78,56 @@ export default function Contact() {
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.08 }}
           onSubmit={onSubmit}
-          className="space-y-5 bg-ink p-8 text-paper md:p-10"
+          className="space-y-5 bg-ink p-8 text-white md:p-10"
         >
           <div className="grid gap-5 sm:grid-cols-2">
             <label className="block text-sm">
-              <span className="mb-2 block text-paper/55">Name</span>
+              <span className="mb-2 block text-white/55">Name</span>
               <input
                 name="name"
                 required
                 value={formData.name}
                 onChange={onChange}
-                className="w-full border-0 border-b border-white/20 bg-transparent px-0 py-3 text-paper outline-none transition focus:border-brand"
+                className="w-full border-0 border-b border-white/20 bg-transparent px-0 py-3 text-white outline-none transition focus:border-brand"
                 placeholder="Your name"
               />
             </label>
             <label className="block text-sm">
-              <span className="mb-2 block text-paper/55">Email</span>
+              <span className="mb-2 block text-white/55">Email</span>
               <input
                 type="email"
                 name="email"
                 required
                 value={formData.email}
                 onChange={onChange}
-                className="w-full border-0 border-b border-white/20 bg-transparent px-0 py-3 text-paper outline-none transition focus:border-brand"
+                className="w-full border-0 border-b border-white/20 bg-transparent px-0 py-3 text-white outline-none transition focus:border-brand"
                 placeholder="you@company.com"
               />
             </label>
           </div>
           <label className="block text-sm">
-            <span className="mb-2 block text-paper/55">Message</span>
+            <span className="mb-2 block text-white/55">Message</span>
             <textarea
               name="message"
               required
               rows={5}
               value={formData.message}
               onChange={onChange}
-              className="w-full resize-none border-0 border-b border-white/20 bg-transparent px-0 py-3 text-paper outline-none transition focus:border-brand"
+              className="w-full resize-none border-0 border-b border-white/20 bg-transparent px-0 py-3 text-white outline-none transition focus:border-brand"
               placeholder="What are we building?"
             />
           </label>
 
-          <button
-            type="submit"
-            disabled={status === 'submitting'}
-            className="mt-2 bg-brand px-7 py-3.5 text-sm font-semibold text-ink transition-opacity hover:opacity-90 disabled:opacity-60"
-          >
+          <button type="submit" disabled={status === 'submitting'} className="btn btn-on-dark mt-2">
             {status === 'submitting' ? 'Sending…' : 'Send message'}
           </button>
 
           {status === 'success' && (
-            <p className="text-sm text-brand">
-              Message sent. If this is your first inquiry, check {siteConfig.email} for a one-time
-              FormSubmit confirmation link.
-            </p>
+            <p className="text-sm text-brand">Thanks! We’ll be in touch shortly.</p>
           )}
           {status === 'error' && (
             <p className="text-sm text-red-300">
-              Something went wrong — email us at {siteConfig.email} or call {siteConfig.phoneDisplay}.
+              Something went wrong — email {siteConfig.email} or call {siteConfig.phoneDisplay}.
             </p>
           )}
         </motion.form>
