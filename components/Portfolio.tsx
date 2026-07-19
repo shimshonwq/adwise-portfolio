@@ -1,101 +1,90 @@
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { projects } from '../data/projects'
-
-function ProjectVisual({
-  gradient,
-  coverImage,
-  title,
-  category,
-}: {
-  gradient: string
-  coverImage?: string
-  title: string
-  category: string
-}) {
-  return (
-    <div
-      className="relative aspect-[16/10] overflow-hidden transition-transform duration-500 group-hover:-translate-y-1 md:aspect-[5/3]"
-      style={{ background: gradient }}
-    >
-      {coverImage ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={coverImage}
-          alt={title}
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-        />
-      ) : (
-        <div
-          className="absolute inset-0 opacity-30 mix-blend-overlay"
-          style={{
-            backgroundImage: 'radial-gradient(circle at 20% 20%, #fff 0, transparent 45%)',
-          }}
-        />
-      )}
-      <span className="absolute left-4 top-4 bg-ink/50 px-2.5 py-1 text-xs font-semibold uppercase tracking-widest text-white backdrop-blur-sm">
-        {category}
-      </span>
-    </div>
-  )
-}
+import { motion, AnimatePresence } from 'framer-motion'
+import { categories, projects } from '../data/projects'
 
 export default function Portfolio() {
+  const [active, setActive] = useState<(typeof categories)[number]>('All')
+
+  const filtered = useMemo(
+    () => (active === 'All' ? projects : projects.filter((p) => p.category === active)),
+    [active],
+  )
+
   return (
     <section id="work" className="scroll-mt-24 bg-paper py-24 md:py-32">
       <div className="site-shell">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="eyebrow">Selected work</p>
             <h2 className="mt-3 font-display text-4xl font-bold tracking-tight text-ink md:text-5xl">
-              Projects that earn attention
+              Real brands. Real craft.
             </h2>
+            <p className="mt-4 max-w-lg text-ink/55">
+              Logos, brand systems, and signage designed to look sharp in the real world — not just on a screen.
+            </p>
           </div>
-          <p className="max-w-sm text-ink/55 md:text-right">
-            Brand systems, campaigns, and content built to look sharp and perform.
-          </p>
         </div>
 
-        <hr className="rule mt-12" />
-
-        <ul className="divide-y divide-line">
-          {projects.map((project, index) => (
-            <li key={project.id}>
-              <Link href={`/projects/${project.slug}`} className="group block py-8 md:py-10">
-                <motion.div
-                  initial={{ y: 18 }}
-                  whileInView={{ y: 0 }}
-                  viewport={{ once: true, margin: '-40px' }}
-                  transition={{ duration: 0.5, delay: Math.min(index * 0.04, 0.2) }}
-                  className="grid items-center gap-6 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1.35fr)_auto]"
-                >
-                  <ProjectVisual
-                    gradient={project.gradient}
-                    coverImage={project.coverImage}
-                    title={project.title}
-                    category={project.category}
-                  />
-
-                  <div>
-                    <div className="flex flex-wrap items-center gap-3 text-sm text-muted">
-                      <span>{project.client}</span>
-                      <span aria-hidden>·</span>
-                      <span>{project.year}</span>
-                    </div>
-                    <h3 className="mt-2 font-display text-2xl font-bold tracking-tight text-ink transition-colors group-hover:text-brand-deep md:text-3xl">
-                      {project.title}
-                    </h3>
-                    <p className="mt-3 max-w-md text-ink/60">{project.description}</p>
-                  </div>
-
-                  <span className="hidden text-sm font-semibold tracking-wide text-ink/40 transition-colors group-hover:text-ink md:inline">
-                    View case →
-                  </span>
-                </motion.div>
-              </Link>
-            </li>
+        <div className="mt-10 flex flex-wrap gap-2">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => setActive(cat)}
+              className={`px-4 py-2 text-sm font-semibold transition-colors ${
+                active === cat
+                  ? 'bg-ink text-white'
+                  : 'border border-line text-ink/60 hover:border-ink hover:text-ink'
+              }`}
+            >
+              {cat}
+            </button>
           ))}
-        </ul>
+        </div>
+
+        <motion.div layout className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <AnimatePresence mode="popLayout">
+            {filtered.map((project, index) => {
+              const isWide = project.category === 'Signage'
+              return (
+                <motion.div
+                  key={project.id}
+                  layout
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.98 }}
+                  transition={{ duration: 0.35, delay: Math.min(index * 0.03, 0.2) }}
+                  className={isWide ? 'sm:col-span-2 lg:col-span-2' : ''}
+                >
+                  <Link href={`/projects/${project.slug}`} className="group block">
+                    <div className={`logo-tile ${isWide ? 'wide' : ''}`}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={project.coverImage} alt={project.title} />
+                      <div className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-2 bg-gradient-to-t from-ink/80 via-ink/40 to-transparent p-5 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                        <p className="text-xs font-semibold uppercase tracking-widest text-brand">
+                          {project.category}
+                        </p>
+                        <p className="mt-1 font-display text-lg font-bold text-white">{project.title}</p>
+                      </div>
+                    </div>
+                    <div className="mt-4 flex items-start justify-between gap-3">
+                      <div>
+                        <h3 className="font-display text-xl font-bold text-ink">{project.title}</h3>
+                        <p className="mt-1 text-sm text-muted">
+                          {project.client} · {project.year}
+                        </p>
+                      </div>
+                      <span className="mt-1 text-sm font-semibold text-ink/35 transition-colors group-hover:text-ink">
+                        View →
+                      </span>
+                    </div>
+                  </Link>
+                </motion.div>
+              )
+            })}
+          </AnimatePresence>
+        </motion.div>
       </div>
     </section>
   )
