@@ -9,7 +9,9 @@ export interface Project {
   description: string
   fullDescription: string
   category: Category
+  /** CSS gradient used as the project visual plane */
   gradient: string
+  accent: string
   tags: string[]
   results?: { label: string; value: string }[]
   deliverables?: string[]
@@ -22,29 +24,31 @@ export const projects: Project[] = [
     slug: 'adwise-brand-identity',
     client: 'Adwise Media',
     year: '2025',
-    description: 'A bold, modern brand identity and logo system built for scale.',
+    description: 'A bold identity system built to scale from social avatars to billboards.',
     fullDescription:
       'We crafted a distinctive brand identity for Adwise Media — from the core logomark and typography to a flexible color system and usage guidelines. The result is a confident, energetic look that works everywhere from social avatars to billboards.',
     category: 'Logo Design',
-    gradient: 'linear-gradient(135deg, #fdc621 0%, #e5ad0d 100%)',
+    gradient: 'linear-gradient(145deg, #fdc621 0%, #f0b400 45%, #121212 120%)',
+    accent: '#fdc621',
     tags: ['Logo Design', 'Brand Identity', 'Art Direction'],
     results: [
       { label: 'Brand assets', value: '40+' },
-      { label: 'Recognition lift', value: '3x' },
+      { label: 'Recognition lift', value: '3×' },
     ],
     deliverables: ['Primary & secondary logos', 'Color & type system', 'Brand guidelines'],
   },
   {
     id: 2,
-    title: 'Social Media Growth Campaign',
+    title: 'Social Growth Campaign',
     slug: 'social-media-campaign',
     client: 'Lifestyle Brand',
     year: '2025',
-    description: 'Multi-platform campaign that turned followers into customers.',
+    description: 'A multi-platform campaign that turned attention into customers.',
     fullDescription:
-      'A full-funnel social strategy across Instagram, TikTok, and Facebook — combining a content calendar, short-form video, and paid amplification. We focused on hooks, consistency, and community, driving a 250% jump in engagement in three months.',
+      'A full-funnel social strategy across Instagram, TikTok, and Facebook — combining a content calendar, short-form video, and paid amplification. Focused on hooks, consistency, and community, driving a 250% jump in engagement in three months.',
     category: 'Marketing',
-    gradient: 'linear-gradient(135deg, #1a1a1a 0%, #fdc621 130%)',
+    gradient: 'linear-gradient(145deg, #1a1a1a 0%, #3d3420 55%, #fdc621 130%)',
+    accent: '#fdc621',
     tags: ['Social Strategy', 'Paid Ads', 'Community'],
     results: [
       { label: 'Engagement', value: '+250%' },
@@ -58,29 +62,31 @@ export const projects: Project[] = [
     slug: 'brand-guidelines',
     client: 'Tech Startup',
     year: '2024',
-    description: 'A complete design system that keeps every touchpoint on-brand.',
+    description: 'A living design system that keeps every touchpoint on-brand.',
     fullDescription:
-      'We documented a comprehensive brand system: color palettes, typographic scale, imagery direction, iconography, and logo usage rules. The living guideline empowers internal teams and partners to ship consistent, high-quality work fast.',
+      'We documented a comprehensive brand system: color palettes, typographic scale, imagery direction, iconography, and logo usage rules. The living guideline empowers teams and partners to ship consistent, high-quality work fast.',
     category: 'Branding',
-    gradient: 'linear-gradient(135deg, #fdc621 0%, #e5ad0d 55%, #1a1a1a 130%)',
+    gradient: 'linear-gradient(145deg, #fdc621 0%, #fff3b0 50%, #2a2a2a 125%)',
+    accent: '#e0ad00',
     tags: ['Design System', 'Guidelines', 'Typography'],
     results: [
       { label: 'Consistency', value: '100%' },
-      { label: 'Faster handoff', value: '2x' },
+      { label: 'Faster handoff', value: '2×' },
     ],
     deliverables: ['Design tokens', 'Usage rules', 'Asset library'],
   },
   {
     id: 4,
-    title: 'Content Creation Series',
+    title: 'Content Creation Engine',
     slug: 'content-creation',
     client: 'Wellness Studio',
     year: '2024',
-    description: 'Monthly content engine — video, blog, and infographics.',
+    description: 'A monthly content engine — video, editorial, and shareable design.',
     fullDescription:
-      'A repeatable content engine covering short-form video, editorial blog posts, and shareable infographics. Every piece maps back to brand pillars and business goals, keeping the audience engaged and the pipeline full.',
+      'A repeatable content engine covering short-form video, editorial posts, and shareable graphics. Every piece maps back to brand pillars and business goals, keeping the audience engaged and the pipeline full.',
     category: 'Content',
-    gradient: 'linear-gradient(135deg, #fdc621 0%, #ffe066 100%)',
+    gradient: 'linear-gradient(145deg, #ffe066 0%, #fdc621 40%, #121212 120%)',
+    accent: '#fdc621',
     tags: ['Content Creation', 'Video', 'Copywriting'],
     results: [
       { label: 'Reach', value: '1.2M' },
@@ -94,11 +100,12 @@ export const projects: Project[] = [
     slug: 'marketing-collateral',
     client: 'Local Business',
     year: '2024',
-    description: 'Print & digital collateral that stays perfectly on-brand.',
+    description: 'Print and digital collateral that stays perfectly on-brand.',
     fullDescription:
-      'From business cards and brochures to pitch decks and promotional graphics, we designed a cohesive suite of marketing collateral that maintains brand consistency across every customer touchpoint — online and in print.',
+      'From business cards and brochures to pitch decks and promotional graphics, we designed a cohesive suite of marketing collateral that maintains brand consistency across every customer touchpoint.',
     category: 'Marketing',
-    gradient: 'linear-gradient(135deg, #1a1a1a 0%, #3a3218 55%, #fdc621 140%)',
+    gradient: 'linear-gradient(145deg, #121212 0%, #2c2410 50%, #fdc621 140%)',
+    accent: '#fdc621',
     tags: ['Print Design', 'Brochures', 'Pitch Decks'],
     results: [
       { label: 'Touchpoints', value: '12+' },
@@ -114,22 +121,15 @@ export const projects: Project[] = [
     year: '2025',
     description: 'Conversion-focused web design with a premium feel.',
     fullDescription:
-      'We designed multiple high-fidelity website concepts focused on user experience, clarity, and conversion. Clean layouts, strong visual hierarchy, and thoughtful motion combine into a modern, trustworthy digital presence.',
+      'We designed high-fidelity website concepts focused on clarity, hierarchy, and conversion. Clean layouts and thoughtful motion combine into a modern, trustworthy digital presence.',
     category: 'Branding',
-    gradient: 'linear-gradient(135deg, #fdc621 0%, #e5ad0d 50%, #1a1a1a 130%)',
+    gradient: 'linear-gradient(145deg, #fdc621 0%, #e0ad00 40%, #121212 115%)',
+    accent: '#fdc621',
     tags: ['Web Design', 'UI/UX', 'Prototyping'],
     results: [
       { label: 'Prototypes', value: '3' },
-      { label: 'Bounce rate', value: '-30%' },
+      { label: 'Bounce rate', value: '−30%' },
     ],
     deliverables: ['Wireframes', 'Hi-fi mockups', 'Interactive prototype'],
   },
-]
-
-export const categories: ('All' | Category)[] = [
-  'All',
-  'Logo Design',
-  'Marketing',
-  'Content',
-  'Branding',
 ]

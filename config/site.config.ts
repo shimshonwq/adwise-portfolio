@@ -1,19 +1,17 @@
 /**
  * Single source of truth for site-wide content.
- * Edit the values below to personalize the site — no need to touch components.
  */
 export const siteConfig = {
   name: 'Adwise Media',
   shortName: 'Adwise',
   tagline: 'Thinkink Your Next Thing',
   description:
-    'Adwise Media is a creative studio helping brands grow through strategic marketing, scroll-stopping content, and standout graphic design.',
+    'Adwise Media is a creative studio for marketing, content creation, and graphic design — helping brands look sharper and grow faster.',
   url: 'https://adwisemedia.co',
-
   email: 'adwisecreativity@gmail.com',
   phone: '8455515506',
   phoneDisplay: '(845) 551-5506',
-  location: 'Available worldwide · Remote',
+  location: 'Available worldwide',
 
   socialLinks: {
     instagram: 'https://instagram.com/',
@@ -23,17 +21,10 @@ export const siteConfig = {
   },
 
   nav: [
-    { href: '#services', label: 'Services' },
     { href: '#work', label: 'Work' },
+    { href: '#services', label: 'Services' },
     { href: '#about', label: 'About' },
     { href: '#contact', label: 'Contact' },
-  ],
-
-  stats: [
-    { value: '150+', label: 'Projects delivered' },
-    { value: '60+', label: 'Happy clients' },
-    { value: '250%', label: 'Avg. engagement lift' },
-    { value: '7+', label: 'Years of craft' },
   ],
 }
 

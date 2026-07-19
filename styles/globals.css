@@ -1,24 +1,24 @@
 @import 'tailwindcss';
 
 /*
- * Tailwind CSS v4 – CSS-first configuration.
- * Brand colors matched to the Adwise Media logo (gold yellow + charcoal).
+ * Adwise Media — design system
+ * Direction: typography-led creative studio. Gold brand on ink / warm paper.
+ * Tokens matched to the official logo (#fdc621 gold, #545454 media gray).
  */
 @theme {
-  --font-heading: var(--font-museo), ui-sans-serif, system-ui, sans-serif;
-  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-syne), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-dm), ui-sans-serif, system-ui, sans-serif;
 
-  /* Brand palette (from official logo) */
-  --color-ink: #1a1a1a;
+  --color-ink: #121212;
   --color-ink-soft: #2a2a2a;
-  --color-cream: #f6f4f0;
+  --color-paper: #f4f1ea;
+  --color-paper-deep: #ebe6db;
   --color-brand: #fdc621;
-  --color-brand-dark: #e5ad0d;
-  --color-amber: #fdc621;
+  --color-brand-deep: #e0ad00;
   --color-muted: #545454;
+  --color-line: rgb(18 18 18 / 0.12);
 
-  --shadow-glow: 0 20px 60px -15px rgb(253 198 33 / 0.45);
-  --shadow-card: 0 10px 40px -12px rgb(26 26 26 / 0.12);
+  --shadow-lift: 0 24px 48px -24px rgb(18 18 18 / 0.28);
 }
 
 *,
@@ -35,57 +35,103 @@ html {
 body {
   margin: 0;
   font-family: var(--font-body);
-  background-color: var(--color-cream);
+  background: var(--color-paper);
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+::selection {
+  background: var(--color-brand);
+  color: var(--color-ink);
+}
+
 h1,
 h2,
 h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-heading);
-  letter-spacing: -0.02em;
+h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.035em;
+  font-weight: 700;
 }
 
-::selection {
-  background: var(--color-brand);
-  color: #1a1a1a;
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
-::-webkit-scrollbar {
-  width: 10px;
-}
-::-webkit-scrollbar-track {
-  background: #efece6;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--color-brand);
-  border-radius: 999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-brand-dark);
+img {
+  max-width: 100%;
+  display: block;
 }
 
-.text-gradient {
-  background: linear-gradient(120deg, #e5ad0d, #fdc621 55%, #ffe066);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+.site-shell {
+  width: min(1120px, calc(100% - 2.5rem));
+  margin-inline: auto;
 }
 
-@keyframes float-slow {
-  0%,
-  100% {
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.rule {
+  height: 1px;
+  background: var(--color-line);
+  border: 0;
+}
+
+/* Soft gold atmosphere — used as full-bleed hero plane */
+.gold-field {
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 40%, rgb(253 198 33 / 0.55), transparent 60%),
+    radial-gradient(ellipse 50% 50% at 15% 80%, rgb(253 198 33 / 0.28), transparent 55%),
+    linear-gradient(165deg, #f7f3e8 0%, #f4f1ea 45%, #ebe4d0 100%);
+}
+
+.ink-field {
+  background: var(--color-ink);
+  color: #f7f3e8;
+}
+
+/* Marquee for presence without clutter */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee-track {
+  animation: marquee 32s linear infinite;
+  width: max-content;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
     transform: translateY(0);
   }
-  50% {
-    transform: translateY(-18px);
-  }
 }
-.animate-float-slow {
-  animation: float-slow 7s ease-in-out infinite;
+.reveal {
+  animation: rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .marquee-track,
+  .reveal {
+    animation: none !important;
+  }
 }
