@@ -9,7 +9,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "preview": "next build && next start"
+    "preview": "next build && npx serve out",
+    "deploy": "npm run build && npx wrangler versions upload"
   },
   "dependencies": {
     "react": "^19.0.0",
