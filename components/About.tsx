@@ -4,15 +4,15 @@ import { siteConfig } from '../config/site.config'
 const principles = [
   {
     title: 'Strategy first',
-    body: 'Every pixel and post ladders up to a clear business goal — not decoration for decoration’s sake.',
+    body: 'Every mark and campaign ladders up to a clear goal — not decoration for decoration’s sake.',
   },
   {
     title: 'Craft obsessed',
     body: 'Premium details that make brands feel expensive, consistent, and unforgettable.',
   },
   {
-    title: 'Results driven',
-    body: 'We measure what matters and keep refining until the work earns its keep.',
+    title: 'Built to last',
+    body: 'Identities that work on a sign, a phone screen, a truck, and a business card.',
   },
 ]
 
@@ -33,10 +33,9 @@ export default function About() {
             Meaningful results.
           </h2>
           <p className="mt-6 text-lg leading-relaxed text-ink/65">
-            {siteConfig.name} helps businesses stand out with marketing, content creation, and
-            graphic design that actually moves the needle. We blend strategic thinking with creative
-            execution — whether we’re shaping a brand identity, running a campaign, or producing
-            content that stops the scroll.
+            {siteConfig.name} helps businesses stand out with logo design, branding, marketing, and
+            content that actually moves the needle. From first sketch to finished signage, we blend
+            strategy with craft.
           </p>
           <p className="mt-4 text-lg leading-relaxed text-ink/65">
             {siteConfig.tagline} isn’t just a line — it’s how we work.
@@ -48,7 +47,7 @@ export default function About() {
           whileInView={{ y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.08 }}
-          className="space-y-0 border-t border-line"
+          className="border-t border-line"
         >
           {principles.map((item) => (
             <div key={item.title} className="border-b border-line py-7">

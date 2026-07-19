@@ -15,6 +15,7 @@ interface Props {
 export default function ProjectPage({ project }: Props) {
   const embedSrc = project.videoUrl ? getVideoEmbedSrc(project.videoUrl) : null
   const isLocalVideo = project.videoUrl?.startsWith('/')
+  const images = [project.coverImage, ...(project.gallery || [])]
 
   return (
     <>
@@ -22,61 +23,45 @@ export default function ProjectPage({ project }: Props) {
         <title>{`${project.title} — ${siteConfig.name}`}</title>
         <meta name="description" content={project.description} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta property="og:image" content={`${siteConfig.url}${project.coverImage}`} />
       </Head>
 
       <Navigation />
 
       <main>
-        <section
-          className="relative flex min-h-[58vh] items-end overflow-hidden px-0 pb-14 pt-32 md:min-h-[68vh]"
-          style={{ background: project.gradient }}
-        >
-          {project.coverImage && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={project.coverImage}
-              alt=""
-              className="absolute inset-0 h-full w-full object-cover opacity-50"
-            />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-transparent" />
-
-          <div className="site-shell relative w-full text-white">
-            <Link
-              href="/#work"
-              className="text-sm font-medium text-white/75 transition-colors hover:text-white"
-            >
+        <section className="bg-paper-deep px-0 pb-10 pt-28 md:pt-32">
+          <div className="site-shell">
+            <Link href="/#work" className="text-sm font-medium text-ink/55 hover:text-ink">
               ← Back to work
             </Link>
             <motion.div
-              initial={{ y: 24 }}
+              initial={{ y: 18 }}
               animate={{ y: 0 }}
-              transition={{ duration: 0.7 }}
-              className="mt-8"
+              transition={{ duration: 0.55 }}
+              className="mt-8 max-w-3xl"
             >
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-white/75">
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-muted">
                 {project.category} · {project.client} · {project.year}
               </p>
-              <h1 className="mt-4 max-w-3xl font-display text-4xl font-bold tracking-tight md:text-6xl">
+              <h1 className="mt-4 font-display text-4xl font-bold tracking-tight text-ink md:text-6xl">
                 {project.title}
               </h1>
-              <p className="mt-5 max-w-2xl text-lg text-white/85">{project.description}</p>
-              {project.link && (
-                <a
-                  href={project.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-on-dark mt-8"
-                >
-                  View live project →
-                </a>
-              )}
+              <p className="mt-5 text-lg text-ink/60">{project.description}</p>
             </motion.div>
+          </div>
+
+          <div className="site-shell mt-10 overflow-hidden border border-line bg-white">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={project.coverImage}
+              alt={project.title}
+              className="mx-auto max-h-[70vh] w-full object-contain"
+            />
           </div>
         </section>
 
         <section className="bg-paper py-16 md:py-24">
-          <div className="site-shell grid gap-14 md:grid-cols-[1.4fr_0.8fr]">
+          <div className="site-shell grid gap-14 md:grid-cols-[1.35fr_0.85fr]">
             <div>
               <h2 className="font-display text-2xl font-bold text-ink">Overview</h2>
               <p className="mt-5 text-lg leading-relaxed text-ink/65">{project.fullDescription}</p>
@@ -95,7 +80,20 @@ export default function ProjectPage({ project }: Props) {
                 </>
               )}
 
-              {/* Video */}
+              {images.length > 1 && (
+                <div className="mt-14">
+                  <h3 className="font-display text-xl font-bold text-ink">Gallery</h3>
+                  <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                    {images.slice(1).map((src) => (
+                      <div key={src} className="border border-line bg-white p-4">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={src} alt="" className="mx-auto w-full object-contain" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {project.videoUrl && (
                 <div className="mt-12 overflow-hidden border border-line bg-ink">
                   {embedSrc ? (
@@ -109,47 +107,13 @@ export default function ProjectPage({ project }: Props) {
                       />
                     </div>
                   ) : isLocalVideo ? (
-                    <video controls className="aspect-video w-full" src={project.videoUrl}>
-                      Your browser does not support the video tag.
-                    </video>
+                    <video controls className="aspect-video w-full" src={project.videoUrl} />
                   ) : null}
-                </div>
-              )}
-
-              {/* Gallery */}
-              {project.gallery && project.gallery.length > 0 && (
-                <div className="mt-12">
-                  <h3 className="font-display text-xl font-bold text-ink">Gallery</h3>
-                  <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                    {project.gallery.map((src) => (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        key={src}
-                        src={src}
-                        alt=""
-                        className="w-full border border-line object-cover"
-                      />
-                    ))}
-                  </div>
                 </div>
               )}
             </div>
 
             <aside className="space-y-8">
-              {project.results && (
-                <div className="border border-line bg-paper-deep p-7">
-                  <h3 className="font-display text-lg font-bold text-ink">Results</h3>
-                  <div className="mt-6 space-y-6">
-                    {project.results.map((r) => (
-                      <div key={r.label}>
-                        <p className="font-display text-4xl font-bold text-brand-deep">{r.value}</p>
-                        <p className="mt-1 text-sm text-muted">{r.label}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               <div className="border border-line p-7">
                 <h3 className="font-display text-lg font-bold text-ink">Skills & tools</h3>
                 <div className="mt-4 flex flex-wrap gap-2">
@@ -163,13 +127,19 @@ export default function ProjectPage({ project }: Props) {
                   ))}
                 </div>
               </div>
+
+              {project.link && (
+                <a href={project.link} target="_blank" rel="noopener noreferrer" className="btn btn-primary w-full">
+                  View live project →
+                </a>
+              )}
             </aside>
           </div>
 
           <div className="site-shell mt-20 bg-ink px-8 py-14 text-center text-white md:px-16">
-            <h2 className="font-display text-3xl font-bold md:text-4xl">Have a project like this?</h2>
+            <h2 className="font-display text-3xl font-bold md:text-4xl">Want work like this?</h2>
             <p className="mx-auto mt-4 max-w-md text-white/60">
-              Let’s create something your audience won’t scroll past.
+              Let’s build a brand people remember.
             </p>
             <Link href="/#contact" className="btn btn-on-dark mt-8">
               Start a project

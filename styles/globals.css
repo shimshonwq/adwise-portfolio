@@ -1,23 +1,21 @@
 @import 'tailwindcss';
 
 /*
- * Adwise Media design system
- * Display type: Fredoka — rounded, bold, close to the logo letterforms.
+ * Adwise Media — premium studio system
+ * Type: Outfit (display) + Manrope (body) — geometric, modern, logo-friendly.
  */
 @theme {
-  --font-display: var(--font-logo), ui-rounded, ui-sans-serif, system-ui, sans-serif;
-  --font-body: var(--font-dm), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
 
-  --color-ink: #121212;
-  --color-ink-soft: #2a2a2a;
-  --color-paper: #f4f1ea;
-  --color-paper-deep: #ebe6db;
+  --color-ink: #0e0e0e;
+  --color-ink-soft: #1c1c1c;
+  --color-paper: #f7f4ee;
+  --color-paper-deep: #efe9df;
   --color-brand: #fdc621;
   --color-brand-deep: #e0ad00;
-  --color-muted: #545454;
-  --color-line: rgb(18 18 18 / 0.12);
-
-  --shadow-lift: 0 24px 48px -24px rgb(18 18 18 / 0.28);
+  --color-muted: #5c5c5c;
+  --color-line: rgb(14 14 14 / 0.1);
 }
 
 *,
@@ -28,7 +26,6 @@
 
 html {
   scroll-behavior: smooth;
-  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -37,7 +34,6 @@ body {
   background: var(--color-paper);
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
@@ -50,7 +46,7 @@ h2,
 h3,
 h4 {
   font-family: var(--font-display);
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
   font-weight: 700;
 }
 
@@ -66,15 +62,14 @@ video {
 }
 
 .site-shell {
-  width: min(1120px, calc(100% - 2.5rem));
+  width: min(1180px, calc(100% - 2.5rem));
   margin-inline: auto;
 }
 
 .eyebrow {
-  font-family: var(--font-body);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--color-muted);
 }
@@ -85,73 +80,70 @@ video {
   border: 0;
 }
 
-/* Bulletproof CTAs — white label on ink (fixes invisible button text) */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.875rem 1.75rem;
+  padding: 0.9rem 1.7rem;
   font-size: 0.875rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-weight: 650;
+  letter-spacing: 0.01em;
   border: 1px solid transparent;
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
   cursor: pointer;
 }
 
-.btn-primary {
-  background: #121212;
-  color: #ffffff !important;
+.btn:hover {
+  transform: translateY(-1px);
 }
 
+.btn-primary {
+  background: #0e0e0e;
+  color: #ffffff !important;
+}
 .btn-primary:hover {
   background: #fdc621;
-  color: #121212 !important;
+  color: #0e0e0e !important;
 }
 
 .btn-secondary {
   background: transparent;
-  border-color: rgb(18 18 18 / 0.28);
-  color: #121212 !important;
+  border-color: rgb(14 14 14 / 0.25);
+  color: #0e0e0e !important;
 }
-
 .btn-secondary:hover {
-  background: #121212;
-  border-color: #121212;
+  background: #0e0e0e;
+  border-color: #0e0e0e;
   color: #ffffff !important;
 }
 
 .btn-brand {
   background: #fdc621;
-  color: #121212 !important;
+  color: #0e0e0e !important;
 }
-
 .btn-brand:hover {
   background: #e0ad00;
-  color: #121212 !important;
 }
 
 .btn-on-dark {
   background: #fdc621;
-  color: #121212 !important;
+  color: #0e0e0e !important;
 }
-
 .btn-on-dark:hover {
   background: #ffffff;
-  color: #121212 !important;
 }
 
 .gold-field {
   background:
-    radial-gradient(ellipse 80% 60% at 70% 40%, rgb(253 198 33 / 0.55), transparent 60%),
-    radial-gradient(ellipse 50% 50% at 15% 80%, rgb(253 198 33 / 0.28), transparent 55%),
-    linear-gradient(165deg, #f7f3e8 0%, #f4f1ea 45%, #ebe4d0 100%);
+    radial-gradient(ellipse 70% 55% at 80% 30%, rgb(253 198 33 / 0.45), transparent 60%),
+    radial-gradient(ellipse 45% 40% at 10% 85%, rgb(253 198 33 / 0.2), transparent 55%),
+    #f7f4ee;
 }
 
 .ink-field {
   background: var(--color-ink);
-  color: #f7f3e8;
+  color: #f7f4ee;
 }
 
 @keyframes marquee {
@@ -163,14 +155,14 @@ video {
   }
 }
 .marquee-track {
-  animation: marquee 32s linear infinite;
+  animation: marquee 36s linear infinite;
   width: max-content;
 }
 
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(28px);
+    transform: translateY(24px);
   }
   to {
     opacity: 1;
@@ -178,7 +170,37 @@ video {
   }
 }
 .reveal {
-  animation: rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: rise 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.logo-tile {
+  position: relative;
+  overflow: hidden;
+  background: #fff;
+  aspect-ratio: 1;
+  border: 1px solid var(--color-line);
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s ease;
+}
+.logo-tile:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 28px 50px -28px rgb(14 14 14 / 0.35);
+}
+.logo-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 12%;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.logo-tile:hover img {
+  transform: scale(1.04);
+}
+.logo-tile.wide {
+  aspect-ratio: 16 / 9;
+}
+.logo-tile.wide img {
+  object-fit: cover;
+  padding: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -186,7 +208,10 @@ video {
     scroll-behavior: auto;
   }
   .marquee-track,
-  .reveal {
+  .reveal,
+  .logo-tile,
+  .logo-tile img {
     animation: none !important;
+    transition: none !important;
   }
 }
