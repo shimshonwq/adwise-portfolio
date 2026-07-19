@@ -28,13 +28,13 @@ export default function About() {
         >
           <p className="eyebrow">About {siteConfig.shortName}</p>
           <h2 className="mt-3 font-display text-4xl font-bold tracking-tight text-ink md:text-5xl">
-            Creative thinking.
+            Logos & graphics
             <br />
-            Meaningful results.
+            that work for business.
           </h2>
           <p className="mt-6 text-lg leading-relaxed text-ink/65">
-            {siteConfig.name} helps businesses stand out with logo design, branding, marketing, and
-            content that actually moves the needle. From first sketch to finished signage, we blend
+            {siteConfig.name} designs logos, brand graphics, and marketing visuals for companies that
+            want to look professional and memorable. From first sketch to finished signage, we blend
             strategy with craft.
           </p>
           <p className="mt-4 text-lg leading-relaxed text-ink/65">

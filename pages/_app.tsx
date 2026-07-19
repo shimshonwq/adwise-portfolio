@@ -1,24 +1,25 @@
 import type { AppProps } from 'next/app'
-import { Outfit, Manrope } from 'next/font/google'
+import { Fredoka, DM_Sans } from 'next/font/google'
 import '../styles/globals.css'
 
-const outfit = Outfit({
+/** Fredoka matches the rounded, chunky letterforms in the Adwise logo */
+const logoFont = Fredoka({
   subsets: ['latin'],
-  variable: '--font-outfit',
+  variable: '--font-logo',
   display: 'swap',
-  weight: ['500', '600', '700', '800'],
+  weight: ['500', '600', '700'],
 })
 
-const manrope = Manrope({
+const dm = DM_Sans({
   subsets: ['latin'],
-  variable: '--font-manrope',
+  variable: '--font-dm',
   display: 'swap',
   weight: ['400', '500', '600', '700'],
 })
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <div className={`${outfit.variable} ${manrope.variable} font-body`}>
+    <div className={`${logoFont.variable} ${dm.variable} font-body`}>
       <Component {...pageProps} />
     </div>
   )

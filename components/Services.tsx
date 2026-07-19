@@ -30,10 +30,10 @@ export default function Services() {
       <div className="site-shell">
         <p className="eyebrow !text-brand">What we do</p>
         <h2 className="mt-3 max-w-2xl font-display text-4xl font-bold tracking-tight text-white md:text-5xl">
-          Three crafts. One studio.
+          What we make for businesses
         </h2>
         <p className="mt-5 max-w-xl text-lg text-white/60">
-          From first impression to full campaigns — we cover the creative journey end to end.
+          Logos, graphics, and marketing creatives — from first impression to full campaigns.
         </p>
 
         <div className="mt-16 grid gap-0 border-t border-white/10 md:grid-cols-3">
