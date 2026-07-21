@@ -1,19 +1,19 @@
 import type { AppProps } from 'next/app'
-import { Fredoka, Nunito } from 'next/font/google'
+import { Manrope, Syne } from 'next/font/google'
 import '../styles/globals.css'
 
 /**
- * Fredoka = rounded chunky display (matches Adwise logo / THINKINK letterforms).
- * Applied via style.fontFamily so headings always pick it up (not just a CSS variable).
+ * Syne gives the site a sharper premium display voice.
+ * Applied via style.fontFamily so headings always pick it up reliably.
  */
-const logoFont = Fredoka({
+const displayFont = Syne({
   subsets: ['latin'],
-  variable: '--font-logo',
+  variable: '--font-display-face',
   display: 'swap',
-  weight: ['400', '500', '600', '700'],
+  weight: ['500', '600', '700', '800'],
 })
 
-const bodyFont = Nunito({
+const bodyFont = Manrope({
   subsets: ['latin'],
   variable: '--font-body-face',
   display: 'swap',
@@ -23,10 +23,10 @@ const bodyFont = Nunito({
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <div
-      className={`${logoFont.variable} ${bodyFont.variable} ${bodyFont.className}`}
+      className={`${displayFont.variable} ${bodyFont.variable} ${bodyFont.className}`}
       style={
         {
-          '--font-logo-stack': logoFont.style.fontFamily,
+          '--font-display-stack': displayFont.style.fontFamily,
           '--font-body-stack': bodyFont.style.fontFamily,
         } as React.CSSProperties
       }

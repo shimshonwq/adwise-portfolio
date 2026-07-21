@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion'
-import { siteConfig } from '../config/site.config'
 import AnimatedText from './AnimatedText'
 
 const marqueeItems = [
@@ -30,17 +29,6 @@ export default function Hero() {
 
       <div className="site-shell relative flex min-h-[100svh] flex-col justify-end pb-28 pt-28 md:justify-center md:pb-32 md:pt-32">
         <div className="max-w-2xl">
-          <motion.img
-            src="/logo.png"
-            alt={siteConfig.name}
-            width={420}
-            height={130}
-            className="mb-9 h-14 w-auto md:mb-11 md:h-20"
-            initial={{ opacity: 0, y: 18, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          />
-
           <AnimatedText
             as="h1"
             text="Logos & graphics for businesses."

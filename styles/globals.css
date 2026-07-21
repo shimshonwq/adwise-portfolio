@@ -2,11 +2,11 @@
 
 /*
  * Adwise Media — soft, rounded brand system
- * Display: Fredoka (logo match) · Body: Nunito
+ * Display: Syne · Body: Manrope
  */
 @theme {
-  --font-display: var(--font-logo-stack), var(--font-logo), 'Fredoka', ui-rounded, sans-serif;
-  --font-body: var(--font-body-stack), var(--font-body-face), 'Nunito', ui-sans-serif, sans-serif;
+  --font-display: var(--font-display-stack), var(--font-display-face), 'Syne', ui-sans-serif, sans-serif;
+  --font-body: var(--font-body-stack), var(--font-body-face), 'Manrope', ui-sans-serif, sans-serif;
 
   --color-ink: #0e0e0e;
   --color-ink-soft: #1c1c1c;
@@ -48,8 +48,8 @@ h2,
 h3,
 h4,
 .font-display {
-  font-family: var(--font-logo-stack), var(--font-logo), 'Fredoka', ui-rounded, sans-serif !important;
-  letter-spacing: -0.01em;
+  font-family: var(--font-display-stack), var(--font-display-face), 'Syne', ui-sans-serif, sans-serif !important;
+  letter-spacing: -0.035em;
   font-weight: 700;
 }
 
