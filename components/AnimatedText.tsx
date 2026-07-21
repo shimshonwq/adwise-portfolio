@@ -2,7 +2,7 @@ import { motion, type Variants } from 'framer-motion'
 
 /**
  * Animate with motion only — never hide text with opacity:0.
- * Optional shimmer applies the yellow/black animated brand text style.
+ * Optional shimmer applies readable solid gold with a soft eye-catching pulse.
  */
 const container: Variants = {
   hidden: {},

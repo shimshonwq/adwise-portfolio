@@ -7,7 +7,7 @@ const taglineLines = ['Thinkink', 'Your', 'Next', 'Thing']
 /** Mid-page brand spotlight — clean stacked tagline on a soft gold/ink gradient */
 export default function Spotlight() {
   return (
-    <section className="relative overflow-hidden py-20 md:py-28">
+    <section className="spotlight-stage relative overflow-hidden py-20 md:py-28">
       <div
         className="absolute inset-0"
         style={{

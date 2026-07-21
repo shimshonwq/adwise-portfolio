@@ -15,33 +15,12 @@ export default function Hero() {
   return (
     <section id="top" className="relative min-h-[100svh] overflow-hidden section-aurora text-ink">
       <div className="absolute inset-0 -z-10" aria-hidden>
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_30%,rgba(253,198,33,0.5),transparent_32%),radial-gradient(circle_at_18%_75%,rgba(255,255,255,0.75),transparent_28%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_28%,rgba(253,198,33,0.38),transparent_34%),radial-gradient(circle_at_12%_78%,rgba(255,255,255,0.8),transparent_30%)]" />
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 top-[7.5rem] z-0 flex justify-center px-6 md:inset-y-0 md:right-[-2%] md:left-auto md:top-0 md:w-[58%] md:items-center md:justify-end md:px-0 lg:w-[54%]">
-        <div className="relative w-full max-w-[420px] md:max-w-none md:w-[92%]">
-          <div
-            className="pointer-events-none absolute left-1/2 top-1/2 h-[78%] w-[78%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(253,198,33,0.4)_0%,rgba(255,255,255,0.6)_42%,transparent_70%)] blur-2xl"
-            aria-hidden
-          />
-          <motion.div
-            className="relative motion-safe:animate-[float_18s_ease-in-out_infinite]"
-            initial={{ y: 22, scale: 0.96 }}
-            animate={{ y: 0, scale: 1 }}
-            transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/hero-logo.png"
-              alt={siteConfig.tagline}
-              className="mx-auto h-auto w-full max-w-[340px] drop-shadow-[0_28px_60px_rgba(14,14,14,0.18)] select-none sm:max-w-[400px] md:max-w-none md:w-full"
-            />
-          </motion.div>
-        </div>
-      </div>
-
-      <div className="site-shell relative z-10 flex min-h-[100svh] flex-col justify-end pb-28 pt-[22rem] md:justify-center md:pb-32 md:pt-32">
-        <div className="relative max-w-xl lg:max-w-2xl">
+      <div className="site-shell relative z-10 grid min-h-[100svh] items-center gap-10 pb-28 pt-28 md:grid-cols-12 md:gap-8 md:pb-32 md:pt-32">
+        {/* Copy */}
+        <div className="order-2 md:order-1 md:col-span-5 lg:col-span-5">
           <motion.span
             className="mb-6 inline-flex items-center gap-2 rounded-full border border-ink/10 bg-white/85 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-brand-deep shadow-sm backdrop-blur-sm"
             initial={{ x: -12 }}
@@ -57,7 +36,7 @@ export default function Hero() {
             text="We make brands impossible to ignore."
             immediate
             shimmer
-            className="font-display text-[clamp(2.5rem,6.4vw,4.6rem)] font-bold leading-[1.05] tracking-tight"
+            className="font-display text-[clamp(2.4rem,5.8vw,4.2rem)] font-bold leading-[1.05] tracking-tight"
           />
 
           <motion.p
@@ -82,6 +61,35 @@ export default function Hero() {
             <a href="#contact" className="btn btn-brand">
               Start a project
             </a>
+          </motion.div>
+        </div>
+
+        {/* Thinkink graphic — premium framed stage */}
+        <div className="order-1 md:order-2 md:col-span-7 lg:col-span-7">
+          <motion.div
+            className="relative mx-auto w-full max-w-[520px] md:max-w-none"
+            initial={{ y: 20, scale: 0.97 }}
+            animate={{ y: 0, scale: 1 }}
+            transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div
+              className="pointer-events-none absolute -inset-6 rounded-[2.5rem] bg-[radial-gradient(circle_at_55%_40%,rgba(253,198,33,0.45),rgba(255,255,255,0.35)_42%,transparent_70%)] blur-2xl"
+              aria-hidden
+            />
+            <div className="relative overflow-hidden rounded-[2rem] border border-ink/10 bg-gradient-to-br from-ink via-[#1a1608] to-ink p-8 shadow-[0_40px_80px_-40px_rgba(14,14,14,0.55)] sm:p-10 md:p-12 lg:p-14">
+              <div
+                className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_35%,rgba(253,198,33,0.2),transparent_45%)]"
+                aria-hidden
+              />
+              <div className="motion-safe:animate-[float_18s_ease-in-out_infinite]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/hero-logo.png"
+                  alt={siteConfig.tagline}
+                  className="relative z-10 mx-auto h-auto w-full max-w-[420px] drop-shadow-[0_20px_50px_rgba(253,198,33,0.25)] select-none md:max-w-[480px]"
+                />
+              </div>
+            </div>
           </motion.div>
         </div>
       </div>
