@@ -157,8 +157,54 @@ video {
   color: #f7f4ee;
 }
 
+.brand-shimmer {
+  background: linear-gradient(
+    100deg,
+    #0e0e0e 0%,
+    #0e0e0e 18%,
+    #e0ad00 36%,
+    #fdc621 50%,
+    #fff3b0 58%,
+    #fdc621 66%,
+    #e0ad00 78%,
+    #0e0e0e 92%,
+    #0e0e0e 100%
+  );
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 4.5s ease-in-out infinite;
+}
+
+.section-aurora {
+  background:
+    radial-gradient(ellipse 60% 50% at 8% 15%, rgb(253 198 33 / 0.35), transparent 55%),
+    radial-gradient(ellipse 50% 45% at 92% 20%, rgb(255 255 255 / 0.85), transparent 50%),
+    radial-gradient(ellipse 45% 40% at 70% 90%, rgb(253 198 33 / 0.2), transparent 55%),
+    #f7f4ee;
+}
+
+.section-aurora-deep {
+  background:
+    radial-gradient(ellipse 55% 50% at 15% 20%, rgb(253 198 33 / 0.45), transparent 55%),
+    radial-gradient(ellipse 50% 45% at 85% 75%, rgb(255 255 255 / 0.55), transparent 50%),
+    linear-gradient(160deg, #efe9df 0%, #f7f4ee 45%, #ffe9a8 100%);
+}
+
+.section-ink-gold {
+  background:
+    radial-gradient(ellipse 50% 45% at 80% 25%, rgb(253 198 33 / 0.28), transparent 55%),
+    radial-gradient(ellipse 40% 35% at 10% 80%, rgb(253 198 33 / 0.12), transparent 50%),
+    linear-gradient(145deg, #0e0e0e 0%, #1a1608 55%, #12100a 100%);
+  color: #f7f4ee;
+}
+
 .brand-field {
-  background: linear-gradient(145deg, #fdc621 0%, #f5c010 45%, #e0ad00 100%);
+  background:
+    radial-gradient(ellipse 50% 40% at 10% 20%, rgb(255 255 255 / 0.35), transparent 50%),
+    radial-gradient(ellipse 45% 40% at 90% 80%, rgb(14 14 14 / 0.08), transparent 50%),
+    linear-gradient(145deg, #fdc621 0%, #f5c010 45%, #e0ad00 100%);
   color: #0e0e0e;
 }
 
@@ -351,15 +397,6 @@ video {
   50% {
     background-position: 100% 50%;
   }
-}
-
-.brand-shimmer {
-  background: linear-gradient(90deg, #0e0e0e 0%, #e0ad00 35%, #fdc621 50%, #e0ad00 65%, #0e0e0e 100%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: shimmer 5s ease-in-out infinite;
 }
 
 @keyframes hero-glow-drift {

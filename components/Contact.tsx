@@ -7,7 +7,7 @@ import AnimatedText from './AnimatedText'
 type Status = 'idle' | 'submitting' | 'success' | 'error'
 
 export default function Contact() {
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' })
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' })
   const [status, setStatus] = useState<Status>('idle')
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -25,6 +25,7 @@ export default function Contact() {
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,
+          phone: formData.phone,
           message: formData.message,
           _subject: `New inquiry from ${formData.name} — Adwise Media`,
           _template: 'table',
@@ -34,7 +35,7 @@ export default function Contact() {
 
       if (res.ok) {
         setStatus('success')
-        setFormData({ name: '', email: '', message: '' })
+        setFormData({ name: '', email: '', phone: '', message: '' })
       } else {
         setStatus('error')
       }
@@ -44,8 +45,17 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact" className="scroll-mt-24 bg-brand py-24 md:py-32">
-      <div className="site-shell grid gap-14 md:grid-cols-2 md:items-start">
+    <section id="contact" className="scroll-mt-24 relative overflow-hidden brand-field py-24 md:py-32">
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(circle at 15% 20%, rgba(255,255,255,0.45), transparent 35%), radial-gradient(circle at 85% 75%, rgba(14,14,14,0.1), transparent 30%)',
+        }}
+        aria-hidden
+      />
+
+      <div className="site-shell relative z-10 grid gap-14 md:grid-cols-2 md:items-start">
         <motion.div
           initial={{ y: 14 }}
           whileInView={{ y: 0 }}
@@ -56,7 +66,8 @@ export default function Contact() {
           <AnimatedText
             as="h2"
             text="Let’s make something people can’t ignore."
-            className="mt-3 font-display text-4xl font-bold tracking-tight text-ink md:text-5xl"
+            shimmer
+            className="mt-3 font-display text-4xl font-bold tracking-tight md:text-5xl"
           />
           <p className="mt-5 max-w-md text-lg text-ink/70">
             Tell us about your project — or reach out right now on WhatsApp, email, call, or text.
@@ -108,6 +119,17 @@ export default function Contact() {
               />
             </label>
           </div>
+          <label className="block text-sm">
+            <span className="mb-2 block text-white/55">Phone number</span>
+            <input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={onChange}
+              className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-brand"
+              placeholder="(555) 000-0000"
+            />
+          </label>
           <label className="block text-sm">
             <span className="mb-2 block text-white/55">Message</span>
             <textarea

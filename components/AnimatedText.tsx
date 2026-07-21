@@ -2,7 +2,7 @@ import { motion, type Variants } from 'framer-motion'
 
 /**
  * Animate with motion only — never hide text with opacity:0.
- * That previously left the homepage blank when hydration/viewport detection failed.
+ * Optional shimmer applies the yellow/black animated brand text style.
  */
 const container: Variants = {
   hidden: {},
@@ -25,6 +25,8 @@ type Props = {
   className?: string
   delay?: number
   immediate?: boolean
+  /** Yellow ↔ black animated headline style */
+  shimmer?: boolean
 }
 
 export default function AnimatedText({
@@ -33,6 +35,7 @@ export default function AnimatedText({
   className = '',
   delay = 0,
   immediate = false,
+  shimmer = false,
 }: Props) {
   const words = text.split(' ')
   const shared = {
@@ -49,7 +52,7 @@ export default function AnimatedText({
     <motion.span
       key={`${w}-${i}`}
       variants={wordVariant}
-      className="mr-[0.28em] inline-block last:mr-0"
+      className={`mr-[0.28em] inline-block last:mr-0 ${shimmer ? 'brand-shimmer' : ''}`}
     >
       {w}
     </motion.span>

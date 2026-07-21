@@ -33,7 +33,8 @@ export default function Services() {
         <AnimatedText
           as="h2"
           text="What we make for businesses"
-          className="mt-3 max-w-2xl font-display text-4xl font-bold tracking-tight text-ink md:text-5xl"
+          shimmer
+          className="mt-3 max-w-2xl font-display text-4xl font-bold tracking-tight md:text-5xl"
         />
         <p className="mt-5 max-w-xl text-lg text-ink/70">
           Logos, graphics, and marketing creatives — from first impression to full campaigns.
@@ -48,19 +49,35 @@ export default function Services() {
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.45, delay: index * 0.08 }}
               whileHover={{ y: -6, transition: { duration: 0.25 } }}
-              className="soft-panel border border-ink/10 bg-white/90 p-8 shadow-[0_20px_50px_-30px_rgba(14,14,14,0.35)] md:p-9"
+              className={`soft-panel border p-8 shadow-[0_20px_50px_-30px_rgba(14,14,14,0.35)] md:p-9 ${
+                index === 1
+                  ? 'border-ink/20 bg-ink text-white'
+                  : 'border-ink/10 bg-white/95 text-ink'
+              }`}
             >
-              <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-ink font-display text-sm font-bold text-brand">
+              <span
+                className={`inline-flex h-11 w-11 items-center justify-center rounded-full font-display text-sm font-bold ${
+                  index === 1 ? 'bg-brand text-ink' : 'bg-ink text-brand'
+                }`}
+              >
                 {service.num}
               </span>
-              <h3 className="mt-5 font-display text-3xl font-bold tracking-tight text-ink">
-                {service.title}
-              </h3>
-              <p className="mt-4 leading-relaxed text-ink/65">{service.description}</p>
+              <h3 className="mt-5 font-display text-3xl font-bold tracking-tight">{service.title}</h3>
+              <p className={`mt-4 leading-relaxed ${index === 1 ? 'text-white/65' : 'text-ink/65'}`}>
+                {service.description}
+              </p>
               <ul className="mt-8 space-y-2">
                 {service.points.map((point) => (
-                  <li key={point} className="flex items-center gap-3 text-sm text-ink/75">
-                    <span className="h-2 w-2 rounded-full bg-ink" aria-hidden />
+                  <li
+                    key={point}
+                    className={`flex items-center gap-3 text-sm ${
+                      index === 1 ? 'text-white/80' : 'text-ink/75'
+                    }`}
+                  >
+                    <span
+                      className={`h-2 w-2 rounded-full ${index === 1 ? 'bg-brand' : 'bg-ink'}`}
+                      aria-hidden
+                    />
                     {point}
                   </li>
                 ))}

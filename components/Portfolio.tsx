@@ -3,33 +3,25 @@ import Link from 'next/link'
 import AnimatedText from './AnimatedText'
 
 const placeholders = [
-  { label: 'Logos', delay: 0 },
-  { label: 'Branding', delay: 0.08 },
-  { label: 'Signage', delay: 0.16 },
+  { label: 'Logos', delay: 0, tone: 'bg-white' },
+  { label: 'Branding', delay: 0.08, tone: 'bg-brand' },
+  { label: 'Signage', delay: 0.16, tone: 'bg-ink text-white' },
 ]
 
 export default function Portfolio() {
   return (
-    <section id="work" className="scroll-mt-24 relative overflow-hidden bg-paper-deep py-24 md:py-32">
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            'radial-gradient(ellipse 55% 45% at 12% 18%, rgba(253,198,33,0.28), transparent 55%), radial-gradient(ellipse 40% 35% at 88% 78%, rgba(255,255,255,0.7), transparent 50%)',
-        }}
-        aria-hidden
-      />
-
+    <section id="work" className="scroll-mt-24 relative overflow-hidden section-aurora-deep py-24 md:py-32">
       <div className="site-shell relative z-10">
         <p className="eyebrow">Our work</p>
         <AnimatedText
           as="h2"
           text="Portfolio coming soon."
-          className="mt-3 max-w-3xl font-display text-4xl font-bold tracking-tight text-ink md:text-6xl"
+          shimmer
+          className="mt-3 max-w-3xl font-display text-4xl font-bold tracking-tight md:text-6xl"
         />
 
         <motion.div
-          className="mt-12 max-w-3xl rounded-[1.75rem] border border-ink/10 bg-white p-8 shadow-[0_24px_60px_-36px_rgba(14,14,14,0.28)] md:p-10"
+          className="mt-12 max-w-3xl rounded-[1.75rem] border border-ink/10 bg-white/90 p-8 shadow-[0_24px_60px_-36px_rgba(14,14,14,0.28)] backdrop-blur-sm md:p-10"
           initial={{ y: 20 }}
           whileInView={{ y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
@@ -57,7 +49,7 @@ export default function Portfolio() {
           {placeholders.map((item, index) => (
             <motion.div
               key={item.label}
-              className="relative flex min-h-[9rem] flex-col items-start justify-end overflow-hidden rounded-[1.75rem] border border-ink/8 bg-white p-5 shadow-[0_18px_40px_-30px_rgba(14,14,14,0.25)]"
+              className={`relative flex min-h-[9.5rem] flex-col items-start justify-end overflow-hidden rounded-[1.75rem] border border-ink/8 p-5 shadow-[0_18px_40px_-30px_rgba(14,14,14,0.25)] ${item.tone}`}
               initial={{ y: 16 }}
               whileInView={{ y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
@@ -69,10 +61,24 @@ export default function Portfolio() {
                 style={{ animationDelay: `${index * 0.3}s` }}
                 aria-hidden
               />
-              <span className="relative z-10 font-display text-sm font-bold uppercase tracking-widest text-ink/45">
+              <span
+                className={`relative z-10 font-display text-sm font-bold uppercase tracking-widest ${
+                  item.tone.includes('text-white') ? 'text-white/55' : 'text-ink/45'
+                }`}
+              >
                 {item.label}
               </span>
-              <span className="relative z-10 mt-2 text-xs font-semibold text-brand-deep">Coming soon</span>
+              <span
+                className={`relative z-10 mt-2 text-xs font-semibold ${
+                  item.tone.includes('bg-brand')
+                    ? 'text-ink'
+                    : item.tone.includes('text-white')
+                      ? 'text-brand'
+                      : 'text-brand-deep'
+                }`}
+              >
+                Coming soon
+              </span>
             </motion.div>
           ))}
         </div>

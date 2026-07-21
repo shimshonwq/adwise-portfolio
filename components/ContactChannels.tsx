@@ -29,8 +29,8 @@ const channels = [
 ] as const
 
 interface ContactChannelsProps {
-  /** dark = icons on light bg; light = icons on dark/gold bg */
-  variant?: 'dark' | 'light'
+  /** dark = icons on light bg; light = icons on gold bg; onDark = icons on black bg */
+  variant?: 'dark' | 'light' | 'onDark'
   className?: string
 }
 
@@ -39,9 +39,11 @@ export default function ContactChannels({
   className = '',
 }: ContactChannelsProps) {
   const shell =
-    variant === 'light'
-      ? 'border-ink/15 text-ink hover:border-ink hover:bg-ink hover:text-white'
-      : 'border-line text-ink hover:border-ink hover:bg-ink hover:text-white'
+    variant === 'onDark'
+      ? 'border-white/25 text-white hover:border-brand hover:bg-brand hover:text-ink'
+      : variant === 'light'
+        ? 'border-ink/15 text-ink hover:border-ink hover:bg-ink hover:text-white'
+        : 'border-line text-ink hover:border-ink hover:bg-ink hover:text-white'
 
   return (
     <div className={`flex flex-wrap gap-3 ${className}`}>

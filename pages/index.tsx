@@ -3,6 +3,7 @@ import Navigation from '../components/Navigation'
 import Hero from '../components/Hero'
 import Portfolio from '../components/Portfolio'
 import Services from '../components/Services'
+import Spotlight from '../components/Spotlight'
 import Process from '../components/Process'
 import About from '../components/About'
 import Contact from '../components/Contact'
@@ -39,6 +40,7 @@ export default function Home() {
         <Hero />
         <Portfolio />
         <Services />
+        <Spotlight />
         <Process />
         <About />
         <Contact />
