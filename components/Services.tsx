@@ -35,25 +35,20 @@ export default function Services() {
           text="What we make for businesses"
           className="mt-3 max-w-2xl font-display text-4xl font-bold tracking-tight text-ink md:text-5xl"
         />
-        <motion.p
-          className="mt-5 max-w-xl text-lg text-ink/70"
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
+        <p className="mt-5 max-w-xl text-lg text-ink/70">
           Logos, graphics, and marketing creatives — from first impression to full campaigns.
-        </motion.p>
+        </p>
 
         <div className="mt-14 grid gap-5 md:grid-cols-3 md:gap-6">
           {services.map((service, index) => (
             <motion.article
               key={service.num}
-              initial={{ y: 24, opacity: 0 }}
-              whileInView={{ y: 0, opacity: 1 }}
-              viewport={{ once: true, margin: '-60px' }}
-              transition={{ duration: 0.5, delay: index * 0.08 }}
+              initial={{ y: 18 }}
+              whileInView={{ y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.45, delay: index * 0.08 }}
               whileHover={{ y: -6, transition: { duration: 0.25 } }}
-              className="soft-panel border border-ink/10 bg-white/80 p-8 shadow-[0_20px_50px_-30px_rgba(14,14,14,0.35)] md:p-9"
+              className="soft-panel border border-ink/10 bg-white/90 p-8 shadow-[0_20px_50px_-30px_rgba(14,14,14,0.35)] md:p-9"
             >
               <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-ink font-display text-sm font-bold text-brand">
                 {service.num}

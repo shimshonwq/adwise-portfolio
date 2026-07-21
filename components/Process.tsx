@@ -34,9 +34,9 @@ export default function Process() {
           {steps.map((step, index) => (
             <motion.article
               key={step.num}
-              initial={{ y: 22, opacity: 0 }}
-              whileInView={{ y: 0, opacity: 1 }}
-              viewport={{ once: true }}
+              initial={{ y: 16 }}
+              whileInView={{ y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.45, delay: index * 0.08 }}
               whileHover={{ y: -6, transition: { duration: 0.25 } }}
               className={`soft-panel border p-8 md:p-9 ${
@@ -45,15 +45,11 @@ export default function Process() {
                   : 'border-line bg-white text-ink'
               }`}
             >
-              <span
-                className={`inline-flex h-11 w-11 items-center justify-center rounded-full font-display text-sm font-bold ${
-                  index === 1 ? 'bg-brand text-ink' : 'bg-brand text-ink'
-                }`}
-              >
+              <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-brand font-display text-sm font-bold text-ink">
                 {step.num}
               </span>
               <h3 className="mt-6 font-display text-2xl font-bold md:text-3xl">{step.title}</h3>
-              <p className={`mt-4 leading-relaxed ${index === 1 ? 'text-white/65' : 'text-ink/60'}`}>
+              <p className={`mt-4 leading-relaxed ${index === 1 ? 'text-white/70' : 'text-ink/60'}`}>
                 {step.body}
               </p>
             </motion.article>

@@ -1,18 +1,20 @@
 import { motion, type Variants } from 'framer-motion'
 
+/**
+ * Animate with motion only — never hide text with opacity:0.
+ * That previously left the homepage blank when hydration/viewport detection failed.
+ */
 const container: Variants = {
   hidden: {},
   show: {
-    transition: { staggerChildren: 0.06, delayChildren: 0.05 },
+    transition: { staggerChildren: 0.055, delayChildren: 0.04 },
   },
 }
 
 const wordVariant: Variants = {
-  hidden: { opacity: 0, y: 22, rotate: -2 },
+  hidden: { y: 18 },
   show: {
-    opacity: 1,
     y: 0,
-    rotate: 0,
     transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
   },
 }
@@ -22,7 +24,6 @@ type Props = {
   as?: 'h1' | 'h2' | 'h3' | 'p' | 'span'
   className?: string
   delay?: number
-  /** Play on mount (hero) instead of on scroll into view */
   immediate?: boolean
 }
 
@@ -39,7 +40,7 @@ export default function AnimatedText({
     variants: container,
     initial: 'hidden' as const,
     ...(immediate ? { animate: 'show' as const } : { whileInView: 'show' as const }),
-    viewport: immediate ? undefined : { once: true, margin: '-40px' },
+    viewport: immediate ? undefined : { once: true, amount: 0.35 },
     transition: { delayChildren: delay },
     'aria-label': text,
   }

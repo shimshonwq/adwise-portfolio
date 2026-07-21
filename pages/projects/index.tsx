@@ -19,9 +19,9 @@ export default function ProjectsComingSoon() {
       <main className="min-h-[80svh] bg-ink pt-28 text-white md:pt-32">
         <div className="site-shell py-20 md:py-28">
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            initial={{ y: 16 }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.5 }}
             className="coming-soon-panel max-w-2xl"
           >
             <p className="text-sm font-bold uppercase tracking-[0.22em] text-brand">Our work</p>

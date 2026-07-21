@@ -4,8 +4,8 @@ import AnimatedText from './AnimatedText'
 
 const placeholders = [
   { label: 'Logos', delay: 0 },
-  { label: 'Branding', delay: 0.12 },
-  { label: 'Signage', delay: 0.24 },
+  { label: 'Branding', delay: 0.08 },
+  { label: 'Signage', delay: 0.16 },
 ]
 
 export default function Portfolio() {
@@ -20,15 +20,8 @@ export default function Portfolio() {
         aria-hidden
       />
 
-      <div className="site-shell relative">
-        <motion.p
-          className="eyebrow !text-brand"
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          Our work
-        </motion.p>
+      <div className="site-shell relative z-10">
+        <p className="eyebrow !text-brand">Our work</p>
         <AnimatedText
           as="h2"
           text="Portfolio coming soon."
@@ -37,10 +30,10 @@ export default function Portfolio() {
 
         <motion.div
           className="coming-soon-panel mt-12 max-w-3xl"
-          initial={{ opacity: 0, y: 28, scale: 0.98 }}
-          whileInView={{ opacity: 1, y: 0, scale: 1 }}
-          viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+          initial={{ y: 20 }}
+          whileInView={{ y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className="flex items-center gap-3">
             <span className="pulse-dot" aria-hidden />
@@ -51,7 +44,7 @@ export default function Portfolio() {
           <p className="mt-6 font-display text-2xl font-bold leading-snug text-white md:text-3xl">
             We&apos;re currently working on it.
           </p>
-          <p className="mt-4 text-lg leading-relaxed text-white/65">
+          <p className="mt-4 text-lg leading-relaxed text-white/70">
             Our work will be uploaded soon — real client logos, branding, and graphics designed for
             businesses. Check back shortly.
           </p>
@@ -65,18 +58,18 @@ export default function Portfolio() {
             <motion.div
               key={item.label}
               className="placeholder-tile"
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: item.delay }}
+              initial={{ y: 16 }}
+              whileInView={{ y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.45, delay: item.delay }}
               whileHover={{ y: -6, transition: { duration: 0.25 } }}
             >
-              <motion.div
+              <div
                 className="placeholder-shimmer"
-                animate={{ opacity: [0.35, 0.7, 0.35] }}
-                transition={{ duration: 2.8, repeat: Infinity, delay: index * 0.3 }}
+                style={{ animationDelay: `${index * 0.3}s` }}
+                aria-hidden
               />
-              <span className="relative z-10 font-display text-sm font-bold uppercase tracking-widest text-white/50">
+              <span className="relative z-10 font-display text-sm font-bold uppercase tracking-widest text-white/55">
                 {item.label}
               </span>
               <span className="relative z-10 mt-2 text-xs font-semibold text-brand">Coming soon</span>

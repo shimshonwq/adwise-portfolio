@@ -47,10 +47,10 @@ export default function Contact() {
     <section id="contact" className="scroll-mt-24 bg-brand py-24 md:py-32">
       <div className="site-shell grid gap-14 md:grid-cols-2 md:items-start">
         <motion.div
-          initial={{ y: 18, opacity: 0 }}
-          whileInView={{ y: 0, opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+          initial={{ y: 14 }}
+          whileInView={{ y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.45 }}
         >
           <p className="eyebrow !text-ink/55">Contact</p>
           <AnimatedText
@@ -76,10 +76,10 @@ export default function Contact() {
         </motion.div>
 
         <motion.form
-          initial={{ y: 18, opacity: 0 }}
-          whileInView={{ y: 0, opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.08 }}
+          initial={{ y: 14 }}
+          whileInView={{ y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.45, delay: 0.06 }}
           onSubmit={onSubmit}
           className="soft-panel space-y-5 bg-ink p-8 text-white md:p-10"
         >
