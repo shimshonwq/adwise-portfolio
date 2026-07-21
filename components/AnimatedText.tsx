@@ -22,16 +22,24 @@ type Props = {
   as?: 'h1' | 'h2' | 'h3' | 'p' | 'span'
   className?: string
   delay?: number
+  /** Play on mount (hero) instead of on scroll into view */
+  immediate?: boolean
 }
 
-export default function AnimatedText({ text, as = 'h2', className = '', delay = 0 }: Props) {
+export default function AnimatedText({
+  text,
+  as = 'h2',
+  className = '',
+  delay = 0,
+  immediate = false,
+}: Props) {
   const words = text.split(' ')
   const shared = {
     className,
     variants: container,
     initial: 'hidden' as const,
-    whileInView: 'show' as const,
-    viewport: { once: true, margin: '-40px' },
+    ...(immediate ? { animate: 'show' as const } : { whileInView: 'show' as const }),
+    viewport: immediate ? undefined : { once: true, margin: '-40px' },
     transition: { delayChildren: delay },
     'aria-label': text,
   }

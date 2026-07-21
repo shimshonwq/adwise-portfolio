@@ -38,13 +38,24 @@ export default function Process() {
               whileInView={{ y: 0, opacity: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.45, delay: index * 0.08 }}
-              className="soft-panel border border-line bg-white p-8 md:p-9"
+              whileHover={{ y: -6, transition: { duration: 0.25 } }}
+              className={`soft-panel border p-8 md:p-9 ${
+                index === 1
+                  ? 'border-brand/40 bg-ink text-white'
+                  : 'border-line bg-white text-ink'
+              }`}
             >
-              <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-brand font-display text-sm font-bold text-ink">
+              <span
+                className={`inline-flex h-11 w-11 items-center justify-center rounded-full font-display text-sm font-bold ${
+                  index === 1 ? 'bg-brand text-ink' : 'bg-brand text-ink'
+                }`}
+              >
                 {step.num}
               </span>
-              <h3 className="mt-6 font-display text-2xl font-bold text-ink md:text-3xl">{step.title}</h3>
-              <p className="mt-4 leading-relaxed text-ink/60">{step.body}</p>
+              <h3 className="mt-6 font-display text-2xl font-bold md:text-3xl">{step.title}</h3>
+              <p className={`mt-4 leading-relaxed ${index === 1 ? 'text-white/65' : 'text-ink/60'}`}>
+                {step.body}
+              </p>
             </motion.article>
           ))}
         </div>

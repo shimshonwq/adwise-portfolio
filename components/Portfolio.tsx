@@ -1,103 +1,88 @@
-import { useMemo, useState } from 'react'
+import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'framer-motion'
-import { categories, projects } from '../data/projects'
 import AnimatedText from './AnimatedText'
 
+const placeholders = [
+  { label: 'Logos', delay: 0 },
+  { label: 'Branding', delay: 0.12 },
+  { label: 'Signage', delay: 0.24 },
+]
+
 export default function Portfolio() {
-  const [active, setActive] = useState<(typeof categories)[number]>('All')
-
-  const filtered = useMemo(
-    () => (active === 'All' ? projects : projects.filter((p) => p.category === active)),
-    [active],
-  )
-
   return (
-    <section id="work" className="scroll-mt-24 bg-paper py-20 md:py-28">
-      <div className="site-shell">
-        <div className="max-w-2xl">
-          <motion.p
-            className="eyebrow"
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            Selected work
-          </motion.p>
-          <AnimatedText
-            as="h2"
-            text="Logos & brand graphics we’ve made"
-            className="mt-3 font-display text-4xl font-bold tracking-tight text-ink md:text-5xl"
-          />
-          <motion.p
-            className="mt-4 text-lg text-ink/55"
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.15 }}
-          >
-            Real client logos and graphics — colorful, clickable, and built to catch the eye.
-          </motion.p>
-        </div>
+    <section id="work" className="scroll-mt-24 relative overflow-hidden bg-ink py-24 md:py-32">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-60"
+        style={{
+          background:
+            'radial-gradient(ellipse 55% 45% at 15% 20%, rgba(253,198,33,0.22), transparent 55%), radial-gradient(ellipse 40% 35% at 85% 75%, rgba(253,198,33,0.14), transparent 50%)',
+        }}
+        aria-hidden
+      />
 
-        <div className="mt-9 flex flex-wrap gap-2.5">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => setActive(cat)}
-              className={`chip ${active === cat ? 'chip-active' : 'chip-idle'}`}
+      <div className="site-shell relative">
+        <motion.p
+          className="eyebrow !text-brand"
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          Our work
+        </motion.p>
+        <AnimatedText
+          as="h2"
+          text="Portfolio coming soon."
+          className="mt-3 max-w-3xl font-display text-4xl font-bold tracking-tight text-white md:text-6xl"
+        />
+
+        <motion.div
+          className="coming-soon-panel mt-12 max-w-3xl"
+          initial={{ opacity: 0, y: 28, scale: 0.98 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <div className="flex items-center gap-3">
+            <span className="pulse-dot" aria-hidden />
+            <p className="text-sm font-bold uppercase tracking-[0.22em] text-brand">
+              Currently in progress
+            </p>
+          </div>
+          <p className="mt-6 font-display text-2xl font-bold leading-snug text-white md:text-3xl">
+            We&apos;re currently working on it.
+          </p>
+          <p className="mt-4 text-lg leading-relaxed text-white/65">
+            Our work will be uploaded soon — real client logos, branding, and graphics designed for
+            businesses. Check back shortly.
+          </p>
+          <Link href="#contact" className="btn btn-on-dark mt-9">
+            Start your project now
+          </Link>
+        </motion.div>
+
+        <div className="mt-14 grid gap-4 sm:grid-cols-3">
+          {placeholders.map((item, index) => (
+            <motion.div
+              key={item.label}
+              className="placeholder-tile"
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: item.delay }}
+              whileHover={{ y: -6, transition: { duration: 0.25 } }}
             >
-              {cat}
-            </button>
+              <motion.div
+                className="placeholder-shimmer"
+                animate={{ opacity: [0.35, 0.7, 0.35] }}
+                transition={{ duration: 2.8, repeat: Infinity, delay: index * 0.3 }}
+              />
+              <span className="relative z-10 font-display text-sm font-bold uppercase tracking-widest text-white/50">
+                {item.label}
+              </span>
+              <span className="relative z-10 mt-2 text-xs font-semibold text-brand">Coming soon</span>
+            </motion.div>
           ))}
         </div>
-
-        <motion.div layout className="mt-11 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-          <AnimatePresence mode="popLayout">
-            {filtered.map((project, index) => {
-              const isWide = project.category === 'Signage'
-              return (
-                <motion.div
-                  key={project.id}
-                  layout
-                  initial={{ opacity: 0, y: 28, scale: 0.96 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.96 }}
-                  transition={{ duration: 0.45, delay: Math.min(index * 0.05, 0.25) }}
-                  className={isWide ? 'sm:col-span-2' : ''}
-                >
-                  <Link href={`/projects/${project.slug}`} className="group block">
-                    <div
-                      className={`logo-tile ${isWide ? 'wide' : ''}`}
-                      style={{
-                        background: `radial-gradient(circle at 30% 25%, rgba(255,255,255,0.55), transparent 45%), ${project.surface}`,
-                      }}
-                    >
-                      <span className="absolute left-4 top-4 z-10 rounded-full bg-white/85 px-3 py-1 text-[0.65rem] font-extrabold uppercase tracking-widest text-ink shadow-sm backdrop-blur-sm">
-                        {project.category}
-                      </span>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={project.coverImage} alt={project.title} />
-                      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 bg-gradient-to-t from-ink/80 via-ink/25 to-transparent p-5 pt-16 opacity-0 transition-all duration-300 group-hover:opacity-100">
-                        <p className="font-display text-lg font-bold text-white">{project.title}</p>
-                        <span className="rounded-full bg-brand px-3 py-1 text-xs font-extrabold text-ink">
-                          View
-                        </span>
-                      </div>
-                    </div>
-                    <div className="mt-4 px-1">
-                      <h3 className="font-display text-xl font-bold text-ink transition-colors group-hover:text-brand-deep md:text-2xl">
-                        {project.title}
-                      </h3>
-                      <p className="mt-1 text-sm font-semibold text-ink/45">{project.client}</p>
-                    </div>
-                  </Link>
-                </motion.div>
-              )
-            })}
-          </AnimatePresence>
-        </motion.div>
       </div>
     </section>
   )

@@ -145,9 +145,105 @@ video {
     #f7f4ee;
 }
 
+.gold-field-dark {
+  background:
+    radial-gradient(ellipse 60% 50% at 75% 25%, rgb(253 198 33 / 0.28), transparent 58%),
+    radial-gradient(ellipse 45% 40% at 8% 80%, rgb(253 198 33 / 0.12), transparent 55%),
+    #0e0e0e;
+}
+
 .ink-field {
   background: var(--color-ink);
   color: #f7f4ee;
+}
+
+.brand-field {
+  background: linear-gradient(145deg, #fdc621 0%, #f5c010 45%, #e0ad00 100%);
+  color: #0e0e0e;
+}
+
+.btn-secondary-light {
+  background: transparent;
+  border-color: rgb(255 255 255 / 0.35);
+  color: #ffffff !important;
+}
+.btn-secondary-light:hover {
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #0e0e0e !important;
+}
+
+.coming-soon-panel {
+  border-radius: var(--radius-soft);
+  border: 1px solid rgb(253 198 33 / 0.25);
+  background: linear-gradient(145deg, rgb(255 255 255 / 0.08), rgb(255 255 255 / 0.03));
+  padding: 2rem 2rem 2.25rem;
+  backdrop-filter: blur(8px);
+}
+@media (min-width: 768px) {
+  .coming-soon-panel {
+    padding: 2.5rem 2.75rem 2.75rem;
+  }
+}
+
+.placeholder-tile {
+  position: relative;
+  display: flex;
+  min-height: 9rem;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  overflow: hidden;
+  border-radius: var(--radius-soft);
+  border: 1px solid rgb(255 255 255 / 0.1);
+  background: rgb(255 255 255 / 0.04);
+  padding: 1.25rem 1.5rem;
+}
+
+.placeholder-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 0%,
+    rgb(253 198 33 / 0.08) 40%,
+    rgb(253 198 33 / 0.18) 50%,
+    rgb(253 198 33 / 0.08) 60%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-slide 3s ease-in-out infinite;
+}
+
+.pulse-dot {
+  display: inline-block;
+  height: 0.5rem;
+  width: 0.5rem;
+  border-radius: 50%;
+  background: var(--color-brand);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgb(253 198 33 / 0.5);
+  }
+  50% {
+    opacity: 0.7;
+    box-shadow: 0 0 0 6px rgb(253 198 33 / 0);
+  }
+}
+
+@keyframes shimmer-slide {
+  0%,
+  100% {
+    background-position: 200% 0;
+  }
+  50% {
+    background-position: -200% 0;
+  }
 }
 
 .logo-tile {
@@ -274,7 +370,9 @@ video {
   .reveal,
   .logo-tile,
   .logo-tile img,
-  .brand-shimmer {
+  .brand-shimmer,
+  .placeholder-shimmer,
+  .pulse-dot {
     animation: none !important;
     transition: none !important;
   }
