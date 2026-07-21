@@ -41,7 +41,7 @@ export default function Hero() {
 
           <AnimatedText
             as="h1"
-            text="Logos & graphics for businesses."
+            text="We catch eyes."
             immediate
             className="font-display text-[clamp(2.6rem,6.8vw,4.8rem)] font-bold leading-[1.05] tracking-tight text-white"
           />
@@ -52,8 +52,8 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.45, duration: 0.6 }}
           >
-            We design logos, brand graphics, and visuals that help companies look sharp, stand out,
-            and get remembered.
+            Professional branding, logos, and graphics designed to make businesses stand out and stay
+            remembered.
           </motion.p>
 
           <motion.div
@@ -63,7 +63,7 @@ export default function Hero() {
             transition={{ delay: 0.6, duration: 0.55 }}
           >
             <a href="#work" className="btn btn-on-dark">
-              Our work
+              Our projects
             </a>
             <a href="#contact" className="btn btn-secondary-light">
               Start a project
