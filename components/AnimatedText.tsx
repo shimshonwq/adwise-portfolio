@@ -2,7 +2,7 @@ import { motion, type Variants } from 'framer-motion'
 
 /**
  * Animate with motion only — never hide text with opacity:0.
- * Optional shimmer applies readable solid gold with a soft eye-catching pulse.
+ * Optional shimmer applies a light readable gold shine.
  */
 const container: Variants = {
   hidden: {},

@@ -158,32 +158,43 @@ video {
 }
 
 .brand-shimmer {
-  /* Solid readable gold with a soft eye-catching pulse — no hard-to-read flash */
-  color: #c99700;
-  background: none;
-  -webkit-background-clip: border-box;
-  background-clip: border-box;
-  -webkit-text-fill-color: currentColor;
-  text-shadow: 0 1px 0 rgb(14 14 14 / 0.06);
-  animation: brand-soft-pulse 5.5s ease-in-out infinite;
+  /* Light shiny gold — readable, gentle highlight, no black flash */
+  background: linear-gradient(
+    100deg,
+    #b8860b 0%,
+    #d4a017 18%,
+    #e0ad00 34%,
+    #fdc621 50%,
+    #ffe9a0 58%,
+    #fdc621 66%,
+    #e0ad00 82%,
+    #b8860b 100%
+  );
+  background-size: 170% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 6.5s ease-in-out infinite;
 }
 
 .section-ink-gold .brand-shimmer,
 .bg-ink .brand-shimmer,
 footer.bg-ink .brand-shimmer,
 .spotlight-stage .brand-shimmer {
-  color: #fdc621;
-  text-shadow: 0 2px 18px rgb(253 198 33 / 0.28);
-}
-
-@keyframes brand-soft-pulse {
-  0%,
-  100% {
-    filter: brightness(1);
-  }
-  50% {
-    filter: brightness(1.14);
-  }
+  background: linear-gradient(
+    100deg,
+    #e0ad00 0%,
+    #fdc621 28%,
+    #fff1b8 50%,
+    #fdc621 72%,
+    #e0ad00 100%
+  );
+  background-size: 170% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
 }
 
 .section-aurora {
@@ -448,6 +459,7 @@ footer.bg-ink .brand-shimmer,
   .brand-shimmer {
     color: var(--color-brand-deep);
     background: none;
+    -webkit-text-fill-color: var(--color-brand-deep);
     filter: none;
   }
 }
