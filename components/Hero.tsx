@@ -15,14 +15,15 @@ export default function Hero() {
     <section id="top" className="relative min-h-[100svh] overflow-hidden bg-ink text-white">
       <div className="absolute inset-0 -z-10" aria-hidden>
         <div className="gold-field-dark absolute inset-0" />
-        <div className="pointer-events-none absolute left-1/2 top-[4%] w-[135%] -translate-x-1/2 opacity-20 lg:left-auto lg:right-[-10%] lg:top-1/2 lg:w-[56%] lg:translate-x-0 lg:-translate-y-1/2 lg:opacity-75">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(255,255,255,0.08),transparent_22%),radial-gradient(circle_at_82%_26%,rgba(253,198,33,0.18),transparent_28%),radial-gradient(circle_at_64%_72%,rgba(253,198,33,0.12),transparent_24%)]" />
+        <div className="pointer-events-none absolute left-1/2 top-[8%] w-[155%] -translate-x-1/2 opacity-16 mix-blend-screen lg:left-auto lg:right-[-6%] lg:top-1/2 lg:w-[70%] lg:translate-x-0 lg:-translate-y-1/2 lg:opacity-60">
           <div className="motion-safe:animate-[float_18s_ease-in-out_infinite]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/tagline-hero.png" alt="" className="w-full max-w-none select-none" />
           </div>
         </div>
         <div
-          className="absolute inset-0 bg-gradient-to-b from-ink/40 via-ink/70 to-ink lg:bg-gradient-to-r lg:from-ink lg:via-ink/85 lg:to-ink/60"
+          className="absolute inset-0 bg-gradient-to-b from-black/20 via-ink/68 to-ink lg:bg-[linear-gradient(90deg,rgba(14,14,14,0.95)_0%,rgba(14,14,14,0.86)_38%,rgba(14,14,14,0.62)_68%,rgba(14,14,14,0.82)_100%)]"
           aria-hidden
         />
       </div>

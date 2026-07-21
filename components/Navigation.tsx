@@ -32,9 +32,13 @@ export default function Navigation() {
       }`}
     >
       <nav className="site-shell flex h-16 items-center justify-between md:h-20">
-        <Logo href="/#top" size="sm" />
+        <Logo href="/#top" size="sm" bright={onDarkHero} />
 
-        <div className="hidden items-center gap-10 md:flex">
+        <div
+          className={`hidden items-center gap-8 rounded-full px-5 py-3 md:flex ${
+            onDarkHero ? 'border border-white/10 bg-black/25 backdrop-blur-md' : ''
+          }`}
+        >
           {siteConfig.nav.map((item) => (
             <a
               key={item.href}

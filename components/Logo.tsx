@@ -5,6 +5,7 @@ interface LogoProps {
   href?: string
   className?: string
   size?: 'sm' | 'md' | 'lg'
+  bright?: boolean
 }
 
 const sizes = {
@@ -13,7 +14,7 @@ const sizes = {
   lg: 'h-14 md:h-16',
 }
 
-export default function Logo({ href = '/', className = '', size = 'md' }: LogoProps) {
+export default function Logo({ href = '/', className = '', size = 'md', bright = false }: LogoProps) {
   return (
     <Link href={href} className={`inline-flex items-center ${className}`} aria-label={siteConfig.name}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -22,7 +23,7 @@ export default function Logo({ href = '/', className = '', size = 'md' }: LogoPr
         alt={siteConfig.name}
         width={200}
         height={62}
-        className={`w-auto ${sizes[size]}`}
+        className={`w-auto ${sizes[size]} ${bright ? 'drop-shadow-[0_10px_30px_rgba(0,0,0,0.35)]' : ''}`}
       />
     </Link>
   )
