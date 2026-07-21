@@ -158,23 +158,22 @@ video {
 }
 
 .brand-shimmer {
+  /* Soft gold shimmer — mostly readable gold with a gentle highlight */
   background: linear-gradient(
     100deg,
-    #0e0e0e 0%,
-    #0e0e0e 18%,
-    #e0ad00 36%,
-    #fdc621 50%,
-    #fff3b0 58%,
-    #fdc621 66%,
-    #e0ad00 78%,
-    #0e0e0e 92%,
-    #0e0e0e 100%
+    #c99700 0%,
+    #e0ad00 22%,
+    #fdc621 48%,
+    #ffe68a 58%,
+    #fdc621 68%,
+    #e0ad00 88%,
+    #c99700 100%
   );
-  background-size: 220% auto;
+  background-size: 180% auto;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: shimmer 4.5s ease-in-out infinite;
+  animation: shimmer 7s ease-in-out infinite;
 }
 
 .section-aurora {
