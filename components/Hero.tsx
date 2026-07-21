@@ -41,7 +41,7 @@ export default function Hero() {
 
           <AnimatedText
             as="h1"
-            text="We catch eyes."
+            text="We make brands impossible to ignore."
             immediate
             className="font-display text-[clamp(2.6rem,6.8vw,4.8rem)] font-bold leading-[1.05] tracking-tight text-white"
           />
