@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { siteConfig } from '../config/site.config'
 import AnimatedText from './AnimatedText'
 
 const marqueeItems = [
@@ -13,28 +14,41 @@ const marqueeItems = [
 export default function Hero() {
   return (
     <section id="top" className="relative min-h-[100svh] overflow-hidden bg-ink text-white">
+      {/* Atmosphere */}
       <div className="absolute inset-0 -z-10" aria-hidden>
         <div className="gold-field-dark absolute inset-0" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(255,255,255,0.08),transparent_22%),radial-gradient(circle_at_82%_26%,rgba(253,198,33,0.18),transparent_28%),radial-gradient(circle_at_64%_72%,rgba(253,198,33,0.12),transparent_24%)]" />
-        <div className="pointer-events-none absolute left-1/2 top-[8%] w-[155%] -translate-x-1/2 opacity-[0.18] mix-blend-screen lg:left-auto lg:right-[-6%] lg:top-1/2 lg:w-[70%] lg:translate-x-0 lg:-translate-y-1/2 lg:opacity-60">
-          <div className="motion-safe:animate-[float_18s_ease-in-out_infinite]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/tagline-hero.png" alt="" className="w-full max-w-none select-none" />
-          </div>
-        </div>
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(255,255,255,0.07),transparent_24%),radial-gradient(circle_at_78%_30%,rgba(253,198,33,0.22),transparent_30%),radial-gradient(circle_at_60%_78%,rgba(253,198,33,0.1),transparent_28%)]" />
         <div
-          className="absolute inset-0 bg-gradient-to-b from-black/20 via-ink/68 to-ink lg:bg-[linear-gradient(90deg,rgba(14,14,14,0.95)_0%,rgba(14,14,14,0.86)_38%,rgba(14,14,14,0.62)_68%,rgba(14,14,14,0.82)_100%)]"
+          className="absolute inset-0 bg-gradient-to-b from-black/10 via-ink/55 to-ink lg:bg-[linear-gradient(105deg,rgba(14,14,14,0.97)_0%,rgba(14,14,14,0.88)_42%,rgba(14,14,14,0.45)_72%,rgba(14,14,14,0.75)_100%)]"
           aria-hidden
         />
       </div>
 
-      <div className="site-shell relative z-10 flex min-h-[100svh] flex-col justify-end pb-28 pt-28 md:justify-center md:pb-32 md:pt-32">
-        <div className="relative max-w-2xl">
+      {/* Eye-catching logo / tagline art */}
+      <div className="pointer-events-none absolute inset-x-0 top-[7.5rem] z-0 flex justify-center px-6 md:inset-y-0 md:right-[-2%] md:left-auto md:top-0 md:w-[58%] md:items-center md:justify-end md:px-0 lg:w-[54%]">
+        <div className="relative w-full max-w-[420px] md:max-w-none md:w-[92%]">
           <div
-            className="pointer-events-none absolute left-[-6%] top-[18%] -z-10 h-[320px] w-[320px] rounded-full hero-gold-glow blur-3xl md:h-[440px] md:w-[440px]"
+            className="pointer-events-none absolute left-1/2 top-1/2 h-[70%] w-[70%] -translate-x-1/2 -translate-y-1/2 rounded-full hero-gold-glow blur-3xl"
             aria-hidden
           />
+          <motion.div
+            className="relative motion-safe:animate-[float_18s_ease-in-out_infinite]"
+            initial={{ y: 22, scale: 0.96 }}
+            animate={{ y: 0, scale: 1 }}
+            transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/hero-logo.png"
+              alt={siteConfig.tagline}
+              className="mx-auto h-auto w-full max-w-[340px] drop-shadow-[0_30px_80px_rgba(253,198,33,0.22)] select-none sm:max-w-[400px] md:max-w-none md:w-full"
+            />
+          </motion.div>
+        </div>
+      </div>
 
+      <div className="site-shell relative z-10 flex min-h-[100svh] flex-col justify-end pb-28 pt-[22rem] md:justify-center md:pb-32 md:pt-32">
+        <div className="relative max-w-xl lg:max-w-2xl">
           <motion.span
             className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-brand"
             initial={{ x: -12 }}
@@ -49,7 +63,7 @@ export default function Hero() {
             as="h1"
             text="We make brands impossible to ignore."
             immediate
-            className="font-display text-[clamp(2.6rem,6.8vw,4.8rem)] font-bold leading-[1.05] tracking-tight text-white"
+            className="font-display text-[clamp(2.5rem,6.4vw,4.6rem)] font-bold leading-[1.05] tracking-tight text-white"
           />
 
           <motion.p
