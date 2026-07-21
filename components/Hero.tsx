@@ -30,6 +30,7 @@ export default function Hero() {
 
       <div className="site-shell relative flex min-h-[100svh] flex-col justify-end pb-28 pt-28 md:justify-center md:pb-32 md:pt-32">
         <div className="max-w-2xl">
+          <div className="pointer-events-none absolute left-[-4%] top-1/2 -z-10 h-[360px] w-[360px] -translate-y-1/2 rounded-full hero-gold-glow blur-3xl md:h-[480px] md:w-[480px]" />
           <motion.span
             className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-brand"
             initial={{ opacity: 0, x: -12 }}
