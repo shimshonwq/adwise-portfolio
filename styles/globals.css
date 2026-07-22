@@ -157,7 +157,7 @@ video {
   color: #f7f4ee;
 }
 
-/* Default: black shiny words on white / paper — soft gleam, easy to read */
+/* Default: black shiny words on white / paper — soft gleam + gold drop shine */
 .brand-shimmer {
   background: linear-gradient(
     105deg,
@@ -174,10 +174,13 @@ video {
   background-clip: text;
   color: transparent;
   -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 1px 0 rgba(253, 198, 33, 0.55))
+    drop-shadow(0 0 10px rgba(253, 198, 33, 0.35))
+    drop-shadow(0 2px 14px rgba(253, 198, 33, 0.22));
   animation: shimmer 9s ease-in-out infinite;
 }
 
-/* On black/dark backgrounds: light gold shiny words */
+/* On black/dark backgrounds: light gold shiny words (no gold drop — already light) */
 .section-ink-gold .brand-shimmer,
 .bg-ink .brand-shimmer,
 footer.bg-ink .brand-shimmer,
@@ -195,9 +198,10 @@ footer.bg-ink .brand-shimmer,
   background-clip: text;
   color: transparent;
   -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 1px 8px rgba(253, 198, 33, 0.28));
 }
 
-/* Yellow brand sections: black shiny text for contrast */
+/* Yellow brand sections: black shiny text + gold drop shine */
 .brand-field .brand-shimmer {
   background: linear-gradient(
     105deg,
@@ -212,6 +216,9 @@ footer.bg-ink .brand-shimmer,
   background-clip: text;
   color: transparent;
   -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 1px 0 rgba(253, 198, 33, 0.6))
+    drop-shadow(0 0 12px rgba(253, 198, 33, 0.4))
+    drop-shadow(0 2px 16px rgba(253, 198, 33, 0.25));
 }
 
 @keyframes bulb-burst {
