@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { siteConfig } from '../config/site.config'
 
-const taglineLines = ['Thinkink', 'Your', 'Next', 'Thing']
+const taglineLines = ['Thinking', 'Your', 'Next', 'Thing']
 
 /** Mid-page brand spotlight — clean stacked tagline on a soft gold/ink gradient */
 export default function Spotlight() {

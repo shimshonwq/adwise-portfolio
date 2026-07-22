@@ -14,23 +14,26 @@ const marqueeItems = [
 export default function Hero() {
   return (
     <section id="top" className="relative min-h-[100svh] overflow-hidden section-aurora text-ink">
-      {/* Soft blended Thinkink atmosphere — no heavy frame */}
+      {/* Soft blended Thinking graphic + creative opening entrance */}
       <div className="pointer-events-none absolute inset-0 -z-0" aria-hidden>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_35%,rgba(253,198,33,0.32),transparent_36%),radial-gradient(circle_at_18%_70%,rgba(255,255,255,0.75),transparent_30%)]" />
         <div className="absolute left-1/2 top-[18%] w-[120%] -translate-x-1/2 opacity-35 mix-blend-multiply md:left-auto md:right-[-8%] md:top-1/2 md:w-[58%] md:translate-x-0 md:-translate-y-1/2 md:opacity-90 md:mix-blend-normal">
           <div className="relative">
-            <div className="absolute left-1/2 top-1/2 h-[70%] w-[70%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(253,198,33,0.35),transparent_65%)] blur-3xl" />
-            <div className="motion-safe:animate-[float_20s_ease-in-out_infinite]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/hero-logo.png"
-                alt=""
-                className="relative w-full max-w-none select-none drop-shadow-[0_24px_60px_rgba(14,14,14,0.12)]"
-              />
+            {/* Bulb burst + ring — catches the eye on first load */}
+            <div className="hero-bulb-glow absolute left-[62%] top-[38%] h-[55%] w-[55%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(253,198,33,0.8)_0%,rgba(253,198,33,0.28)_38%,transparent_70%)] blur-2xl md:left-[68%] md:top-[36%]" />
+            <div className="hero-bulb-ring absolute left-[62%] top-[38%] h-[42%] w-[42%] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-brand/50 md:left-[68%] md:top-[36%]" />
+            <div className="hero-logo-enter">
+              <div className="motion-safe:animate-[float_20s_ease-in-out_infinite]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/hero-logo.png"
+                  alt=""
+                  className="relative w-full max-w-none select-none"
+                />
+              </div>
             </div>
           </div>
         </div>
-        {/* Soft fade so type stays readable over the art */}
         <div className="absolute inset-0 bg-gradient-to-b from-paper/40 via-transparent to-paper/80 md:bg-gradient-to-r md:from-paper md:via-paper/75 md:to-transparent" />
       </div>
 
@@ -80,7 +83,6 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Accessible label for the decorative Thinkink art */}
       <span className="sr-only">{siteConfig.tagline}</span>
 
       <div className="absolute inset-x-0 bottom-0 z-10 overflow-hidden border-t border-ink/10 bg-ink py-3.5 text-brand">
