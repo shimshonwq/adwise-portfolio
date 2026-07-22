@@ -45,7 +45,7 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact" className="scroll-mt-24 relative overflow-hidden brand-field py-24 md:py-32">
+    <section id="contact" className="scroll-mt-24 relative overflow-hidden brand-field grain py-24 md:py-32">
       <div
         className="pointer-events-none absolute inset-0"
         style={{
@@ -55,7 +55,7 @@ export default function Contact() {
         aria-hidden
       />
 
-      <div className="site-shell relative z-10 grid gap-14 md:grid-cols-2 md:items-start">
+      <div className="site-shell relative z-10 grid gap-14 md:grid-cols-[0.95fr_1.05fr] md:items-start">
         <motion.div
           initial={{ y: 14 }}
           whileInView={{ y: 0 }}
@@ -73,14 +73,20 @@ export default function Contact() {
             Tell us about your project — or reach out right now on WhatsApp, email, call, or text.
           </p>
 
-          <div className="mt-8 space-y-2 text-ink">
-            <a href={siteConfig.contactChannels.email} className="block font-semibold hover:underline">
+          <div className="mt-8 space-y-3 rounded-[1.5rem] border border-ink/10 bg-white/70 p-6 backdrop-blur-sm">
+            <a
+              href={siteConfig.contactChannels.email}
+              className="block text-lg font-semibold hover:underline"
+            >
               {siteConfig.email}
             </a>
-            <a href={siteConfig.contactChannels.call} className="block font-semibold hover:underline">
+            <a
+              href={siteConfig.contactChannels.call}
+              className="block text-lg font-semibold hover:underline"
+            >
               {siteConfig.phoneDisplay}
             </a>
-            <p className="text-ink/60">{siteConfig.location}</p>
+            <p className="text-ink/55">{siteConfig.location}</p>
           </div>
 
           <ContactChannels variant="light" className="mt-8" />
@@ -92,8 +98,15 @@ export default function Contact() {
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.45, delay: 0.06 }}
           onSubmit={onSubmit}
-          className="soft-panel space-y-5 bg-ink p-8 text-white md:p-10"
+          className="soft-panel space-y-5 border border-ink/20 bg-ink p-8 text-white shadow-[0_30px_70px_-36px_rgba(14,14,14,0.55)] md:p-10"
         >
+          <div className="mb-2">
+            <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-brand">
+              Project inquiry
+            </p>
+            <p className="mt-2 text-sm text-white/50">Usually reply within one business day.</p>
+          </div>
+
           <div className="grid gap-5 sm:grid-cols-2">
             <label className="block text-sm">
               <span className="mb-2 block text-white/55">Name</span>
@@ -102,7 +115,7 @@ export default function Contact() {
                 required
                 value={formData.name}
                 onChange={onChange}
-                className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-brand"
+                className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
                 placeholder="Your name"
               />
             </label>
@@ -114,7 +127,7 @@ export default function Contact() {
                 required
                 value={formData.email}
                 onChange={onChange}
-                className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-brand"
+                className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
                 placeholder="you@company.com"
               />
             </label>
@@ -126,7 +139,7 @@ export default function Contact() {
               name="phone"
               value={formData.phone}
               onChange={onChange}
-              className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-brand"
+              className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
               placeholder="(555) 000-0000"
             />
           </label>
@@ -138,7 +151,7 @@ export default function Contact() {
               rows={5}
               value={formData.message}
               onChange={onChange}
-              className="w-full resize-none rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-brand"
+              className="w-full resize-none rounded-2xl border border-white/15 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
               placeholder="What are we building?"
             />
           </label>
