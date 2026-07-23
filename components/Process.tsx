@@ -42,25 +42,29 @@ export default function Process() {
             aria-hidden
           />
 
-          <div className="grid gap-8 md:grid-cols-3 md:gap-10">
+          <div className="tilt-3d-wrap grid gap-8 md:grid-cols-3 md:gap-10">
             {steps.map((step, index) => (
               <motion.article
                 key={step.num}
-                initial={{ y: 20 }}
-                whileInView={{ y: 0 }}
+                initial={{ y: 24, rotateX: 10 }}
+                whileInView={{ y: 0, rotateX: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="relative"
+                transition={{ duration: 0.6, delay: index * 0.12 }}
+                className="tilt-3d panel-3d relative border border-ink/8 bg-white/90 p-7 md:p-8"
               >
-                <div className="relative z-10 mb-6 flex h-16 w-16 items-center justify-center rounded-full border-2 border-ink/10 bg-white shadow-[0_12px_30px_-16px_rgba(14,14,14,0.35)]">
+                <div className="relative z-10 mb-6 flex h-16 w-16 items-center justify-center rounded-full border-2 border-ink/10 bg-white shadow-[0_14px_34px_-14px_rgba(14,14,14,0.4)]">
                   <span className="font-display text-lg font-bold text-ink">{step.num}</span>
                   <span
                     className="absolute inset-0 rounded-full ring-4 ring-brand/20"
                     aria-hidden
                   />
                 </div>
-                <h3 className="font-display text-2xl font-bold md:text-3xl">{step.title}</h3>
-                <p className="mt-3 max-w-xs leading-relaxed text-ink/60">{step.body}</p>
+                <h3 className="relative z-10 font-display text-2xl font-bold md:text-3xl">
+                  {step.title}
+                </h3>
+                <p className="relative z-10 mt-3 max-w-xs leading-relaxed text-ink/60">
+                  {step.body}
+                </p>
               </motion.article>
             ))}
           </div>

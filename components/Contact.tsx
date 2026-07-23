@@ -73,7 +73,7 @@ export default function Contact() {
             Tell us about your project — or reach out right now on WhatsApp, email, call, or text.
           </p>
 
-          <div className="mt-8 space-y-3 rounded-[1.5rem] border border-ink/10 bg-white/70 p-6 backdrop-blur-sm">
+          <div className="panel-3d mt-8 space-y-3 rounded-[1.5rem] border border-ink/10 bg-white/70 p-6 backdrop-blur-sm">
             <a
               href={siteConfig.contactChannels.email}
               className="block text-lg font-semibold hover:underline"
@@ -98,7 +98,7 @@ export default function Contact() {
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.45, delay: 0.06 }}
           onSubmit={onSubmit}
-          className="soft-panel space-y-5 border border-ink/20 bg-ink p-8 text-white shadow-[0_30px_70px_-36px_rgba(14,14,14,0.55)] md:p-10"
+          className="soft-panel panel-3d panel-3d-dark space-y-5 border border-ink/20 bg-ink p-8 text-white md:p-10"
         >
           <div className="mb-2">
             <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-brand">

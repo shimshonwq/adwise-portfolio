@@ -56,9 +56,9 @@ export default function Services() {
               whileInView={{ y: 0, rotateX: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.55, delay: index * 0.08 }}
-              className={`tilt-3d group relative overflow-hidden soft-panel border p-8 shadow-[0_24px_55px_-32px_rgba(14,14,14,0.4)] md:p-9 ${
+              className={`tilt-3d group relative overflow-hidden soft-panel panel-3d border p-8 md:p-9 ${
                 index === 1
-                  ? 'border-ink/20 bg-ink text-white md:-translate-y-3'
+                  ? 'panel-3d-dark border-ink/20 bg-ink text-white md:-translate-y-3'
                   : 'border-ink/10 bg-white/95 text-ink'
               }`}
             >

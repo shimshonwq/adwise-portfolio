@@ -69,10 +69,10 @@ export default function About() {
                 whileInView={{ y: 0, rotateY: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 0.45, delay: index * 0.07 }}
-                className={`tilt-3d soft-panel border p-6 md:p-7 ${
+                className={`tilt-3d soft-panel panel-3d border p-6 md:p-7 ${
                   index === 1
-                    ? 'border-brand/50 bg-brand text-ink shadow-[0_20px_40px_-24px_rgba(253,198,33,0.55)]'
-                    : 'border-white/10 bg-white/5 text-white backdrop-blur-sm'
+                    ? 'border-brand/50 bg-brand text-ink'
+                    : 'panel-3d-dark border-white/10 bg-white/5 text-white backdrop-blur-sm'
                 }`}
               >
                 <p

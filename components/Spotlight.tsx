@@ -41,11 +41,11 @@ export default function Spotlight() {
             {taglineLines.map((line, i) => (
               <motion.span
                 key={line}
-                className="block brand-shimmer"
-                initial={{ y: 28, rotateX: 18, z: -40 }}
+                className="letter-3d block brand-shimmer"
+                initial={{ y: 36, rotateX: 32, z: -60 }}
                 whileInView={{ y: 0, rotateX: 0, z: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.75, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
                 style={{ transformStyle: 'preserve-3d' }}
               >
                 {line}

@@ -54,11 +54,11 @@ export default function Portfolio() {
         </div>
 
         <motion.div
-          className="mt-12 overflow-hidden rounded-[2rem] border border-ink/10 bg-ink p-8 text-white shadow-[0_30px_70px_-40px_rgba(14,14,14,0.55)] md:p-12"
-          initial={{ y: 22 }}
-          whileInView={{ y: 0 }}
+          className="panel-3d panel-3d-dark mt-12 overflow-hidden rounded-[2rem] border border-ink/10 bg-ink p-8 text-white md:p-12"
+          initial={{ y: 28, rotateX: 8 }}
+          whileInView={{ y: 0, rotateX: 0 }}
           viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -87,11 +87,11 @@ export default function Portfolio() {
           {placeholders.map((item, index) => (
             <motion.div
               key={item.label}
-              className={`tilt-3d relative flex flex-col items-start justify-end overflow-hidden rounded-[1.75rem] border border-ink/8 p-6 shadow-[0_18px_40px_-30px_rgba(14,14,14,0.25)] ${item.tone} ${item.height} ${item.span}`}
-              initial={{ y: 18, rotateX: 5 }}
+              className={`tilt-3d panel-3d relative flex flex-col items-start justify-end overflow-hidden rounded-[1.75rem] border border-ink/8 p-6 ${item.tone.includes('bg-ink') ? 'panel-3d-dark' : ''} ${item.tone} ${item.height} ${item.span}`}
+              initial={{ y: 22, rotateX: 10 }}
               whileInView={{ y: 0, rotateX: 0 }}
               viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.5, delay: item.delay }}
+              transition={{ duration: 0.6, delay: item.delay }}
             >
               <div
                 className="placeholder-shimmer"
