@@ -83,16 +83,15 @@ export default function Portfolio() {
           </Link>
         </motion.div>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-3">
+        <div className="tilt-3d-wrap mt-8 grid gap-4 sm:grid-cols-3">
           {placeholders.map((item, index) => (
             <motion.div
               key={item.label}
-              className={`relative flex flex-col items-start justify-end overflow-hidden rounded-[1.75rem] border border-ink/8 p-6 shadow-[0_18px_40px_-30px_rgba(14,14,14,0.25)] ${item.tone} ${item.height} ${item.span}`}
-              initial={{ y: 18 }}
-              whileInView={{ y: 0 }}
+              className={`tilt-3d relative flex flex-col items-start justify-end overflow-hidden rounded-[1.75rem] border border-ink/8 p-6 shadow-[0_18px_40px_-30px_rgba(14,14,14,0.25)] ${item.tone} ${item.height} ${item.span}`}
+              initial={{ y: 18, rotateX: 5 }}
+              whileInView={{ y: 0, rotateX: 0 }}
               viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.45, delay: item.delay }}
-              whileHover={{ y: -6, transition: { duration: 0.25 } }}
+              transition={{ duration: 0.5, delay: item.delay }}
             >
               <div
                 className="placeholder-shimmer"

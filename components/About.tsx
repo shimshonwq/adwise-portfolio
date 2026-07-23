@@ -61,16 +61,15 @@ export default function About() {
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="tilt-3d-wrap space-y-4">
             {principles.map((item, index) => (
               <motion.div
                 key={item.title}
-                initial={{ y: 14 }}
-                whileInView={{ y: 0 }}
+                initial={{ y: 14, rotateY: -4 }}
+                whileInView={{ y: 0, rotateY: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.4, delay: index * 0.07 }}
-                whileHover={{ x: 6, transition: { duration: 0.2 } }}
-                className={`soft-panel border p-6 md:p-7 ${
+                transition={{ duration: 0.45, delay: index * 0.07 }}
+                className={`tilt-3d soft-panel border p-6 md:p-7 ${
                   index === 1
                     ? 'border-brand/50 bg-brand text-ink shadow-[0_20px_40px_-24px_rgba(253,198,33,0.55)]'
                     : 'border-white/10 bg-white/5 text-white backdrop-blur-sm'

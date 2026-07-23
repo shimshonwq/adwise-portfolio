@@ -36,20 +36,23 @@ export default function Spotlight() {
           The Adwise way
         </motion.p>
 
-        <h2 className="mx-auto mt-8 max-w-4xl text-center font-display text-[clamp(3rem,8vw,6.5rem)] font-bold leading-[0.92] tracking-tight">
-          {taglineLines.map((line, i) => (
-            <motion.span
-              key={line}
-              className="block brand-shimmer"
-              initial={{ y: 22 }}
-              whileInView={{ y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.07 }}
-            >
-              {line}
-            </motion.span>
-          ))}
-        </h2>
+        <div className="hero-perspective mx-auto mt-8 max-w-4xl">
+          <h2 className="text-center font-display text-[clamp(3rem,8vw,6.5rem)] font-bold leading-[0.92] tracking-tight">
+            {taglineLines.map((line, i) => (
+              <motion.span
+                key={line}
+                className="block brand-shimmer"
+                initial={{ y: 28, rotateX: 18, z: -40 }}
+                whileInView={{ y: 0, rotateX: 0, z: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                style={{ transformStyle: 'preserve-3d' }}
+              >
+                {line}
+              </motion.span>
+            ))}
+          </h2>
+        </div>
 
         <motion.div
           className="mx-auto mt-12 h-px w-24 bg-gradient-to-r from-transparent via-brand to-transparent"
