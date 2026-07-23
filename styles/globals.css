@@ -252,108 +252,100 @@ footer.bg-ink .brand-shimmer,
     drop-shadow(0 0 7px rgba(253, 198, 33, 0.2));
 }
 
-/* ——— Layered 3D opening sequence (slower, cinematic) ——— */
+/* ——— Creative split-signature opening (slower, shorter) ——— */
 .hero-perspective {
   perspective: 1600px;
   perspective-origin: 50% 42%;
 }
 
-@keyframes layer-ink {
+@keyframes seam-draw {
   0% {
-    opacity: 1;
-    transform: translateZ(0) scale(1) rotateX(0deg);
+    transform: translate(-50%, -50%) scaleY(0);
+    opacity: 0;
   }
-  45% {
+  30% {
     opacity: 1;
-    transform: translateZ(60px) scale(1.05) rotateX(-3deg);
+    transform: translate(-50%, -50%) scaleY(1);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scaleY(1);
   }
   100% {
     opacity: 0;
-    visibility: hidden;
-    transform: translateZ(480px) scale(1.5) rotateX(-14deg);
+    transform: translate(-50%, -50%) scaleY(1.15);
   }
 }
 
-@keyframes layer-gold {
+@keyframes panel-left {
   0%,
-  22% {
-    opacity: 0;
-    transform: translateZ(-140px) scale(0.9) rotateX(10deg);
-  }
   38% {
-    opacity: 1;
-    transform: translateZ(0) scale(1) rotateX(0deg);
-  }
-  72% {
-    opacity: 1;
-    transform: translateZ(50px) scale(1.05) rotateX(-3deg);
+    transform: translateX(0);
   }
   100% {
-    opacity: 0;
-    visibility: hidden;
-    transform: translateZ(420px) scale(1.42) rotateX(-11deg);
+    transform: translateX(-105%);
   }
 }
 
-@keyframes layer-paper {
+@keyframes panel-right {
   0%,
-  42% {
-    opacity: 0;
-    transform: translateZ(-180px) scale(0.86);
-  }
-  58% {
-    opacity: 0.9;
-    transform: translateZ(0) scale(1);
+  38% {
+    transform: translateX(0);
   }
   100% {
-    opacity: 0;
-    visibility: hidden;
-    transform: translateZ(320px) scale(1.3);
+    transform: translateX(105%);
   }
 }
 
-@keyframes open-mark {
+@keyframes mark-stamp {
   0%,
-  18% {
+  12% {
     opacity: 0;
-    letter-spacing: 0.7em;
-    transform: translateY(16px) translateZ(-40px) scale(0.9);
+    letter-spacing: 0.55em;
+    transform: translate(-50%, -50%) translateZ(-80px) scale(0.88);
   }
-  36% {
+  32% {
     opacity: 1;
-    letter-spacing: 0.4em;
-    transform: translateY(0) translateZ(0) scale(1);
+    letter-spacing: 0.32em;
+    transform: translate(-50%, -50%) translateZ(0) scale(1);
   }
-  75% {
+  62% {
     opacity: 1;
+    transform: translate(-50%, -50%) translateZ(20px) scale(1.02);
   }
   100% {
     opacity: 0;
-    transform: translateY(-14px) translateZ(60px) scale(1.06);
+    transform: translate(-50%, -50%) translateZ(80px) scale(1.08);
+  }
+}
+
+@keyframes veil-hide {
+  0%,
+  92% {
+    visibility: visible;
+  }
+  100% {
+    visibility: hidden;
+    pointer-events: none;
   }
 }
 
 @keyframes logo-enter-3d {
   0% {
     opacity: 0;
-    filter: brightness(1.5);
-    transform: translateZ(-360px) scale(0.48) rotateY(22deg) rotateX(10deg);
-  }
-  58% {
-    opacity: 1;
-    filter: brightness(1.1);
-    transform: translateZ(50px) scale(1.05) rotateY(-3deg) rotateX(-1deg);
+    filter: brightness(1.25);
+    transform: translateZ(-180px) scale(0.72) rotateY(10deg);
   }
   100% {
     opacity: 1;
     filter: brightness(1);
-    transform: translateZ(0) scale(1) rotateY(0deg) rotateX(0deg);
+    transform: translateZ(0) scale(1) rotateY(0deg);
   }
 }
 
-@keyframes scene-zoom {
+@keyframes scene-settle {
   0% {
-    transform: scale(1.16);
+    transform: scale(1.06);
   }
   100% {
     transform: scale(1);
@@ -362,39 +354,10 @@ footer.bg-ink .brand-shimmer,
 
 @keyframes content-rise-3d {
   0% {
-    transform: translateY(44px) translateZ(-60px) rotateX(10deg);
+    transform: translateY(28px) translateZ(-30px) rotateX(6deg);
   }
   100% {
     transform: translateY(0) translateZ(0) rotateX(0deg);
-  }
-}
-
-@keyframes bulb-burst {
-  0% {
-    transform: translate(-50%, -50%) scale(0.2);
-    opacity: 0;
-  }
-  30% {
-    transform: translate(-50%, -50%) scale(1.2);
-    opacity: 0.9;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0.42;
-  }
-}
-
-@keyframes bulb-ring {
-  0% {
-    transform: translate(-50%, -50%) scale(0.35);
-    opacity: 0;
-  }
-  35% {
-    opacity: 0.8;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(1.9);
-    opacity: 0;
   }
 }
 
@@ -404,154 +367,122 @@ footer.bg-ink .brand-shimmer,
     transform: translateY(0) rotateY(0deg) rotateX(0deg);
   }
   50% {
-    transform: translateY(-14px) rotateY(-3deg) rotateX(1.5deg);
+    transform: translateY(-12px) rotateY(-2deg) rotateX(1deg);
   }
 }
 
-@keyframes orb-pulse {
+@keyframes ribbon-glow {
   0%,
   100% {
-    transform: translate(-50%, -50%) scale(1);
-    box-shadow: 0 0 0 0 rgb(253 198 33 / 0.45), 0 18px 40px -12px rgb(224 173 0 / 0.55);
+    box-shadow: 0 18px 40px -24px rgb(14 14 14 / 0.35), 0 0 0 0 rgb(253 198 33 / 0.2);
   }
   50% {
-    transform: translate(-50%, -50%) scale(1.08);
-    box-shadow: 0 0 0 18px rgb(253 198 33 / 0), 0 22px 48px -10px rgb(224 173 0 / 0.65);
+    box-shadow: 0 22px 48px -20px rgb(14 14 14 / 0.4), 0 0 24px 0 rgb(253 198 33 / 0.18);
   }
 }
 
-@keyframes orbit-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes scroll-bob {
+@keyframes diamond-spin {
   0%,
   100% {
-    transform: translateY(0);
+    transform: rotate(45deg) rotateY(0deg);
   }
   50% {
-    transform: translateY(8px);
+    transform: rotate(45deg) rotateY(180deg);
   }
 }
 
-@keyframes chip-float-a {
-  0%,
+@keyframes line-draw {
+  0% {
+    transform: scaleX(0.15);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
   100% {
-    transform: translateY(0) rotateY(0deg) rotateX(0deg);
-  }
-  50% {
-    transform: translateY(-10px) rotateY(-6deg) rotateX(3deg);
+    transform: scaleX(0.15);
+    opacity: 0.35;
   }
 }
 
-@keyframes chip-float-b {
-  0%,
-  100% {
-    transform: translateY(0) rotateY(0deg) rotateX(0deg);
-  }
-  50% {
-    transform: translateY(-14px) rotateY(6deg) rotateX(-2deg);
-  }
+.hero-open {
+  animation: veil-hide 2.45s linear forwards;
 }
 
-@keyframes chip-float-c {
-  0%,
-  100% {
-    transform: translateY(-4px) rotateY(0deg);
-  }
-  50% {
-    transform: translateY(-16px) rotateY(-4deg);
-  }
-}
-
-.hero-layer {
+.hero-panel-left,
+.hero-panel-right {
   position: absolute;
-  inset: 0;
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
-}
-
-.hero-layer-ink {
+  top: 0;
+  bottom: 0;
+  width: 50.2%;
   background: #0e0e0e;
-  animation: layer-ink 2.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform-style: preserve-3d;
 }
 
-.hero-layer-gold {
-  background: linear-gradient(145deg, #fdc621 0%, #e0ad00 55%, #c99800 100%);
-  animation: layer-gold 2.95s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+.hero-panel-left {
+  left: 0;
+  animation: panel-left 2.35s cubic-bezier(0.65, 0, 0.35, 1) forwards;
 }
 
-.hero-layer-paper {
-  background: radial-gradient(circle at 50% 40%, #fff8e0 0%, #f7f4ee 55%, #efe9df 100%);
-  animation: layer-paper 3.15s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+.hero-panel-right {
+  right: 0;
+  animation: panel-right 2.35s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+.hero-seam {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2px;
+  height: min(52vh, 420px);
+  background: linear-gradient(180deg, transparent, #fdc621 18%, #fff1a8 50%, #fdc621 82%, transparent);
+  transform-origin: center;
+  box-shadow: 0 0 24px rgb(253 198 33 / 0.55);
+  animation: seam-draw 2.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .hero-open-mark {
-  animation: open-mark 2.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.hero-bulb-glow {
-  animation: bulb-burst 2.4s cubic-bezier(0.22, 1, 0.36, 1) 1.1s both;
-}
-
-.hero-bulb-ring {
-  animation: bulb-ring 2.2s cubic-bezier(0.22, 1, 0.36, 1) 1.25s both;
-}
-
-.hero-bulb-ring-delay {
-  animation: bulb-ring 2.4s cubic-bezier(0.22, 1, 0.36, 1) 1.55s both;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  white-space: nowrap;
+  animation: mark-stamp 2.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .hero-logo-enter {
   transform-style: preserve-3d;
-  animation: logo-enter-3d 2.5s cubic-bezier(0.22, 1, 0.36, 1) 1.35s both;
+  animation: logo-enter-3d 1.5s cubic-bezier(0.22, 1, 0.36, 1) 1.35s both;
 }
 
 .hero-scene-zoom {
-  animation: scene-zoom 3.4s cubic-bezier(0.22, 1, 0.36, 1) 0.85s both;
+  animation: scene-settle 2s cubic-bezier(0.22, 1, 0.36, 1) 1.1s both;
 }
 
 .hero-content-3d {
   transform-style: preserve-3d;
-  animation: content-rise-3d 1.35s cubic-bezier(0.22, 1, 0.36, 1) 2.15s both;
+  animation: content-rise-3d 1.1s cubic-bezier(0.22, 1, 0.36, 1) 1.55s both;
 }
 
 .hero-float-3d {
   transform-style: preserve-3d;
-  animation: float-3d 14s ease-in-out 4s infinite;
+  animation: float-3d 14s ease-in-out 3.2s infinite;
 }
 
-/* Eye-catching hero dock (replaces marquee) */
-.hero-dock {
-  transform-style: preserve-3d;
+/* Professional brand ribbon (replaces orb dock) */
+.hero-ribbon {
+  animation: ribbon-glow 4s ease-in-out infinite;
 }
 
-.hero-orb {
-  background: radial-gradient(circle at 35% 30%, #fff6c8 0%, #fdc621 42%, #e0ad00 100%);
-  animation: orb-pulse 2.8s ease-in-out infinite;
+.hero-diamond {
+  background: linear-gradient(145deg, #fff1a8 0%, #fdc621 45%, #e0ad00 100%);
+  box-shadow: 0 8px 18px -8px rgb(224 173 0 / 0.7);
+  animation: diamond-spin 5.5s ease-in-out infinite;
 }
 
-.hero-orbit {
-  animation: orbit-spin 14s linear infinite;
-}
-
-.hero-scroll-cue {
-  animation: scroll-bob 1.8s ease-in-out infinite;
-}
-
-.hero-chip-a {
-  animation: chip-float-a 5.5s ease-in-out infinite;
-}
-.hero-chip-b {
-  animation: chip-float-b 6.2s ease-in-out 0.4s infinite;
-}
-.hero-chip-c {
-  animation: chip-float-c 5.8s ease-in-out 0.8s infinite;
+.hero-ribbon-line {
+  transform-origin: center;
+  animation: line-draw 3.8s ease-in-out infinite;
 }
 
 /* Stronger 3D depth for interactive panels */
@@ -917,28 +848,21 @@ footer.bg-ink .brand-shimmer,
     color: #fdc621;
     -webkit-text-fill-color: #fdc621;
   }
-  .hero-layer-ink,
-  .hero-layer-gold,
-  .hero-layer-paper,
+  .hero-open,
+  .hero-panel-left,
+  .hero-panel-right,
+  .hero-seam,
   .hero-open-mark,
-  .hero-bulb-glow,
-  .hero-bulb-ring,
-  .hero-bulb-ring-delay,
   .hero-logo-enter,
   .hero-scene-zoom,
   .hero-content-3d,
   .hero-float-3d,
-  .hero-orb,
-  .hero-orbit,
-  .hero-scroll-cue,
-  .hero-chip-a,
-  .hero-chip-b,
-  .hero-chip-c {
+  .hero-ribbon,
+  .hero-diamond,
+  .hero-ribbon-line {
     animation: none !important;
   }
-  .hero-layer-ink,
-  .hero-layer-gold,
-  .hero-layer-paper {
+  .hero-open {
     display: none;
   }
   .tilt-3d:hover {
