@@ -252,237 +252,181 @@ footer.bg-ink .brand-shimmer,
     drop-shadow(0 0 7px rgba(253, 198, 33, 0.2));
 }
 
-/* ——— Creative split-signature opening (slower, shorter) ——— */
+/* ——— Modern soft-dissolve opening (matches paper / gold / ink system) ——— */
 .hero-perspective {
-  perspective: 1600px;
-  perspective-origin: 50% 42%;
+  perspective: 1400px;
+  perspective-origin: 50% 45%;
 }
 
-@keyframes seam-draw {
+@keyframes open-veil-fade {
   0% {
-    transform: translate(-50%, -50%) scaleY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes open-wash {
+  0% {
+    transform: translate(-50%, -50%) scale(0.35);
+    opacity: 0.25;
+  }
+  40% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.55);
     opacity: 0;
   }
-  30% {
+}
+
+@keyframes open-word {
+  0% {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translate(-50%, -50%) translateY(14px) scale(0.96);
+  }
+  35% {
     opacity: 1;
-    transform: translate(-50%, -50%) scaleY(1);
+    filter: blur(0);
+    transform: translate(-50%, -50%) translateY(0) scale(1);
   }
   70% {
     opacity: 1;
-    transform: translate(-50%, -50%) scaleY(1);
+    filter: blur(0);
+    transform: translate(-50%, -50%) translateY(0) scale(1);
   }
   100% {
     opacity: 0;
-    transform: translate(-50%, -50%) scaleY(1.15);
-  }
-}
-
-@keyframes panel-left {
-  0%,
-  38% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-105%);
-  }
-}
-
-@keyframes panel-right {
-  0%,
-  38% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(105%);
-  }
-}
-
-@keyframes mark-stamp {
-  0%,
-  12% {
-    opacity: 0;
-    letter-spacing: 0.55em;
-    transform: translate(-50%, -50%) translateZ(-80px) scale(0.88);
-  }
-  32% {
-    opacity: 1;
-    letter-spacing: 0.32em;
-    transform: translate(-50%, -50%) translateZ(0) scale(1);
-  }
-  62% {
-    opacity: 1;
-    transform: translate(-50%, -50%) translateZ(20px) scale(1.02);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) translateZ(80px) scale(1.08);
-  }
-}
-
-@keyframes veil-hide {
-  0%,
-  92% {
-    visibility: visible;
-  }
-  100% {
-    visibility: hidden;
-    pointer-events: none;
-  }
-}
-
-@keyframes logo-enter-3d {
-  0% {
-    opacity: 0;
-    filter: brightness(1.25);
-    transform: translateZ(-180px) scale(0.72) rotateY(10deg);
-  }
-  100% {
-    opacity: 1;
-    filter: brightness(1);
-    transform: translateZ(0) scale(1) rotateY(0deg);
-  }
-}
-
-@keyframes scene-settle {
-  0% {
-    transform: scale(1.06);
-  }
-  100% {
-    transform: scale(1);
+    filter: blur(8px);
+    transform: translate(-50%, -50%) translateY(-10px) scale(1.04);
   }
 }
 
 @keyframes content-rise-3d {
   0% {
-    transform: translateY(28px) translateZ(-30px) rotateX(6deg);
+    transform: translateY(24px) translateZ(-24px) rotateX(5deg);
   }
   100% {
     transform: translateY(0) translateZ(0) rotateX(0deg);
   }
 }
 
-@keyframes float-3d {
+@keyframes float-soft {
   0%,
   100% {
-    transform: translateY(0) rotateY(0deg) rotateX(0deg);
+    transform: translateY(0) scale(1);
   }
   50% {
-    transform: translateY(-12px) rotateY(-2deg) rotateX(1deg);
+    transform: translateY(-18px) scale(1.04);
   }
 }
 
-@keyframes ribbon-glow {
+@keyframes float-soft-alt {
   0%,
   100% {
-    box-shadow: 0 18px 40px -24px rgb(14 14 14 / 0.35), 0 0 0 0 rgb(253 198 33 / 0.2);
+    transform: translateY(0) scale(1);
   }
   50% {
-    box-shadow: 0 22px 48px -20px rgb(14 14 14 / 0.4), 0 0 24px 0 rgb(253 198 33 / 0.18);
+    transform: translateY(14px) scale(0.96);
   }
 }
 
-@keyframes diamond-spin {
-  0%,
-  100% {
-    transform: rotate(45deg) rotateY(0deg);
-  }
-  50% {
-    transform: rotate(45deg) rotateY(180deg);
-  }
-}
-
-@keyframes line-draw {
+@keyframes word-cycle-in {
   0% {
-    transform: scaleX(0.15);
-    opacity: 0.35;
+    opacity: 0;
+    transform: translateY(12px) rotateX(40deg);
+  }
+  15%,
+  75% {
+    opacity: 1;
+    transform: translateY(0) rotateX(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-12px) rotateX(-40deg);
+  }
+}
+
+@keyframes accent-pulse {
+  0%,
+  100% {
+    transform: scaleX(0.4);
+    opacity: 0.4;
   }
   50% {
     transform: scaleX(1);
     opacity: 1;
   }
-  100% {
-    transform: scaleX(0.15);
-    opacity: 0.35;
-  }
 }
 
 .hero-open {
-  animation: veil-hide 2.45s linear forwards;
+  background:
+    radial-gradient(ellipse 55% 45% at 50% 45%, rgb(253 198 33 / 0.35), transparent 60%),
+    #f7f4ee;
+  animation: open-veil-fade 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-.hero-panel-left,
-.hero-panel-right {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 50.2%;
-  background: #0e0e0e;
-  transform-style: preserve-3d;
-}
-
-.hero-panel-left {
-  left: 0;
-  animation: panel-left 2.35s cubic-bezier(0.65, 0, 0.35, 1) forwards;
-}
-
-.hero-panel-right {
-  right: 0;
-  animation: panel-right 2.35s cubic-bezier(0.65, 0, 0.35, 1) forwards;
-}
-
-.hero-seam {
+.hero-open-wash {
   position: absolute;
   left: 50%;
-  top: 50%;
-  width: 2px;
-  height: min(52vh, 420px);
-  background: linear-gradient(180deg, transparent, #fdc621 18%, #fff1a8 50%, #fdc621 82%, transparent);
-  transform-origin: center;
-  box-shadow: 0 0 24px rgb(253 198 33 / 0.55);
-  animation: seam-draw 2.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  top: 45%;
+  width: min(70vw, 520px);
+  height: min(70vw, 520px);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(253 198 33 / 0.75) 0%, rgb(253 198 33 / 0.2) 42%, transparent 70%);
+  filter: blur(8px);
+  animation: open-wash 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-.hero-open-mark {
+.hero-open-word {
   position: absolute;
   left: 50%;
-  top: 50%;
-  white-space: nowrap;
-  animation: mark-stamp 2.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.hero-logo-enter {
-  transform-style: preserve-3d;
-  animation: logo-enter-3d 1.5s cubic-bezier(0.22, 1, 0.36, 1) 1.35s both;
-}
-
-.hero-scene-zoom {
-  animation: scene-settle 2s cubic-bezier(0.22, 1, 0.36, 1) 1.1s both;
+  top: 46%;
+  transform: translate(-50%, -50%);
+  animation: open-word 1.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .hero-content-3d {
   transform-style: preserve-3d;
-  animation: content-rise-3d 1.1s cubic-bezier(0.22, 1, 0.36, 1) 1.55s both;
+  animation: content-rise-3d 0.95s cubic-bezier(0.22, 1, 0.36, 1) 1.15s both;
 }
 
-.hero-float-3d {
+.hero-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  pointer-events: none;
+}
+
+.hero-blob-a {
+  animation: float-soft 11s ease-in-out infinite;
+}
+
+.hero-blob-b {
+  animation: float-soft-alt 13s ease-in-out infinite;
+}
+
+.hero-blob-c {
+  animation: float-soft 15s ease-in-out 1s infinite;
+}
+
+.hero-cycle-word {
+  display: inline-block;
   transform-style: preserve-3d;
-  animation: float-3d 14s ease-in-out 3.2s infinite;
+  animation: word-cycle-in 2.8s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Professional brand ribbon (replaces orb dock) */
-.hero-ribbon {
-  animation: ribbon-glow 4s ease-in-out infinite;
-}
-
-.hero-diamond {
-  background: linear-gradient(145deg, #fff1a8 0%, #fdc621 45%, #e0ad00 100%);
-  box-shadow: 0 8px 18px -8px rgb(224 173 0 / 0.7);
-  animation: diamond-spin 5.5s ease-in-out infinite;
-}
-
-.hero-ribbon-line {
-  transform-origin: center;
-  animation: line-draw 3.8s ease-in-out infinite;
+.hero-cycle-line {
+  transform-origin: left center;
+  animation: accent-pulse 2.8s ease-in-out infinite;
 }
 
 /* Stronger 3D depth for interactive panels */
@@ -849,17 +793,14 @@ footer.bg-ink .brand-shimmer,
     -webkit-text-fill-color: #fdc621;
   }
   .hero-open,
-  .hero-panel-left,
-  .hero-panel-right,
-  .hero-seam,
-  .hero-open-mark,
-  .hero-logo-enter,
-  .hero-scene-zoom,
+  .hero-open-wash,
+  .hero-open-word,
   .hero-content-3d,
-  .hero-float-3d,
-  .hero-ribbon,
-  .hero-diamond,
-  .hero-ribbon-line {
+  .hero-blob-a,
+  .hero-blob-b,
+  .hero-blob-c,
+  .hero-cycle-word,
+  .hero-cycle-line {
     animation: none !important;
   }
   .hero-open {

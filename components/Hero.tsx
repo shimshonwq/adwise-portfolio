@@ -1,109 +1,115 @@
-import { motion } from 'framer-motion'
+import { useEffect, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { siteConfig } from '../config/site.config'
 import AnimatedText from './AnimatedText'
 
+const cycleWords = ['identity', 'presence', 'momentum', 'clarity']
+
 export default function Hero() {
+  const [wordIndex, setWordIndex] = useState(0)
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setWordIndex((i) => (i + 1) % cycleWords.length)
+    }, 2800)
+    return () => window.clearInterval(id)
+  }, [])
+
   return (
     <section id="top" className="relative min-h-[100svh] overflow-hidden section-aurora grain text-ink">
-      {/* Creative split-signature opening — gold seam, then panels part */}
-      <div className="hero-open hero-perspective pointer-events-none fixed inset-0 z-[60]" aria-hidden>
-        <div className="hero-panel-left" />
-        <div className="hero-panel-right" />
-        <div className="hero-seam" />
-        <p className="hero-open-mark font-display text-sm font-bold uppercase tracking-[0.32em] text-brand md:text-base">
-          {siteConfig.name}
+      {/* Soft modern dissolve — paper + gold wash, matches site system */}
+      <div className="hero-open pointer-events-none fixed inset-0 z-[60]" aria-hidden>
+        <div className="hero-open-wash" />
+        <p className="hero-open-word font-display text-2xl font-bold tracking-tight text-ink md:text-4xl">
+          {siteConfig.shortName}
         </p>
       </div>
 
-      <div className="hero-scene-zoom absolute inset-0">
-        <div className="pointer-events-none absolute inset-0 -z-0" aria-hidden>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_35%,rgba(253,198,33,0.38),transparent_36%),radial-gradient(circle_at_18%_70%,rgba(255,255,255,0.8),transparent_30%)]" />
-          <div className="hero-perspective absolute left-1/2 top-[14%] w-[125%] -translate-x-1/2 opacity-40 mix-blend-multiply md:left-auto md:right-[-10%] md:top-[46%] md:w-[62%] md:translate-x-0 md:-translate-y-1/2 md:opacity-95 md:mix-blend-normal">
-            <div className="relative">
-              <div className="absolute left-[62%] top-[38%] h-[55%] w-[55%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(253,198,33,0.55)_0%,rgba(253,198,33,0.18)_40%,transparent_70%)] blur-2xl md:left-[68%] md:top-[36%]" />
-              <div className="hero-logo-enter">
-                <div className="hero-float-3d">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="/hero-logo.png"
-                    alt=""
-                    className="relative w-full max-w-none select-none drop-shadow-[0_30px_50px_rgba(14,14,14,0.18)]"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-b from-paper/35 via-transparent to-paper/85 md:bg-gradient-to-r md:from-paper md:via-paper/70 md:to-transparent" />
-        </div>
+      {/* Abstract atmosphere — no uploaded Thinking graphic */}
+      <div className="pointer-events-none absolute inset-0 -z-0" aria-hidden>
+        <div className="hero-blob hero-blob-a right-[-8%] top-[18%] h-[42vmin] w-[42vmin] bg-brand/35 md:right-[4%] md:top-[22%]" />
+        <div className="hero-blob hero-blob-b right-[12%] top-[48%] h-[28vmin] w-[28vmin] bg-white/70 md:right-[22%]" />
+        <div className="hero-blob hero-blob-c bottom-[18%] right-[28%] h-[22vmin] w-[22vmin] bg-brand/25 md:bottom-[22%]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-paper/20 via-transparent to-paper/70 md:bg-gradient-to-r md:from-paper md:via-paper/55 md:to-transparent" />
+      </div>
 
-        <div className="site-shell relative z-10 flex min-h-[100svh] flex-col justify-end pb-36 pt-28 md:justify-center md:pb-40 md:pt-32">
-          <div className="hero-perspective relative max-w-xl lg:max-w-2xl">
-            <div className="hero-content-3d">
-              <motion.span
-                className="panel-3d mb-6 inline-flex items-center gap-2 rounded-full border border-ink/10 bg-white/90 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-brand-deep backdrop-blur-sm"
-                initial={{ x: -12, rotateY: 10 }}
-                animate={{ x: 0, rotateY: 0 }}
-                transition={{ delay: 1.7, duration: 0.6 }}
-              >
-                <span className="pulse-dot" aria-hidden />
-                Branding & marketing studio
-              </motion.span>
+      <div className="site-shell relative z-10 flex min-h-[100svh] flex-col justify-end pb-32 pt-28 md:justify-center md:pb-36 md:pt-32">
+        <div className="hero-perspective relative max-w-xl lg:max-w-2xl">
+          <div className="hero-content-3d">
+            <motion.span
+              className="panel-3d mb-6 inline-flex items-center gap-2 rounded-full border border-ink/10 bg-white/90 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-brand-deep backdrop-blur-sm"
+              initial={{ x: -12 }}
+              animate={{ x: 0 }}
+              transition={{ delay: 1.25, duration: 0.55 }}
+            >
+              <span className="pulse-dot" aria-hidden />
+              Branding & marketing studio
+            </motion.span>
 
-              <AnimatedText
-                as="h1"
-                text="We make brands impossible to ignore."
-                immediate
-                shimmer
-                delay={1.65}
-                className="font-display text-[clamp(2.65rem,6.4vw,4.75rem)] font-bold leading-[1.04] tracking-tight"
-              />
+            <AnimatedText
+              as="h1"
+              text="We make brands impossible to ignore."
+              immediate
+              shimmer
+              delay={1.2}
+              className="font-display text-[clamp(2.65rem,6.4vw,4.75rem)] font-bold leading-[1.04] tracking-tight"
+            />
 
-              <motion.p
-                className="mt-6 max-w-md text-lg leading-relaxed text-ink/65 md:text-xl"
-                initial={{ y: 16, rotateX: 6 }}
-                animate={{ y: 0, rotateX: 0 }}
-                transition={{ delay: 1.95, duration: 0.6 }}
-              >
-                Strategy-led logos, brand systems, and marketing creatives that make businesses look
-                premium — and get remembered.
-              </motion.p>
+            <motion.p
+              className="mt-6 max-w-md text-lg leading-relaxed text-ink/65 md:text-xl"
+              initial={{ y: 14 }}
+              animate={{ y: 0 }}
+              transition={{ delay: 1.5, duration: 0.55 }}
+            >
+              Strategy-led logos, brand systems, and marketing creatives that make businesses look
+              premium — and get remembered.
+            </motion.p>
 
-              <motion.div
-                className="mt-9 flex flex-wrap items-center gap-3"
-                initial={{ y: 16, rotateX: 6 }}
-                animate={{ y: 0, rotateX: 0 }}
-                transition={{ delay: 2.1, duration: 0.6 }}
-              >
-                <a href="#work" className="btn btn-primary">
-                  Our projects
-                </a>
-                <a href="#contact" className="btn btn-brand">
-                  Start a project
-                </a>
-              </motion.div>
-            </div>
+            <motion.div
+              className="mt-9 flex flex-wrap items-center gap-3"
+              initial={{ y: 14 }}
+              animate={{ y: 0 }}
+              transition={{ delay: 1.65, duration: 0.55 }}
+            >
+              <a href="#work" className="btn btn-primary">
+                Our projects
+              </a>
+              <a href="#contact" className="btn btn-brand">
+                Start a project
+              </a>
+            </motion.div>
           </div>
         </div>
       </div>
 
-      <span className="sr-only">{siteConfig.tagline}</span>
-
-      {/* Professional brand ribbon — unique, calm, eye-catching */}
-      <div className="absolute inset-x-0 bottom-6 z-10 px-4 md:bottom-8">
+      {/* Live word cycle — different motion + copy from the old ribbon */}
+      <div className="absolute inset-x-0 bottom-7 z-10 md:bottom-9">
         <a
-          href="#contact"
-          className="hero-ribbon panel-3d mx-auto flex max-w-xl items-center gap-4 rounded-full border border-ink/10 bg-white/90 px-5 py-3.5 backdrop-blur-md transition hover:-translate-y-1 md:gap-5 md:px-7 md:py-4"
+          href="#work"
+          className="hero-perspective mx-auto flex w-fit flex-col items-start gap-2 px-4"
         >
-          <span className="hero-diamond relative z-10 h-3 w-3 shrink-0 rounded-[2px]" aria-hidden />
-          <span className="relative z-10 min-w-0 flex-1">
-            <span className="block font-display text-sm font-bold tracking-tight text-ink md:text-base">
-              {siteConfig.tagline}
+          <span className="text-[0.68rem] font-extrabold uppercase tracking-[0.24em] text-ink/40">
+            Built for
+          </span>
+          <span className="flex items-baseline gap-3">
+            <span className="relative block h-[1.35em] min-w-[9ch] overflow-hidden font-display text-2xl font-bold tracking-tight text-ink md:text-3xl">
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={cycleWords[wordIndex]}
+                  className="absolute inset-x-0 top-0 brand-shimmer"
+                  initial={{ y: 18, rotateX: 50 }}
+                  animate={{ y: 0, rotateX: 0 }}
+                  exit={{ y: -18, rotateX: -50 }}
+                  transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ transformStyle: 'preserve-3d' }}
+                >
+                  {cycleWords[wordIndex]}
+                </motion.span>
+              </AnimatePresence>
             </span>
-            <span className="hero-ribbon-line mt-1.5 block h-px w-full bg-gradient-to-r from-transparent via-brand to-transparent" />
+            <span className="text-sm font-semibold text-ink/45 md:text-base">→ see the work</span>
           </span>
-          <span className="relative z-10 shrink-0 text-xs font-extrabold uppercase tracking-[0.16em] text-brand-deep">
-            Begin →
-          </span>
+          <span className="hero-cycle-line h-0.5 w-28 rounded-full bg-brand" aria-hidden />
         </a>
       </div>
     </section>
