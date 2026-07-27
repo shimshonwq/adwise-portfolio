@@ -3,6 +3,7 @@ import Navigation from '../components/Navigation'
 import Hero from '../components/Hero'
 import Portfolio from '../components/Portfolio'
 import Services from '../components/Services'
+import CraftIcons from '../components/CraftIcons'
 import Spotlight from '../components/Spotlight'
 import Process from '../components/Process'
 import About from '../components/About'
@@ -40,6 +41,7 @@ export default function Home() {
         <Hero />
         <Portfolio />
         <Services />
+        <CraftIcons />
         <Spotlight />
         <Process />
         <About />
