@@ -71,18 +71,14 @@ export default function Spotlight() {
           transition={{ duration: 0.5, delay: 0.15 }}
         >
           <p className="text-lg leading-relaxed text-white/70 md:text-xl">
-            Bold ideas. Sharp logos. Graphics that stop people mid-scroll — and bring customers your
-            way.
-          </p>
-          <p className="mt-4 text-sm font-semibold uppercase tracking-[0.2em] text-brand/90">
-            {siteConfig.name}
+            Sharp design, clear strategy — so your brand looks the part and earns trust.
           </p>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
             <Link href="#contact" className="btn btn-on-dark">
-              Let’s build your brand
+              Work with us
             </Link>
             <Link href="#work" className="btn btn-secondary-light">
-              See our clients
+              View clients
             </Link>
           </div>
         </motion.div>

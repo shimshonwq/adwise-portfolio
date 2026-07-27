@@ -23,7 +23,7 @@ export default function Footer() {
               <span className="brand-shimmer">{siteConfig.tagline}</span>
             </p>
             <p className="mt-4 text-sm leading-relaxed text-white/50">
-              Branding, logos, and marketing creatives for businesses that want to stand out.
+              Logos, graphics, and marketing for businesses worldwide.
             </p>
             <ContactChannels variant="onDark" className="mt-7" />
           </div>
@@ -78,7 +78,7 @@ export default function Footer() {
           <p>
             © {year} {siteConfig.name}
           </p>
-          <p>Marketing · Content · Design</p>
+          <p>Graphic design · Marketing · Media</p>
         </div>
       </div>
     </footer>

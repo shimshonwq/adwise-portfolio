@@ -84,7 +84,7 @@ export default function Hero() {
               typingDone ? 'opacity-100' : 'opacity-0'
             }`}
           >
-            Graphic design · Marketing · Media
+            {siteConfig.tagline}
           </p>
           <span
             className={`mx-auto mt-5 block h-0.5 w-28 rounded-full bg-brand transition-transform duration-700 origin-center ${
@@ -123,7 +123,7 @@ export default function Hero() {
 
               <AnimatedText
                 as="h1"
-                text="We make brands impossible to ignore."
+                text="Design that makes your brand stand out."
                 immediate
                 shimmer
                 delay={2.1}
@@ -136,8 +136,7 @@ export default function Hero() {
                 animate={{ y: 0 }}
                 transition={{ delay: 2.4, duration: 0.55 }}
               >
-                Logos, brand graphics, and marketing creatives — designed so businesses look premium
-                and get remembered.
+                Logos, visuals, and campaigns — built to look sharp everywhere you show up.
               </motion.p>
 
               <motion.div
@@ -147,7 +146,7 @@ export default function Hero() {
                 transition={{ delay: 2.55, duration: 0.55 }}
               >
                 <a href="#work" className="btn btn-primary">
-                  Brands we work with
+                  View clients
                 </a>
                 <a href="#contact" className="btn btn-brand">
                   Start a project
@@ -181,7 +180,7 @@ export default function Hero() {
                 </AnimatePresence>
               </span>
               <span className="hero-cycle-line h-0.5 w-20 rounded-full bg-brand" aria-hidden />
-              <span className="text-xs font-semibold text-ink/45">Graphic · Marketing · Media →</span>
+              <span className="text-xs font-semibold text-ink/45">See what we do →</span>
             </a>
             <p className="sr-only">{siteConfig.name}</p>
           </aside>

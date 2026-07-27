@@ -5,22 +5,19 @@ const services = [
   {
     num: '01',
     title: 'Marketing',
-    description:
-      'Strategy and campaigns that turn attention into measurable growth — social, paid, and always on-brand.',
+    description: 'Campaigns and creative that get attention — social, paid, and always on-brand.',
     points: ['Social strategy', 'Paid advertising', 'Campaign management'],
   },
   {
     num: '02',
     title: 'Content Creation',
-    description:
-      'Video, photography, and copy that stops the scroll and keeps your audience coming back.',
+    description: 'Video, photography, and copy your audience actually wants to watch.',
     points: ['Short-form video', 'Editorial & copy', 'Content calendars'],
   },
   {
     num: '03',
     title: 'Graphic Design',
-    description:
-      'Logos, brand systems, and visuals that make your brand feel premium in every channel.',
+    description: 'Logos, identity, and print that hold up at every size and channel.',
     points: ['Logo & branding', 'Print & digital', 'Design systems'],
   },
 ]
@@ -35,16 +32,16 @@ export default function Services() {
       <div className="site-shell relative z-10">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
-            <p className="eyebrow !text-ink/50">What we do</p>
+            <p className="eyebrow !text-ink/50">Services</p>
             <AnimatedText
               as="h2"
-              text="Full-stack brand & marketing craft"
+              text="What we do"
               shimmer
               className="mt-3 font-display text-4xl font-bold tracking-tight md:text-5xl"
             />
           </div>
           <p className="max-w-sm text-base leading-relaxed text-ink/70 md:text-right md:text-lg">
-            From first mark to launch campaign — one studio, one sharp visual system.
+            One studio from first logo to launch campaign.
           </p>
         </div>
 

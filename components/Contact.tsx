@@ -60,12 +60,12 @@ export default function Contact() {
           <p className="eyebrow !text-ink/55">Contact</p>
           <AnimatedText
             as="h2"
-            text="Let’s make something people can’t ignore."
+            text="Get in touch"
             shimmer
             className="mt-3 font-display text-4xl font-bold tracking-tight md:text-5xl"
           />
           <p className="mt-5 max-w-md text-lg text-ink/70">
-            Tell us about your project — or reach out right now on WhatsApp, email, call, or text.
+            Tell us what you’re building — or reach us on WhatsApp, email, call, or text.
           </p>
 
           <div className="panel-3d mt-8 space-y-3 rounded-[1.5rem] border border-ink/10 bg-white/70 p-6 backdrop-blur-sm">

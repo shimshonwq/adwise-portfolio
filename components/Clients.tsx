@@ -86,13 +86,10 @@ export default function Clients() {
       />
 
       <div className="site-shell relative z-10 text-center">
-        <p className="text-xs font-extrabold uppercase tracking-[0.28em] text-brand">Our clients</p>
+        <p className="text-xs font-extrabold uppercase tracking-[0.28em] text-brand">Clients</p>
         <h2 className="mt-3 font-display text-3xl font-bold tracking-tight md:text-4xl">
-          Brands we advertise
+          Brands we work with
         </h2>
-        <p className="mx-auto mt-3 max-w-lg text-sm text-white/50 md:text-base">
-          Logos and campaigns for the brands we help grow.
-        </p>
       </div>
 
       <div

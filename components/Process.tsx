@@ -32,7 +32,7 @@ export default function Process() {
             className="mt-3 font-display text-4xl font-bold tracking-tight md:text-5xl"
           />
           <p className="mt-5 max-w-lg text-lg text-ink/60">
-            Three focused phases — built for brands that want polish without the chaos.
+            Three steps. No guesswork.
           </p>
         </div>
 

@@ -5,26 +5,19 @@ import AnimatedText from './AnimatedText'
 const principles = [
   {
     title: 'Strategy first',
-    body: 'Every mark and campaign ladders up to a clear goal — not decoration for decoration’s sake.',
+    body: 'Every decision ties back to a goal — not decoration for its own sake.',
   },
   {
     title: 'Craft obsessed',
-    body: 'Premium details that make brands feel expensive, consistent, and unforgettable.',
+    body: 'Clean details that make a brand feel considered and consistent.',
   },
   {
     title: 'Built to last',
-    body: 'Identities that work on a sign, a phone screen, a truck, and a business card.',
+    body: 'Work that reads on a sign, a screen, a truck, and a business card.',
   },
 ]
 
-const capabilities = [
-  'Logo design',
-  'Brand identity',
-  'Signage',
-  'Print systems',
-  'Social creatives',
-  'Campaign design',
-]
+const capabilities = ['Signage', 'Print systems', 'Social ads', 'Brand guides']
 
 export default function About() {
   return (
@@ -35,18 +28,13 @@ export default function About() {
             <p className="eyebrow !text-brand">About {siteConfig.shortName}</p>
             <AnimatedText
               as="h2"
-              text="A branding studio for businesses that want to look expensive."
+              text="A small studio with big standards."
               shimmer
               className="mt-3 font-display text-4xl font-bold tracking-tight md:text-5xl"
             />
             <p className="mt-6 text-lg leading-relaxed text-white/70">
-              {siteConfig.name} designs logos, brand graphics, and marketing visuals for companies
-              that want to look professional and memorable. From first sketch to finished signage,
-              we blend strategy with craft.
-            </p>
-            <p className="mt-4 text-lg leading-relaxed text-white/70">
-              <span className="brand-shimmer font-display font-bold">{siteConfig.tagline}</span>{' '}
-              isn’t just a line — it’s how we work.
+              We help businesses look professional and stay consistent — from the first logo sketch
+              to finished signage and campaign rollout.
             </p>
 
             <div className="mt-10 flex flex-wrap gap-2.5">

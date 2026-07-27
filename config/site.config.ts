@@ -7,7 +7,7 @@ export const siteConfig = {
   shortName: 'Adwise',
   tagline: 'Thinking Your Next Thing',
   description:
-    'Adwise Media designs logos, brand graphics, and visual systems for businesses — plus marketing and content that help brands stand out.',
+    'Logo design, brand graphics, and marketing for businesses that want to look sharp and get noticed.',
   url: 'https://adwisemedia.co',
   email: 'adwisecreativity@gmail.com',
   phone: '8455515506',
