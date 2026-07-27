@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import Navigation from '../components/Navigation'
 import Hero from '../components/Hero'
-import Portfolio from '../components/Portfolio'
+import Clients from '../components/Clients'
 import Services from '../components/Services'
 import Spotlight from '../components/Spotlight'
 import Process from '../components/Process'
@@ -38,7 +38,7 @@ export default function Home() {
       <Navigation />
       <main>
         <Hero />
-        <Portfolio />
+        <Clients />
         <Services />
         <Spotlight />
         <Process />

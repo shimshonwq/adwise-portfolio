@@ -82,7 +82,7 @@ export default function Spotlight() {
               Let’s build your brand
             </Link>
             <Link href="#work" className="btn btn-secondary-light">
-              See what’s coming
+              See our clients
             </Link>
           </div>
         </motion.div>

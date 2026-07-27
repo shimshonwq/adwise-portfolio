@@ -147,7 +147,7 @@ export default function Hero() {
                 transition={{ delay: 2.55, duration: 0.55 }}
               >
                 <a href="#work" className="btn btn-primary">
-                  Our projects
+                  Brands we work with
                 </a>
                 <a href="#contact" className="btn btn-brand">
                   Start a project

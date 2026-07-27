@@ -559,6 +559,17 @@ footer.bg-ink .brand-shimmer,
   animation: accent-pulse 2.6s ease-in-out infinite;
 }
 
+.clients-track {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  touch-action: pan-x;
+}
+.clients-track::-webkit-scrollbar {
+  display: none;
+}
+
 /* Stronger 3D depth for interactive panels */
 .tilt-3d-wrap {
   perspective: 1200px;
