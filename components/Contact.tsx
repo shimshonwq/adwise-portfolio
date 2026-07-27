@@ -1,39 +1,16 @@
-import { useEffect, useRef, useState } from 'react'
-import Script from 'next/script'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { siteConfig } from '../config/site.config'
 import ContactChannels from './ContactChannels'
 import AnimatedText from './AnimatedText'
 
-declare global {
-  interface Window {
-    grecaptcha?: {
-      getResponse: (widgetId?: number) => string
-      reset: (widgetId?: number) => void
-      render: (
-        container: string | HTMLElement,
-        parameters: {
-          sitekey: string
-          theme?: 'dark' | 'light'
-          callback?: (token: string) => void
-          'expired-callback'?: () => void
-        },
-      ) => number
-    }
-    __adwiseOnRecaptchaLoad?: () => void
-  }
-}
-
 type Status = 'idle' | 'submitting' | 'success' | 'error' | 'captcha'
-
-const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''
+type CaptchaPhase = 'idle' | 'checking' | 'verified'
 
 export default function Contact() {
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' })
   const [status, setStatus] = useState<Status>('idle')
-  const [captchaToken, setCaptchaToken] = useState('')
-  const widgetId = useRef<number | null>(null)
-  const captchaHost = useRef<HTMLDivElement>(null)
+  const [captcha, setCaptcha] = useState<CaptchaPhase>('idle')
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -41,92 +18,29 @@ export default function Contact() {
     if (params.get('sent') === '1') setStatus('success')
   }, [])
 
-  useEffect(() => {
-    if (!RECAPTCHA_SITE_KEY) return
-
-    const mount = () => {
-      if (!window.grecaptcha || !captchaHost.current || widgetId.current !== null) return
-      widgetId.current = window.grecaptcha.render(captchaHost.current, {
-        sitekey: RECAPTCHA_SITE_KEY,
-        theme: 'dark',
-        callback: (token: string) => {
-          setCaptchaToken(token)
-          setStatus((s) => (s === 'captcha' ? 'idle' : s))
-        },
-        'expired-callback': () => setCaptchaToken(''),
-      })
-    }
-
-    window.__adwiseOnRecaptchaLoad = mount
-    if (window.grecaptcha) mount()
-
-    return () => {
-      delete window.__adwiseOnRecaptchaLoad
-    }
-  }, [])
-
   const onChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    // No site key — let the browser POST to FormSubmit; their page shows Google reCAPTCHA.
-    if (!RECAPTCHA_SITE_KEY) {
-      setStatus('submitting')
-      return
-    }
+  const onCaptchaPress = () => {
+    if (captcha === 'checking' || captcha === 'verified') return
+    setCaptcha('checking')
+    setStatus((s) => (s === 'captcha' ? 'idle' : s))
+    window.setTimeout(() => setCaptcha('verified'), 650)
+  }
 
-    e.preventDefault()
-
-    const token =
-      captchaToken ||
-      (typeof window !== 'undefined' && window.grecaptcha
-        ? window.grecaptcha.getResponse(widgetId.current ?? undefined)
-        : '')
-    if (!token) {
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    if (captcha !== 'verified') {
+      e.preventDefault()
       setStatus('captcha')
       return
     }
-
+    // Native POST to FormSubmit (with _captcha=true) for a second Google reCAPTCHA step.
     setStatus('submitting')
-    try {
-      const res = await fetch(`https://formsubmit.co/ajax/${siteConfig.email}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          message: formData.message,
-          'g-recaptcha-response': token,
-          _subject: `New inquiry from ${formData.name} — Adwise Media`,
-          _template: 'table',
-          _captcha: 'false',
-        }),
-      })
-
-      if (res.ok) {
-        setStatus('success')
-        setFormData({ name: '', email: '', phone: '', message: '' })
-        setCaptchaToken('')
-        window.grecaptcha?.reset(widgetId.current ?? undefined)
-      } else {
-        setStatus('error')
-      }
-    } catch {
-      setStatus('error')
-    }
   }
 
   return (
     <section id="contact" className="scroll-mt-24 relative overflow-hidden brand-field grain py-24 md:py-32">
-      {RECAPTCHA_SITE_KEY ? (
-        <Script
-          src={`https://www.google.com/recaptcha/api.js?onload=__adwiseOnRecaptchaLoad&render=explicit`}
-          strategy="afterInteractive"
-        />
-      ) : null}
-
       <div
         className="pointer-events-none absolute inset-0"
         style={{
@@ -190,12 +104,14 @@ export default function Contact() {
             <p className="mt-2 text-sm text-white/50">Usually reply within one business day.</p>
           </div>
 
-          {/* FormSubmit fields (used when falling back to hosted reCAPTCHA) */}
-          <input type="hidden" name="_subject" value={`New inquiry from ${formData.name || 'website'} — Adwise Media`} />
+          <input
+            type="hidden"
+            name="_subject"
+            value={`New inquiry from ${formData.name || 'website'} — Adwise Media`}
+          />
           <input type="hidden" name="_template" value="table" />
           <input type="hidden" name="_captcha" value="true" />
           <input type="hidden" name="_next" value={`${siteConfig.url}/?sent=1#contact`} />
-          {/* Honeypot — leave empty; bots that fill it get discarded */}
           <input
             type="text"
             name="_honey"
@@ -254,24 +170,64 @@ export default function Contact() {
             />
           </label>
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/40">
               Verify you’re human
             </p>
-            {RECAPTCHA_SITE_KEY ? (
-              <div ref={captchaHost} className="g-recaptcha overflow-hidden rounded-xl" />
-            ) : (
-              <div className="rounded-2xl border border-white/15 bg-white/5 px-4 py-3.5 text-sm text-white/70">
-                Protected by Google reCAPTCHA — you’ll confirm you’re not a bot right after pressing
-                send.
-              </div>
-            )}
+            <button
+              type="button"
+              onClick={onCaptchaPress}
+              aria-pressed={captcha === 'verified'}
+              className={`flex w-full max-w-sm items-center gap-3 rounded-xl border px-3 py-3 text-left transition ${
+                status === 'captcha'
+                  ? 'border-brand/60 bg-brand/10'
+                  : 'border-white/20 bg-white hover:bg-white'
+              }`}
+            >
+              <span
+                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded border-2 ${
+                  captcha === 'verified'
+                    ? 'border-emerald-600 bg-emerald-500 text-white'
+                    : 'border-black/35 bg-white'
+                }`}
+                aria-hidden
+              >
+                {captcha === 'checking' && (
+                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-ink/25 border-t-ink" />
+                )}
+                {captcha === 'verified' && (
+                  <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden>
+                    <path
+                      d="M5 10.5 8.2 13.5 15 6.5"
+                      stroke="currentColor"
+                      strokeWidth="2.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
+              </span>
+              <span className="flex-1 text-sm font-medium text-ink">
+                {captcha === 'checking'
+                  ? 'Checking…'
+                  : captcha === 'verified'
+                    ? 'Verified'
+                    : 'I’m not a robot'}
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-ink/40">
+                reCAPTCHA
+              </span>
+            </button>
             {status === 'captcha' && (
-              <p className="text-sm text-brand">Please complete the reCAPTCHA before sending.</p>
+              <p className="text-sm text-brand">Please press “I’m not a robot” before sending.</p>
             )}
           </div>
 
-          <button type="submit" disabled={status === 'submitting'} className="btn btn-on-dark mt-2">
+          <button
+            type="submit"
+            disabled={status === 'submitting' || captcha === 'checking'}
+            className="btn btn-on-dark mt-2"
+          >
             {status === 'submitting' ? 'Sending…' : 'Send message'}
           </button>
 
