@@ -1,7 +1,16 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { FaBullhorn, FaCamera, FaPaintBrush, FaPenNib, FaVideo } from 'react-icons/fa'
 import { siteConfig } from '../config/site.config'
 import AnimatedText from './AnimatedText'
+
+const bgIcons = [
+  { Icon: FaPaintBrush, className: 'hero-bg-icon hero-bg-icon-a right-[8%] top-[22%] md:right-[14%] md:top-[24%]' },
+  { Icon: FaVideo, className: 'hero-bg-icon hero-bg-icon-b right-[22%] top-[48%] md:right-[28%] md:top-[46%]' },
+  { Icon: FaBullhorn, className: 'hero-bg-icon hero-bg-icon-c right-[6%] top-[62%] md:right-[10%] md:top-[58%]' },
+  { Icon: FaCamera, className: 'hero-bg-icon hero-bg-icon-d right-[30%] top-[28%] md:right-[36%] md:top-[30%]' },
+  { Icon: FaPenNib, className: 'hero-bg-icon hero-bg-icon-e right-[18%] top-[72%] md:right-[22%] md:top-[68%]' },
+]
 
 const OPEN_NAME = 'Adwise Media'
 
@@ -85,12 +94,17 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Soft atmospheric shapes */}
+      {/* Soft atmosphere + subtle craft icons in the background */}
       <div className="pointer-events-none absolute inset-0 -z-0" aria-hidden>
         <div className="hero-blob hero-blob-a right-[-8%] top-[18%] h-[42vmin] w-[42vmin] bg-brand/35 md:right-[6%] md:top-[20%]" />
         <div className="hero-blob hero-blob-b right-[18%] top-[52%] h-[26vmin] w-[26vmin] bg-white/75 md:right-[26%]" />
         <div className="hero-blob hero-blob-c bottom-[12%] left-[8%] h-[20vmin] w-[20vmin] bg-brand/20 md:left-[12%]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-paper/25 via-transparent to-paper/75 md:bg-gradient-to-r md:from-paper md:via-paper/60 md:to-transparent" />
+        {bgIcons.map(({ Icon, className }) => (
+          <span key={className} className={className}>
+            <Icon />
+          </span>
+        ))}
+        <div className="absolute inset-0 bg-gradient-to-b from-paper/25 via-transparent to-paper/75 md:bg-gradient-to-r md:from-paper md:via-paper/55 md:to-transparent" />
       </div>
 
       <div className="site-shell relative z-10 flex min-h-[100svh] flex-col justify-center py-28 md:py-32">
