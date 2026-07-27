@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { siteConfig } from '../config/site.config'
 
 const taglineLines = ['Thinking', 'Your', 'Next', 'Thing']
 
