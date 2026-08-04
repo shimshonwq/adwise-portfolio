@@ -1,10 +1,9 @@
 import Head from 'next/head'
 import Navigation from '../components/Navigation'
 import Hero from '../components/Hero'
-import Clients from '../components/Clients'
+import Portfolio from '../components/Portfolio'
 import Services from '../components/Services'
 import Spotlight from '../components/Spotlight'
-import Trending from '../components/Trending'
 import Process from '../components/Process'
 import About from '../components/About'
 import Contact from '../components/Contact'
@@ -16,7 +15,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>{`${siteConfig.name} — Logo Design & Marketing`}</title>
+        <title>{`${siteConfig.name} — Logos & Graphics for Businesses`}</title>
         <meta name="description" content={siteConfig.description} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta
@@ -24,14 +23,14 @@ export default function Home() {
           content="Adwise Media, logo design, branding, graphic design, marketing, content creation, adwisemedia.co"
         />
         <link rel="canonical" href={siteConfig.url} />
-        <meta property="og:title" content={`${siteConfig.name} — Logo Design & Marketing`} />
+        <meta property="og:title" content={`${siteConfig.name} — Logos & Graphics for Businesses`} />
         <meta property="og:description" content={siteConfig.description} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={siteConfig.url} />
         <meta property="og:image" content={`${siteConfig.url}/logo.png`} />
         <meta property="og:site_name" content={siteConfig.name} />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${siteConfig.name} — Logo Design & Marketing`} />
+        <meta name="twitter:title" content={`${siteConfig.name} — Logos & Graphics for Businesses`} />
         <meta name="twitter:description" content={siteConfig.description} />
       </Head>
 
@@ -39,10 +38,9 @@ export default function Home() {
       <Navigation />
       <main>
         <Hero />
-        <Clients />
+        <Portfolio />
         <Services />
         <Spotlight />
-        <Trending />
         <Process />
         <About />
         <Contact />

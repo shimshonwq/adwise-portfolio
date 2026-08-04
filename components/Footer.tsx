@@ -10,10 +10,7 @@ export default function Footer() {
       <div className="site-shell flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
         <div>
           <Logo href="/#top" size="sm" bright />
-          <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/50">
-            Logos, graphics, and marketing for businesses worldwide.
-          </p>
-          <p className="mt-3 max-w-xs text-sm">
+          <p className="mt-4 max-w-xs text-sm">
             <span className="brand-shimmer font-display font-bold">{siteConfig.tagline}</span>
           </p>
           <ContactChannels variant="onDark" className="mt-6" />

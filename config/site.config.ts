@@ -5,9 +5,9 @@
 export const siteConfig = {
   name: 'Adwise Media',
   shortName: 'Adwise',
-  tagline: 'Thinking Your Next Thing',
+  tagline: 'Thinkink Your Next Thing',
   description:
-    'Logo design, brand graphics, and marketing for businesses that want to look sharp and get noticed.',
+    'Adwise Media designs logos, brand graphics, and visual systems for businesses — plus marketing and content that help brands stand out.',
   url: 'https://adwisemedia.co',
   email: 'adwisecreativity@gmail.com',
   phone: '8455515506',
@@ -23,7 +23,7 @@ export const siteConfig = {
   },
 
   nav: [
-    { href: '#work', label: 'Clients' },
+    { href: '#work', label: 'Work' },
     { href: '#services', label: 'Services' },
     { href: '#about', label: 'About' },
     { href: '#contact', label: 'Contact' },

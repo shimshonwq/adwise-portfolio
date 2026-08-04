@@ -4,36 +4,32 @@ import AnimatedText from './AnimatedText'
 const steps = [
   {
     num: '01',
-    title: 'Research',
-    body: 'We learn the business, audience, and goal — so creative isn’t a guess.',
+    title: 'Discover',
+    body: 'We learn your brand, audience, and goals — so every creative choice has a reason.',
   },
   {
     num: '02',
     title: 'Create',
-    body: 'Strategy becomes logos, visuals, and campaigns that look sharp and stay on-brand.',
+    body: 'Strategy turns into visuals, content, and campaigns that feel premium and on-brand.',
   },
   {
     num: '03',
-    title: 'Launch',
+    title: 'Launch & grow',
     body: 'We ship, measure, and refine — so the work keeps earning attention after go-live.',
   },
 ]
 
-/** Structured process — MOTG-style “corporate approach to creative” */
 export default function Process() {
   return (
-    <section id="process" className="scroll-mt-24 section-aurora py-24 md:py-28">
+    <section className="section-aurora py-24 md:py-28">
       <div className="site-shell">
-        <p className="eyebrow">This is how we do it</p>
+        <p className="eyebrow">How we work</p>
         <AnimatedText
           as="h2"
-          text="A structured approach to creative."
+          text="A simple process. Serious craft."
           shimmer
-          className="mt-3 max-w-2xl font-display text-4xl font-bold tracking-tight md:text-5xl"
+          className="mt-3 max-w-xl font-display text-4xl font-bold tracking-tight md:text-5xl"
         />
-        <p className="mt-5 max-w-lg text-lg text-ink/60">
-          Research. Planning. Execution. Creative that works like a business.
-        </p>
 
         <div className="mt-14 grid gap-5 md:grid-cols-3 md:gap-6">
           {steps.map((step, index) => (
@@ -60,7 +56,11 @@ export default function Process() {
                 {step.num}
               </span>
               <h3 className="mt-6 font-display text-2xl font-bold md:text-3xl">{step.title}</h3>
-              <p className={`mt-4 leading-relaxed ${index === 2 ? 'text-white/70' : 'text-ink/60'}`}>
+              <p
+                className={`mt-4 leading-relaxed ${
+                  index === 2 ? 'text-white/70' : 'text-ink/60'
+                }`}
+              >
                 {step.body}
               </p>
             </motion.article>
