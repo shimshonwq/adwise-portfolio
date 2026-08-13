@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 
 type Client = {
   name: string
@@ -23,57 +23,7 @@ const clients: Client[] = [
 
 /** Uniform slow-sliding client logo row */
 export default function Clients() {
-  const trackRef = useRef<HTMLDivElement>(null)
   const [paused, setPaused] = useState(false)
-  const drag = useRef({ active: false, startX: 0, scrollLeft: 0 })
-
-  useEffect(() => {
-    const el = trackRef.current
-    if (!el || paused) return
-    let raf = 0
-    let last = performance.now()
-
-    const tick = (now: number) => {
-      const dt = now - last
-      last = now
-      if (!drag.current.active) {
-        // Slow continuous slide (~22px/sec)
-        el.scrollLeft += dt * 0.022
-        const half = el.scrollWidth / 2
-        if (half > 0 && el.scrollLeft >= half) el.scrollLeft -= half
-      }
-      raf = requestAnimationFrame(tick)
-    }
-
-    raf = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(raf)
-  }, [paused])
-
-  const onPointerDown = (e: React.PointerEvent) => {
-    const el = trackRef.current
-    if (!el) return
-    drag.current = { active: true, startX: e.clientX, scrollLeft: el.scrollLeft }
-    setPaused(true)
-    el.setPointerCapture(e.pointerId)
-  }
-
-  const onPointerMove = (e: React.PointerEvent) => {
-    const el = trackRef.current
-    if (!el || !drag.current.active) return
-    el.scrollLeft = drag.current.scrollLeft - (e.clientX - drag.current.startX)
-  }
-
-  const endDrag = (e: React.PointerEvent) => {
-    if (!drag.current.active) return
-    drag.current.active = false
-    try {
-      trackRef.current?.releasePointerCapture(e.pointerId)
-    } catch {
-      /* ignore */
-    }
-    window.setTimeout(() => setPaused(false), 900)
-  }
-
   const loop = [...clients, ...clients]
 
   return (
@@ -100,14 +50,17 @@ export default function Clients() {
       </div>
 
       <div
-        ref={trackRef}
-        className="clients-track relative z-10 mt-8 cursor-grab active:cursor-grabbing md:mt-10"
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={endDrag}
-        onPointerCancel={endDrag}
+        className="clients-track relative z-10 mt-8 overflow-hidden md:mt-10"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+        onFocus={() => setPaused(true)}
+        onBlur={() => setPaused(false)}
       >
-        <div className="flex w-max items-center gap-0 px-6 md:px-10">
+        <div
+          className={`logo-marquee-track flex w-max items-center gap-0 px-6 md:px-10 ${
+            paused ? 'is-paused' : ''
+          }`}
+        >
           {loop.map((client, i) => (
             <div
               key={`${client.name}-${i}`}

@@ -419,14 +419,26 @@ footer.bg-ink .brand-shimmer,
 }
 
 .clients-track {
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  touch-action: pan-x;
+  overflow: hidden;
 }
-.clients-track::-webkit-scrollbar {
-  display: none;
+
+.logo-marquee-track {
+  animation: logo-marquee 55s linear infinite;
+  width: max-content;
+  will-change: transform;
+}
+
+.logo-marquee-track.is-paused {
+  animation-play-state: paused;
+}
+
+@keyframes logo-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 .logo-box {
@@ -687,6 +699,7 @@ footer.bg-ink .brand-shimmer,
     scroll-behavior: auto;
   }
   .marquee-track,
+  .logo-marquee-track,
   .reveal,
   .logo-tile,
   .logo-tile img,
