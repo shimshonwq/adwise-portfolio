@@ -29,7 +29,7 @@ export default function About() {
             shimmer
             className="mt-3 font-display text-4xl font-bold tracking-tight md:text-5xl"
           />
-          <p className="mt-6 text-lg leading-relaxed text-white/70">
+          <p className="mt-6 text-lg leading-relaxed text-white/85">
             We help ambitious businesses look professional and stay consistent — from the first logo
             sketch to finished signage and campaign rollout.
           </p>

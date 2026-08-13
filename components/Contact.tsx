@@ -94,7 +94,7 @@ export default function Contact() {
             <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-brand">
               Project inquiry
             </p>
-            <p className="mt-2 text-sm text-white/50">Usually reply within one business day.</p>
+            <p className="mt-2 text-sm text-white/70">Usually reply within one business day.</p>
           </div>
 
           <input

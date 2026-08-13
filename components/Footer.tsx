@@ -10,7 +10,7 @@ export default function Footer() {
       <div className="site-shell flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
         <div>
           <Logo href="/#top" size="sm" bright />
-          <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/50">
+          <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/70">
             Logos, graphics, and marketing for businesses worldwide.
           </p>
           <p className="mt-3 max-w-xs text-sm">
@@ -65,7 +65,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="site-shell mt-12 flex flex-col gap-2 border-t border-white/10 pt-6 text-sm text-white/40 sm:flex-row sm:justify-between">
+      <div className="site-shell mt-12 flex flex-col gap-2 border-t border-white/10 pt-6 text-sm text-white/55 sm:flex-row sm:justify-between">
         <p>
           © {year} {siteConfig.name}
         </p>

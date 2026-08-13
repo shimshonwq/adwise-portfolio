@@ -67,7 +67,7 @@ export default function Spotlight() {
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.15 }}
         >
-          <p className="text-lg leading-relaxed text-white/70 md:text-xl">
+          <p className="text-lg leading-relaxed text-white/85 md:text-xl">
             Safe design gets safe results. We build logos, graphics, and campaigns that turn heads —
             and move the business forward.
           </p>

@@ -64,7 +64,7 @@ export default function Services() {
                 {service.num}
               </span>
               <h3 className="mt-5 font-display text-3xl font-bold tracking-tight">{service.title}</h3>
-              <p className={`mt-4 leading-relaxed ${index === 1 ? 'text-white/65' : 'text-ink/65'}`}>
+              <p className={`mt-4 leading-relaxed ${index === 1 ? 'text-white/80' : 'text-ink/75'}`}>
                 {service.description}
               </p>
               <ul className="mt-8 space-y-2.5">
