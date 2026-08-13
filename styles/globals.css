@@ -159,9 +159,9 @@ video {
 
 .brand-shimmer {
   /* Solid readable gold — no animated shine that washes out type */
-  color: #c99700;
+  color: #c28a00;
   background: none;
-  -webkit-text-fill-color: #c99700;
+  -webkit-text-fill-color: #c28a00;
   animation: none;
 }
 
