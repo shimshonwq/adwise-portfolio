@@ -423,7 +423,7 @@ footer.bg-ink .brand-shimmer,
 }
 
 .logo-marquee-track {
-  animation: logo-marquee 55s linear infinite;
+  animation: logo-marquee 42s linear infinite;
   width: max-content;
   will-change: transform;
 }
@@ -619,6 +619,27 @@ footer.bg-ink .brand-shimmer,
   animation: hero-scroll-pulse 1.6s ease-in-out infinite;
 }
 
+.hero-type-caret {
+  display: inline-block;
+  width: 0.08em;
+  height: 0.85em;
+  margin-left: 0.06em;
+  vertical-align: -0.05em;
+  background: currentColor;
+  animation: hero-caret-blink 0.7s steps(1) infinite;
+}
+
+@keyframes hero-caret-blink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
 @keyframes hero-core-pop {
   0% {
     transform: translate(-50%, -50%) scale(0);
@@ -712,7 +733,8 @@ footer.bg-ink .brand-shimmer,
   .hero-shock-flare,
   .hero-shock-shard,
   .hero-shock-exit,
-  .hero-scroll-line {
+  .hero-scroll-line,
+  .hero-type-caret {
     animation: none !important;
     transition: none !important;
   }

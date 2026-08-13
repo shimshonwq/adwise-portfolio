@@ -1,5 +1,3 @@
-import { useState } from 'react'
-
 type Client = {
   name: string
   src: string
@@ -21,9 +19,8 @@ const clients: Client[] = [
   { name: 'Reel Show', src: '/clients/reel-show.png' },
 ]
 
-/** Uniform slow-sliding client logo row */
+/** Uniform slow-sliding client logo row — always moving */
 export default function Clients() {
-  const [paused, setPaused] = useState(false)
   const loop = [...clients, ...clients]
 
   return (
@@ -49,18 +46,8 @@ export default function Clients() {
         </p>
       </div>
 
-      <div
-        className="clients-track relative z-10 mt-8 overflow-hidden md:mt-10"
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
-        onFocus={() => setPaused(true)}
-        onBlur={() => setPaused(false)}
-      >
-        <div
-          className={`logo-marquee-track flex w-max items-center gap-0 px-6 md:px-10 ${
-            paused ? 'is-paused' : ''
-          }`}
-        >
+      <div className="clients-track relative z-10 mt-8 overflow-hidden md:mt-10">
+        <div className="logo-marquee-track flex w-max items-center gap-0 px-6 md:px-10">
           {loop.map((client, i) => (
             <div
               key={`${client.name}-${i}`}
@@ -74,7 +61,7 @@ export default function Clients() {
                 draggable={false}
                 width={200}
                 height={72}
-                className="h-[3.25rem] w-[12.5rem] object-contain object-center opacity-95 select-none transition duration-300 hover:opacity-100 md:h-14"
+                className="h-[3.25rem] w-[12.5rem] object-contain object-center opacity-95 select-none md:h-14"
               />
             </div>
           ))}
