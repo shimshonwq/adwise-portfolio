@@ -15,6 +15,10 @@ const clients: Client[] = [
   { name: 'Ride 24', src: '/clients/ride-24.png' },
   { name: 'Reel Show', src: '/clients/reel-show.png' },
   { name: 'Flavor Max', src: '/clients/flavor-max.png' },
+  { name: 'Vish-Vash', src: '/clients/vish-vash.png' },
+  { name: 'Coffee Break', src: '/clients/coffee-break.png' },
+  { name: 'Green Power Electric', src: '/clients/greenpower.png' },
+  { name: 'Mendel Style Events', src: '/clients/mendel-style.png' },
 ]
 
 /** Uniform slow-sliding client logo row — always moving */

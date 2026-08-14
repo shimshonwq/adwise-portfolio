@@ -73,13 +73,13 @@ export default function Hero() {
   const scatters = useMemo(
     () =>
       LETTERS.map((_, i) => {
-        const angle = (i / LETTERS.length) * Math.PI * 2 + (i % 3) * 0.4
-        const dist = 180 + (i % 5) * 55
+        const angle = (i / LETTERS.length) * Math.PI * 2 + (i % 3) * 0.35
+        const dist = 48 + (i % 4) * 10
         return {
-          x: Math.cos(angle) * dist * (i % 2 === 0 ? 1.4 : -1.2),
-          y: Math.sin(angle) * dist * (i % 2 === 0 ? -1.1 : 1.3),
-          r: (i % 2 === 0 ? 1 : -1) * (28 + (i % 4) * 18),
-          delay: 0.04 * i,
+          x: Math.cos(angle) * dist * (i % 2 === 0 ? 1.1 : -1),
+          y: Math.sin(angle) * dist * 0.55,
+          r: (i % 2 === 0 ? 1 : -1) * (6 + (i % 3) * 4),
+          delay: 0.018 * i,
         }
       }),
     [],
@@ -97,14 +97,15 @@ export default function Hero() {
       return
     }
 
-    const t1 = window.setTimeout(() => setPhase('burst'), 280)
-    const t2 = window.setTimeout(() => setPhase('assemble'), 720)
-    const t3 = window.setTimeout(() => setPhase('lock'), 2100)
-    const t4 = window.setTimeout(() => setPhase('exit'), 2900)
+    // Short, professional open (~1.8s)
+    const t1 = window.setTimeout(() => setPhase('burst'), 120)
+    const t2 = window.setTimeout(() => setPhase('assemble'), 280)
+    const t3 = window.setTimeout(() => setPhase('lock'), 900)
+    const t4 = window.setTimeout(() => setPhase('exit'), 1200)
     const t5 = window.setTimeout(() => {
       setPhase('done')
       setReady(true)
-    }, 3700)
+    }, 1750)
 
     return () => {
       window.clearTimeout(t1)
@@ -142,22 +143,6 @@ export default function Hero() {
               <span className="hero-shock-core" />
               <span className="hero-shock-ring hero-shock-ring-a" />
               <span className="hero-shock-ring hero-shock-ring-b" />
-              <span className="hero-shock-ring hero-shock-ring-c" />
-              <span className="hero-shock-flare" />
-              {Array.from({ length: 14 }).map((_, i) => (
-                <span
-                  key={i}
-                  className="hero-shock-shard"
-                  style={
-                    {
-                      '--sx': `${(i % 2 === 0 ? 1 : -1) * (40 + i * 18)}px`,
-                      '--sy': `${(i % 3 === 0 ? -1 : 1) * (30 + i * 14)}px`,
-                      '--sd': `${0.02 * i}s`,
-                      '--sr': `${(i % 2 === 0 ? 1 : -1) * (20 + i * 8)}deg`,
-                    } as React.CSSProperties
-                  }
-                />
-              ))}
             </>
           )}
 

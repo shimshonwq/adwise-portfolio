@@ -4,7 +4,6 @@ import Hero from '../components/Hero'
 import Clients from '../components/Clients'
 import Services from '../components/Services'
 import Spotlight from '../components/Spotlight'
-import Trending from '../components/Trending'
 import Process from '../components/Process'
 import About from '../components/About'
 import Contact from '../components/Contact'
@@ -39,10 +38,9 @@ export default function Home() {
       <Navigation />
       <main>
         <Hero />
-        <Clients />
         <Services />
+        <Clients />
         <Spotlight />
-        <Trending />
         <Process />
         <About />
         <Contact />

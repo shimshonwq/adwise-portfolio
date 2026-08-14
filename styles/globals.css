@@ -471,7 +471,7 @@ footer.bg-ink .brand-shimmer,
 }
 
 .hero-shock-exit {
-  animation: hero-shock-out 0.85s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  animation: hero-shock-out 0.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
 }
 
 .hero-shock-core {
@@ -562,24 +562,23 @@ footer.bg-ink .brand-shimmer,
 
 .hero-shock-letter {
   display: inline-block;
-  transform: translate(var(--lx), var(--ly)) rotate(var(--lr)) scale(0.4);
+  transform: translate(var(--lx), var(--ly)) rotate(var(--lr)) scale(0.92);
   opacity: 0;
-  filter: blur(6px);
+  filter: none;
   transition:
-    transform 0.85s cubic-bezier(0.16, 1, 0.3, 1) var(--ld),
-    opacity 0.5s ease var(--ld),
-    filter 0.55s ease var(--ld),
-    text-shadow 0.35s ease;
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) var(--ld),
+    opacity 0.3s ease var(--ld),
+    text-shadow 0.25s ease;
 }
 
 .hero-shock-letter.is-in {
   transform: translate(0, 0) rotate(0deg) scale(1);
   opacity: 1;
-  filter: blur(0);
+  filter: none;
 }
 
 .hero-shock-letter.is-lock {
-  text-shadow: 0 0 28px rgb(253 198 33 / 0.75), 0 0 60px rgb(253 198 33 / 0.35);
+  text-shadow: 0 0 18px rgb(253 198 33 / 0.45);
 }
 
 .hero-shock-space {
