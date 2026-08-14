@@ -640,6 +640,241 @@ footer.bg-ink .brand-shimmer,
   }
 }
 
+/* Living brand-orbit artwork — fills the empty hero right side */
+.hero-orbit {
+  position: relative;
+  width: min(100%, 30rem);
+  aspect-ratio: 1;
+  margin-inline: auto;
+}
+
+.hero-orbit-glow {
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 42% 38%, rgb(253 198 33 / 0.55), transparent 42%),
+    radial-gradient(circle at 70% 70%, rgb(255 255 255 / 0.55), transparent 48%),
+    radial-gradient(circle at 50% 50%, rgb(253 198 33 / 0.18), transparent 68%);
+  filter: blur(2px);
+  animation: hero-orbit-breathe 7s ease-in-out infinite;
+}
+
+.hero-orbit-core {
+  position: absolute;
+  inset: 14%;
+  display: grid;
+  place-items: center;
+}
+
+.hero-orbit-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid rgb(14 14 14 / 0.14);
+  pointer-events: none;
+}
+
+.hero-orbit-ring-outer {
+  inset: -2%;
+  border-color: rgb(224 173 0 / 0.55);
+  border-style: dashed;
+  animation: hero-orbit-spin 28s linear infinite;
+}
+
+.hero-orbit-ring-mid {
+  inset: 10%;
+  border-color: rgb(14 14 14 / 0.2);
+  border-top-color: #fdc621;
+  border-right-color: rgb(253 198 33 / 0.35);
+  animation: hero-orbit-spin-rev 18s linear infinite;
+}
+
+.hero-orbit-ring-inner {
+  inset: 24%;
+  border-color: rgb(14 14 14 / 0.12);
+  background:
+    radial-gradient(circle at 50% 50%, rgb(255 255 255 / 0.55), transparent 62%),
+    radial-gradient(circle at 50% 50%, rgb(253 198 33 / 0.22), transparent 70%);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.35);
+}
+
+.hero-orbit-cross {
+  position: absolute;
+  background: rgb(14 14 14 / 0.12);
+}
+
+.hero-orbit-cross-h {
+  width: 72%;
+  height: 1px;
+  left: 14%;
+  top: 50%;
+}
+
+.hero-orbit-cross-v {
+  width: 1px;
+  height: 72%;
+  left: 50%;
+  top: 14%;
+}
+
+.hero-orbit-mark {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 42%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #0e0e0e;
+  color: #fdc621;
+  box-shadow:
+    0 24px 50px -28px rgb(14 14 14 / 0.55),
+    0 0 0 10px rgb(253 198 33 / 0.12);
+  animation: hero-orbit-float 5.5s ease-in-out infinite;
+}
+
+.hero-orbit-ink {
+  width: 62%;
+  height: 62%;
+}
+
+.hero-orbit-chip {
+  position: absolute;
+  border-radius: 0.85rem;
+  background: #fdc621;
+  box-shadow: 0 14px 30px -18px rgb(14 14 14 / 0.45);
+}
+
+.hero-orbit-chip-a {
+  width: 2.6rem;
+  height: 2.6rem;
+  top: 11%;
+  right: 16%;
+  border-radius: 0.7rem;
+  animation: hero-orbit-bob 4.8s ease-in-out infinite;
+}
+
+.hero-orbit-chip-b {
+  width: 1.7rem;
+  height: 3.4rem;
+  bottom: 18%;
+  left: 10%;
+  background: #0e0e0e;
+  animation: hero-orbit-bob 5.6s ease-in-out infinite 0.4s;
+}
+
+.hero-orbit-chip-c {
+  width: 2.1rem;
+  height: 2.1rem;
+  bottom: 14%;
+  right: 12%;
+  border-radius: 999px;
+  background: #fff;
+  border: 2px solid rgb(14 14 14 / 0.08);
+  animation: hero-orbit-bob 6.2s ease-in-out infinite 0.8s;
+}
+
+.hero-orbit-dot {
+  position: absolute;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: #0e0e0e;
+}
+
+.hero-orbit-dot-a {
+  top: 22%;
+  left: 18%;
+  background: #fdc621;
+  animation: pulse-glow 2.4s ease-in-out infinite;
+}
+
+.hero-orbit-dot-b {
+  top: 48%;
+  right: 8%;
+  animation: pulse-glow 2.8s ease-in-out infinite 0.35s;
+}
+
+.hero-orbit-dot-c {
+  bottom: 28%;
+  left: 22%;
+  background: #e0ad00;
+  animation: pulse-glow 3.1s ease-in-out infinite 0.7s;
+}
+
+.hero-orbit-arc {
+  position: absolute;
+  top: 8%;
+  left: 28%;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: #0e0e0e;
+  border-right-color: rgb(14 14 14 / 0.25);
+  transform: rotate(-20deg);
+  animation: hero-orbit-spin 12s linear infinite;
+}
+
+.hero-orbit-nib {
+  position: absolute;
+  right: 22%;
+  top: 36%;
+  width: 0;
+  height: 0;
+  border-left: 0.55rem solid transparent;
+  border-right: 0.55rem solid transparent;
+  border-bottom: 1.35rem solid #0e0e0e;
+  transform: rotate(28deg);
+  filter: drop-shadow(0 8px 10px rgb(14 14 14 / 0.18));
+  animation: hero-orbit-bob 4.2s ease-in-out infinite 0.2s;
+}
+
+@keyframes hero-orbit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes hero-orbit-spin-rev {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes hero-orbit-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes hero-orbit-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(4deg);
+  }
+}
+
+@keyframes hero-orbit-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
 @keyframes hero-core-pop {
   0% {
     transform: translate(-50%, -50%) scale(0);
@@ -734,7 +969,15 @@ footer.bg-ink .brand-shimmer,
   .hero-shock-shard,
   .hero-shock-exit,
   .hero-scroll-line,
-  .hero-type-caret {
+  .hero-type-caret,
+  .hero-orbit-ring-outer,
+  .hero-orbit-ring-mid,
+  .hero-orbit-mark,
+  .hero-orbit-chip,
+  .hero-orbit-dot,
+  .hero-orbit-arc,
+  .hero-orbit-nib,
+  .hero-orbit-glow {
     animation: none !important;
     transition: none !important;
   }

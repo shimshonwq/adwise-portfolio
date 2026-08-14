@@ -8,6 +8,57 @@ const HEADLINE = 'Turn heads. Grow brands.'
 
 type Phase = 'void' | 'burst' | 'assemble' | 'lock' | 'exit' | 'done'
 
+/** Floating craft marks — pure visual, no words */
+function HeroOrbit({ active }: { active: boolean }) {
+  return (
+    <motion.div
+      className="hero-orbit"
+      aria-hidden
+      initial={{ opacity: 0, scale: 0.88, x: 28 }}
+      animate={active ? { opacity: 1, scale: 1, x: 0 } : { opacity: 0, scale: 0.88, x: 28 }}
+      transition={{ duration: 0.85, delay: active ? 0.15 : 0, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <div className="hero-orbit-glow" />
+      <div className="hero-orbit-core">
+        <span className="hero-orbit-ring hero-orbit-ring-outer" />
+        <span className="hero-orbit-ring hero-orbit-ring-mid" />
+        <span className="hero-orbit-ring hero-orbit-ring-inner" />
+        <span className="hero-orbit-cross hero-orbit-cross-h" />
+        <span className="hero-orbit-cross hero-orbit-cross-v" />
+        <span className="hero-orbit-mark">
+          <svg viewBox="0 0 120 120" className="hero-orbit-ink">
+            <path
+              d="M34 92 L60 22 L86 92"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="11"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M44 68 H76"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="9"
+              strokeLinecap="round"
+            />
+            <circle cx="60" cy="22" r="7" fill="currentColor" />
+          </svg>
+        </span>
+      </div>
+
+      <span className="hero-orbit-chip hero-orbit-chip-a" />
+      <span className="hero-orbit-chip hero-orbit-chip-b" />
+      <span className="hero-orbit-chip hero-orbit-chip-c" />
+      <span className="hero-orbit-dot hero-orbit-dot-a" />
+      <span className="hero-orbit-dot hero-orbit-dot-b" />
+      <span className="hero-orbit-dot hero-orbit-dot-c" />
+      <span className="hero-orbit-arc" />
+      <span className="hero-orbit-nib" />
+    </motion.div>
+  )
+}
+
 /** Cinematic opening — gold shock, then a quick typewriter headline */
 export default function Hero() {
   const [phase, setPhase] = useState<Phase>('void')
@@ -60,7 +111,6 @@ export default function Hero() {
     }
   }, [])
 
-  // Quick typewriter as soon as the opening peels away
   useEffect(() => {
     if (!ready || typingDone) return
     let i = 0
@@ -147,19 +197,17 @@ export default function Hero() {
       <div className="pointer-events-none absolute inset-0 -z-0" aria-hidden>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_32%,rgba(253,198,33,0.38),transparent_38%),radial-gradient(circle_at_18%_72%,rgba(255,255,255,0.8),transparent_32%)]" />
         <div className="hero-gold-glow absolute right-[-6%] top-[18%] h-[48vmin] w-[48vmin] rounded-full blur-3xl md:right-[4%] md:top-[22%]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-paper/35 via-transparent to-paper/85 md:bg-gradient-to-r md:from-paper md:via-paper/70 md:to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-paper/35 via-transparent to-paper/85 md:bg-gradient-to-r md:from-paper md:via-paper/55 md:to-transparent" />
       </div>
 
-      <div className="site-shell relative z-10 flex min-h-[100svh] flex-col justify-end pb-16 pt-28 md:justify-center md:pb-20 md:pt-32">
-        <div
-          className={`relative max-w-xl lg:max-w-2xl ${ready ? 'hero-content-ready' : 'hero-content-wait'}`}
-        >
+      <div className="site-shell relative z-10 grid min-h-[100svh] items-center gap-10 pb-16 pt-28 md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] md:gap-8 md:pb-20 md:pt-32 lg:gap-12">
+        <div className={`${ready ? 'hero-content-ready' : 'hero-content-wait'}`}>
           <p className="mb-5 text-xs font-extrabold uppercase tracking-[0.28em] text-brand-deep">
             Made to be noticed
           </p>
 
           <h1
-            className="font-display text-[clamp(2.6rem,6.4vw,4.75rem)] font-bold leading-[1.04] tracking-tight brand-shimmer"
+            className="font-display text-[clamp(3rem,7.2vw,5.4rem)] font-bold leading-[1.02] tracking-tight brand-shimmer"
             aria-label={HEADLINE}
           >
             {typed}
@@ -189,6 +237,10 @@ export default function Hero() {
               Start a project
             </a>
           </motion.div>
+        </div>
+
+        <div className="relative mx-auto flex w-full max-w-[34rem] items-center justify-center md:max-w-none md:justify-end">
+          <HeroOrbit active={ready} />
         </div>
       </div>
 
