@@ -73,13 +73,12 @@ export default function Hero() {
   const scatters = useMemo(
     () =>
       LETTERS.map((_, i) => {
-        const angle = (i / LETTERS.length) * Math.PI * 2 + (i % 3) * 0.35
-        const dist = 48 + (i % 4) * 10
+        // Subtle fade-up — no wild scatter
         return {
-          x: Math.cos(angle) * dist * (i % 2 === 0 ? 1.1 : -1),
-          y: Math.sin(angle) * dist * 0.55,
-          r: (i % 2 === 0 ? 1 : -1) * (6 + (i % 3) * 4),
-          delay: 0.018 * i,
+          x: 0,
+          y: 14 + (i % 3) * 2,
+          r: 0,
+          delay: 0.012 * i,
         }
       }),
     [],
@@ -97,15 +96,15 @@ export default function Hero() {
       return
     }
 
-    // Short, professional open (~1.8s)
-    const t1 = window.setTimeout(() => setPhase('burst'), 120)
-    const t2 = window.setTimeout(() => setPhase('assemble'), 280)
-    const t3 = window.setTimeout(() => setPhase('lock'), 900)
-    const t4 = window.setTimeout(() => setPhase('exit'), 1200)
+    // Quiet brand open (~1.15s) then hero
+    const t1 = window.setTimeout(() => setPhase('burst'), 40)
+    const t2 = window.setTimeout(() => setPhase('assemble'), 80)
+    const t3 = window.setTimeout(() => setPhase('lock'), 520)
+    const t4 = window.setTimeout(() => setPhase('exit'), 780)
     const t5 = window.setTimeout(() => {
       setPhase('done')
       setReady(true)
-    }, 1750)
+    }, 1150)
 
     return () => {
       window.clearTimeout(t1)
@@ -139,11 +138,7 @@ export default function Hero() {
         <div className={`hero-shock ${phase === 'exit' ? 'hero-shock-exit' : ''}`} aria-hidden>
           <div className="hero-shock-void" />
           {(phase === 'burst' || phase === 'assemble' || phase === 'lock' || phase === 'exit') && (
-            <>
-              <span className="hero-shock-core" />
-              <span className="hero-shock-ring hero-shock-ring-a" />
-              <span className="hero-shock-ring hero-shock-ring-b" />
-            </>
+            <span className="hero-shock-core" />
           )}
 
           <div className="hero-shock-copy">
