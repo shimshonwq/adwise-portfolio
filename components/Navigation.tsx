@@ -24,7 +24,9 @@ export default function Navigation() {
   return (
     <>
       <header
-        className={`fixed inset-x-0 top-0 z-50 transition-[background,border-color] duration-300 ${
+        className={`fixed inset-x-0 top-0 transition-[background,border-color] duration-300 ${
+          open ? 'z-[70]' : 'z-50'
+        } ${
           scrolled || open
             ? 'border-b border-line bg-paper/95'
             : 'border-b border-transparent bg-transparent'
