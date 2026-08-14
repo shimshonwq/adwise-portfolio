@@ -7,7 +7,7 @@ type Client = {
 const clients: Client[] = [
   { name: 'The Shvitz', src: '/clients/shvitz.png' },
   { name: 'Green Power Electric', src: '/clients/greenpower.png' },
-  { name: 'Gebecks', src: '/clients/shloimis.png' },
+  { name: 'Kalmys', src: '/clients/shloimis.png' },
   { name: 'iContact Studio', src: '/clients/icontact.png' },
   { name: 'Vish-Vash', src: '/clients/vish-vash.png' },
   { name: 'HVN', src: '/clients/hvn.png' },
@@ -53,7 +53,7 @@ export default function Clients() {
           {loop.map((client, i) => (
             <div
               key={`${client.name}-${i}`}
-              className="logo-box flex h-[4.5rem] w-[12.5rem] shrink-0 items-center justify-center px-2 md:h-20 md:w-[12.5rem]"
+              className="logo-box flex h-[5.25rem] w-[15rem] shrink-0 items-center justify-center px-3 md:h-[5.75rem] md:w-[16rem]"
               title={client.name}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -61,9 +61,9 @@ export default function Clients() {
                 src={client.src}
                 alt={client.name}
                 draggable={false}
-                width={200}
-                height={72}
-                className="h-[3.25rem] w-[12.5rem] object-contain object-center opacity-95 select-none md:h-14"
+                width={260}
+                height={100}
+                className="h-14 w-[14rem] object-contain object-center opacity-95 select-none md:h-16 md:w-[15rem]"
               />
             </div>
           ))}

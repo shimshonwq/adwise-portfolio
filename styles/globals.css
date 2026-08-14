@@ -448,6 +448,10 @@ footer.bg-ink .brand-shimmer,
 .logo-box img {
   /* Force flat white marks on the dark strip — no colored shine */
   filter: brightness(0) invert(1);
+  /* Never crop marks inside the slot */
+  object-fit: contain !important;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 .hero-shock {

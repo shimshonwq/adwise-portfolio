@@ -26,23 +26,27 @@ function HeroOrbit({ active }: { active: boolean }) {
         <span className="hero-orbit-cross hero-orbit-cross-h" />
         <span className="hero-orbit-cross hero-orbit-cross-v" />
         <span className="hero-orbit-mark">
-          <svg viewBox="0 0 120 120" className="hero-orbit-ink">
+          <svg viewBox="0 0 120 120" className="hero-orbit-ink" aria-hidden>
+            {/* Lightbulb — brand idea mark */}
             <path
-              d="M34 92 L60 22 L86 92"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="11"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              d="M60 18c-16 0-28 12.5-28 28 0 10.5 5.5 19.5 14 24.2V80c0 3.3 2.7 6 6 6h16c3.3 0 6-2.7 6-6V70.2c8.5-4.7 14-13.7 14-24.2C88 30.5 76 18 60 18z"
+              fill="currentColor"
             />
             <path
-              d="M44 68 H76"
+              d="M48 92h24M51 100h18"
               fill="none"
               stroke="currentColor"
-              strokeWidth="9"
+              strokeWidth="6"
               strokeLinecap="round"
             />
-            <circle cx="60" cy="22" r="7" fill="currentColor" />
+            <path
+              d="M60 28v14M48 34l8 10M72 34l-8 10"
+              fill="none"
+              stroke="#0e0e0e"
+              strokeWidth="4"
+              strokeLinecap="round"
+              opacity="0.35"
+            />
           </svg>
         </span>
       </div>
