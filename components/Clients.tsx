@@ -3,31 +3,26 @@ import { useEffect, useRef, useState } from 'react'
 type Client = {
   name: string
   src: string
-  /** Light / white marks keep a dark chip so original colors stay visible on the white bar */
-  onDark?: boolean
 }
 
-/**
- * Client logos in original brand color.
- * Add files to public/clients/ and list them here — do not invert or recolor.
- */
+/** Original-color client marks — same slot for every logo */
 export const clients: Client[] = [
   { name: 'Kalmys', src: '/clients/kalmys.png' },
-  { name: 'Shloimy Friedlander', src: '/clients/shloimy.png', onDark: true },
+  { name: 'Shloimy Friedlander', src: '/clients/shloimy.png' },
   { name: 'Coffee Break', src: '/clients/coffee-break.png' },
-  { name: 'Flavor Max', src: '/clients/flavor-max.png', onDark: true },
-  { name: 'Ride 24', src: '/clients/ride-24.png', onDark: true },
-  { name: 'Planit', src: '/clients/planit.png' },
+  { name: 'Flavor Max', src: '/clients/flavor-max.png' },
+  { name: 'Ride 24', src: '/clients/ride-24.png' },
+  { name: 'Planit Architecture', src: '/clients/planit.png' },
   { name: 'iContact Studio', src: '/clients/icontact.png' },
-  { name: 'Garden Gourmet', src: '/clients/garden-gourmet.png', onDark: true },
+  { name: 'Garden Gourmet', src: '/clients/garden-gourmet.png' },
   { name: 'HVN', src: '/clients/hvn.png' },
-  { name: 'Vish Vash', src: '/clients/vish-vash.png', onDark: true },
-  { name: 'The Shvitz', src: '/clients/shvitz.png', onDark: true },
+  { name: 'Vish Vash', src: '/clients/vish-vash.png' },
+  { name: 'The Shvitz', src: '/clients/shvitz.png' },
   { name: 'Green Power Electric', src: '/clients/greenpower.png' },
-  { name: 'Mendel Style Events', src: '/clients/mendel-style.png', onDark: true },
+  { name: 'Mendel Style Events', src: '/clients/mendel-style.png' },
 ]
 
-/** White partnerships strip — auto-slides, and can be dragged / swiped */
+/** White partnerships strip — auto-slides, draggable */
 export default function Clients() {
   const trackRef = useRef<HTMLDivElement>(null)
   const offsetRef = useRef(0)
@@ -124,16 +119,12 @@ export default function Clients() {
         {loop.length > 0 ? (
           <div
             ref={trackRef}
-            className="logo-marquee-track flex w-max items-center gap-5 px-6 md:gap-7 md:px-10"
+            className="logo-marquee-track flex w-max items-center px-6 md:px-10"
           >
             {loop.map((client, i) => (
               <div
                 key={`${client.name}-${i}`}
-                className={`logo-box flex h-[5.5rem] shrink-0 items-center justify-center md:h-[6.35rem] ${
-                  client.onDark
-                    ? 'logo-box--dark w-auto px-5 md:px-6'
-                    : 'w-[14.75rem] px-3.5 md:w-[16.5rem]'
-                }`}
+                className="logo-box flex h-[5.25rem] w-[15rem] shrink-0 items-center justify-center md:h-[5.75rem] md:w-[16rem]"
                 title={client.name}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -141,13 +132,9 @@ export default function Clients() {
                   src={client.src}
                   alt={client.name}
                   draggable={false}
-                  width={260}
-                  height={100}
-                  className={`object-contain object-center select-none ${
-                    client.onDark
-                      ? 'h-[3.6rem] w-auto max-w-[13.5rem] md:h-[4.25rem] md:max-w-[15.5rem]'
-                      : 'h-[3.85rem] w-[13.4rem] md:h-[4.55rem] md:w-[15.2rem]'
-                  }`}
+                  width={300}
+                  height={96}
+                  className="h-14 w-full max-w-[14rem] object-contain object-center select-none md:h-16 md:max-w-[15rem]"
                 />
               </div>
             ))}
