@@ -3,13 +3,29 @@ import { useEffect, useRef, useState } from 'react'
 type Client = {
   name: string
   src: string
+  /** Light / white marks keep a dark chip so original colors stay visible on the white bar */
+  onDark?: boolean
 }
 
 /**
  * Client logos in original brand color.
  * Add files to public/clients/ and list them here — do not invert or recolor.
  */
-export const clients: Client[] = []
+export const clients: Client[] = [
+  { name: 'Kalmys', src: '/clients/kalmys.png' },
+  { name: 'Shloimy Friedlander', src: '/clients/shloimy.png', onDark: true },
+  { name: 'Coffee Break', src: '/clients/coffee-break.png' },
+  { name: 'Flavor Max', src: '/clients/flavor-max.png', onDark: true },
+  { name: 'Ride 24', src: '/clients/ride-24.png', onDark: true },
+  { name: 'Planit', src: '/clients/planit.png' },
+  { name: 'iContact Studio', src: '/clients/icontact.png' },
+  { name: 'Garden Gourmet', src: '/clients/garden-gourmet.png', onDark: true },
+  { name: 'HVN', src: '/clients/hvn.png' },
+  { name: 'Vish Vash', src: '/clients/vish-vash.png', onDark: true },
+  { name: 'The Shvitz', src: '/clients/shvitz.png', onDark: true },
+  { name: 'Green Power Electric', src: '/clients/greenpower.png' },
+  { name: 'Mendel Style Events', src: '/clients/mendel-style.png', onDark: true },
+]
 
 /** White partnerships strip — auto-slides, and can be dragged / swiped */
 export default function Clients() {
@@ -108,12 +124,14 @@ export default function Clients() {
         {loop.length > 0 ? (
           <div
             ref={trackRef}
-            className="logo-marquee-track flex w-max items-center gap-0 px-6 md:px-10"
+            className="logo-marquee-track flex w-max items-center gap-5 px-6 md:gap-7 md:px-10"
           >
             {loop.map((client, i) => (
               <div
                 key={`${client.name}-${i}`}
-                className="logo-box flex h-[5.25rem] w-[15rem] shrink-0 items-center justify-center px-3 md:h-[5.75rem] md:w-[16rem]"
+                className={`logo-box flex h-[5.5rem] w-[15.25rem] shrink-0 items-center justify-center px-3.5 md:h-[6.35rem] md:w-[17.25rem] ${
+                  client.onDark ? 'logo-box--dark' : ''
+                }`}
                 title={client.name}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -123,7 +141,7 @@ export default function Clients() {
                   draggable={false}
                   width={260}
                   height={100}
-                  className="h-14 w-[14rem] object-contain object-center select-none md:h-16 md:w-[15rem]"
+                  className="h-[3.85rem] w-[13.4rem] object-contain object-center select-none md:h-[4.55rem] md:w-[15.2rem]"
                 />
               </div>
             ))}

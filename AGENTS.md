@@ -8,7 +8,7 @@ Standard install/run commands are in `README.md`.
 
 - Refresh deps with `npm install` from the repo root. Dev server: `npm run dev` (port 3000). There is no automated test suite (`package.json` has no `test` script). `npm run lint` may prompt to create an ESLint config — skip that prompt; do not run it unattended.
 - Homepage order is Hero → Services (“What we do”) → Clients logo strip → Spotlight → Process → About → Contact. There is no “Now trending” section.
-- Client marks live in `public/clients/` and are listed in `components/Clients.tsx`. The strip is **white** and shows logos in **original color** — do not invert, crop, or recolor uploads. The row auto-slides and is draggable/swipeable. The list is currently empty until original color files are added.
+- Client marks live in `public/clients/` and are listed in `components/Clients.tsx`. The strip is **white** and shows logos in **original color** — do not invert or recolor uploads. Light/white marks use a dark chip (`onDark`) so they stay visible. The row auto-slides and is draggable/swipeable. Chat image attachments do not land as files here; drop PNGs into `public/clients/` if a mark is missing (Snapshot was not in the repo).
 - Editorial accent type is **EB Garamond italic** (`.font-serif`).
 - The hero lightbulb (`HeroOrbit` in `components/Hero.tsx`) is scroll-driven. To verify it, load `/`, wait for the short opening (~1.2s), then scroll — the bulb and rings should tilt/shift.
 - Mobile hamburger overlay is a sibling of `<header>` (`z-[60]`), not inside a `backdrop-filter` header. Open it mid-page to confirm links are visible. Header uses a solid paper background when scrolled or open.
