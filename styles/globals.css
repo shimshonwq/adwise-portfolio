@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 /*
- * Adwise Media — loud, clean, boxy
+ * Adwise Media — gold, ink, ivory, brass
  * Display: Bricolage Grotesque · Body: Sora · Accent: Instrument Serif
  */
 @theme {
@@ -9,18 +9,17 @@
   --font-body: var(--font-body-stack), var(--font-body-face), 'Sora', ui-sans-serif, sans-serif;
   --font-serif: var(--font-serif-stack), var(--font-serif-face), 'Instrument Serif', ui-serif, Georgia, serif;
 
-  --color-ink: #111111;
-  --color-ink-soft: #1c1c1c;
-  --color-paper: #fff4dc;
-  --color-paper-deep: #ffe8b0;
+  --color-ink: #14130f;
+  --color-ink-soft: #1f1c16;
+  --color-paper: #e8dfd0;
+  --color-paper-deep: #d9cdb8;
   --color-brand: #fdc621;
-  --color-brand-deep: #e0ad00;
-  --color-volt: #2ee6d6;
-  --color-hot: #ff4d8d;
-  --color-muted: #5a5348;
-  --color-line: rgb(17 17 17 / 0.12);
-  --radius-soft: 0;
-  --radius-pill: 0;
+  --color-brand-deep: #c49200;
+  --color-brass: #8f7343;
+  --color-muted: #5c5548;
+  --color-line: rgb(20 19 15 / 0.12);
+  --radius-soft: 0.75rem;
+  --radius-pill: 0.55rem;
 }
 
 *,
@@ -39,6 +38,7 @@ body {
   background: var(--color-paper);
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 ::selection {
@@ -54,6 +54,7 @@ h4,
   font-family: var(--font-display-stack), var(--font-display-face), 'Bricolage Grotesque', ui-sans-serif, sans-serif !important;
   letter-spacing: -0.04em;
   font-weight: 700;
+  overflow-wrap: break-word;
 }
 
 .font-serif {
@@ -72,8 +73,13 @@ video {
 }
 
 .site-shell {
-  width: min(1180px, calc(100% - 2.5rem));
+  width: min(1180px, calc(100% - 1.5rem));
   margin-inline: auto;
+}
+@media (min-width: 768px) {
+  .site-shell {
+    width: min(1180px, calc(100% - 2.5rem));
+  }
 }
 
 .eyebrow {
@@ -95,90 +101,86 @@ video {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.95rem 1.7rem;
+  padding: 0.9rem 1.55rem;
   font-size: 0.88rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  border: 2px solid #111111;
+  border: 1.5px solid transparent;
   border-radius: var(--radius-pill);
-  box-shadow: 4px 4px 0 0 #111111;
+  box-shadow: 0 10px 24px -16px rgb(20 19 15 / 0.55);
   transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.18s ease,
     box-shadow 0.18s ease;
   cursor: pointer;
 }
 
 .btn:hover {
-  transform: translate(-3px, -3px);
-  box-shadow: 7px 7px 0 0 #111111;
+  transform: translateY(-2px);
+  box-shadow: 0 16px 28px -16px rgb(20 19 15 / 0.5);
 }
 
 .btn:active {
-  transform: translate(1px, 1px);
-  box-shadow: 2px 2px 0 0 #111111;
+  transform: translateY(0);
 }
 
 .btn-primary {
-  background: #111111;
+  background: #14130f;
   color: #ffffff !important;
 }
 .btn-primary:hover {
   background: #fdc621;
-  color: #111111 !important;
+  color: #14130f !important;
 }
 
 .btn-secondary {
   background: transparent;
-  border-color: #111111;
-  color: #111111 !important;
+  border-color: rgb(20 19 15 / 0.28);
+  color: #14130f !important;
 }
 .btn-secondary:hover {
-  background: #2ee6d6;
-  color: #111111 !important;
+  background: #14130f;
+  color: #ffffff !important;
 }
 
 .btn-brand {
   background: #fdc621;
-  color: #111111 !important;
+  color: #14130f !important;
 }
 .btn-brand:hover {
-  background: #ff4d8d;
-  color: #ffffff !important;
+  background: #c49200;
+  color: #14130f !important;
 }
 
 .btn-on-dark {
   background: #fdc621;
-  color: #111111 !important;
-  box-shadow: 4px 4px 0 0 #2ee6d6;
+  color: #14130f !important;
 }
 .btn-on-dark:hover {
-  background: #2ee6d6;
-  color: #111111 !important;
-  box-shadow: 7px 7px 0 0 #fdc621;
+  background: #ffffff;
 }
 
 .gold-field {
   background:
-    radial-gradient(ellipse 70% 55% at 80% 30%, rgb(253 198 33 / 0.55), transparent 60%),
-    radial-gradient(ellipse 40% 40% at 8% 82%, rgb(46 230 214 / 0.28), transparent 55%),
-    #fff4dc;
+    radial-gradient(ellipse 70% 55% at 80% 30%, rgb(253 198 33 / 0.42), transparent 60%),
+    radial-gradient(ellipse 40% 40% at 8% 82%, rgb(143 115 67 / 0.18), transparent 55%),
+    #e8dfd0;
 }
 
 .gold-field-dark {
   background:
-    radial-gradient(ellipse 60% 50% at 75% 25%, rgb(253 198 33 / 0.32), transparent 58%),
-    radial-gradient(ellipse 40% 40% at 8% 80%, rgb(255 77 141 / 0.18), transparent 55%),
-    #111111;
+    radial-gradient(ellipse 60% 50% at 75% 25%, rgb(253 198 33 / 0.28), transparent 58%),
+    radial-gradient(ellipse 40% 40% at 8% 80%, rgb(143 115 67 / 0.2), transparent 55%),
+    #14130f;
 }
 
 .ink-field {
   background: var(--color-ink);
-  color: #fff4dc;
+  color: #e8dfd0;
 }
 
 .brand-shimmer {
-  color: #c28a00;
+  color: #14130f;
   background: none;
-  -webkit-text-fill-color: #c28a00;
+  -webkit-text-fill-color: #14130f;
   animation: none;
 }
 
@@ -193,56 +195,54 @@ footer.bg-ink .brand-shimmer,
 
 .section-aurora {
   background:
-    radial-gradient(ellipse 50% 45% at 90% 16%, rgb(46 230 214 / 0.42), transparent 52%),
-    radial-gradient(ellipse 42% 38% at 6% 82%, rgb(255 77 141 / 0.22), transparent 50%),
-    radial-gradient(ellipse 55% 50% at 16% 10%, rgb(253 198 33 / 0.58), transparent 55%),
-    #fff4dc;
+    radial-gradient(ellipse 52% 48% at 88% 18%, rgb(253 198 33 / 0.38), transparent 55%),
+    radial-gradient(ellipse 42% 38% at 8% 78%, rgb(143 115 67 / 0.16), transparent 52%),
+    radial-gradient(ellipse 50% 45% at 18% 12%, rgb(253 198 33 / 0.28), transparent 55%),
+    #e8dfd0;
 }
 
 .section-aurora-deep {
   background:
-    radial-gradient(ellipse 55% 50% at 15% 20%, rgb(253 198 33 / 0.5), transparent 55%),
-    radial-gradient(ellipse 45% 40% at 88% 78%, rgb(46 230 214 / 0.3), transparent 50%),
-    linear-gradient(160deg, #ffe8b0 0%, #fff4dc 45%, #c8fff8 100%);
+    radial-gradient(ellipse 55% 50% at 15% 20%, rgb(253 198 33 / 0.4), transparent 55%),
+    radial-gradient(ellipse 45% 40% at 88% 78%, rgb(143 115 67 / 0.18), transparent 50%),
+    linear-gradient(160deg, #d9cdb8 0%, #e8dfd0 50%, #efe8da 100%);
 }
 
 .section-ink-gold {
   background:
-    radial-gradient(ellipse 50% 45% at 82% 22%, rgb(253 198 33 / 0.32), transparent 55%),
-    radial-gradient(ellipse 38% 32% at 8% 84%, rgb(46 230 214 / 0.16), transparent 50%),
-    linear-gradient(145deg, #111111 0%, #1a1608 55%, #12100a 100%);
-  color: #fff4dc;
+    radial-gradient(ellipse 50% 45% at 82% 22%, rgb(253 198 33 / 0.28), transparent 55%),
+    radial-gradient(ellipse 38% 32% at 8% 84%, rgb(143 115 67 / 0.16), transparent 50%),
+    linear-gradient(145deg, #14130f 0%, #1c1810 55%, #12100c 100%);
+  color: #e8dfd0;
 }
 
 .brand-field {
   background:
-    radial-gradient(ellipse 48% 40% at 8% 18%, rgb(255 255 255 / 0.38), transparent 50%),
-    radial-gradient(ellipse 40% 38% at 92% 82%, rgb(46 230 214 / 0.28), transparent 48%),
-    linear-gradient(145deg, #fdc621 0%, #f5c010 48%, #e8b400 100%);
-  color: #111111;
+    radial-gradient(ellipse 48% 40% at 8% 18%, rgb(255 255 255 / 0.32), transparent 50%),
+    radial-gradient(ellipse 40% 38% at 92% 82%, rgb(20 19 15 / 0.08), transparent 48%),
+    linear-gradient(145deg, #fdc621 0%, #f0bc14 50%, #d9a400 100%);
+  color: #14130f;
+}
+
+.brand-field .brand-shimmer {
+  color: #14130f;
+  -webkit-text-fill-color: #14130f;
 }
 
 .color-rail {
-  height: 7px;
-  background: linear-gradient(
-    90deg,
-    #fdc621 0 34%,
-    #2ee6d6 34% 67%,
-    #ff4d8d 67% 100%
-  );
+  height: 4px;
+  background: #fdc621;
 }
 
 .btn-secondary-light {
   background: transparent;
-  border-color: #ffffff;
+  border-color: rgb(255 255 255 / 0.4);
   color: #ffffff !important;
-  box-shadow: 4px 4px 0 0 #ff4d8d;
 }
 .btn-secondary-light:hover {
-  background: #ff4d8d;
-  border-color: #111111;
-  color: #111111 !important;
-  box-shadow: 7px 7px 0 0 #2ee6d6;
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #14130f !important;
 }
 
 .coming-soon-panel {
@@ -471,7 +471,7 @@ footer.bg-ink .brand-shimmer,
 }
 
 .logo-box {
-  border-radius: 0.2rem;
+  border-radius: 0.75rem;
 }
 
 .logo-box img {
@@ -715,9 +715,9 @@ footer.bg-ink .brand-shimmer,
 
 .hero-orbit-ring-mid {
   inset: 10%;
-  border-color: rgb(17 17 17 / 0.2);
+  border-color: rgb(20 19 15 / 0.2);
   border-top-color: #fdc621;
-  border-right-color: rgb(46 230 214 / 0.7);
+  border-right-color: rgb(143 115 67 / 0.7);
 }
 
 .hero-orbit-ring-inner {
@@ -755,12 +755,12 @@ footer.bg-ink .brand-shimmer,
   place-items: center;
   width: 42%;
   aspect-ratio: 1;
-  border-radius: 0.35rem;
-  background: #111111;
+  border-radius: 1.15rem;
+  background: #14130f;
   color: #fdc621;
   box-shadow:
-    6px 6px 0 0 #2ee6d6,
-    12px 12px 0 0 #ff4d8d;
+    0 22px 40px -24px rgb(20 19 15 / 0.7),
+    0 0 0 8px rgb(253 198 33 / 0.14);
 }
 
 .hero-orbit-ink {
@@ -770,26 +770,26 @@ footer.bg-ink .brand-shimmer,
 
 .hero-orbit-chip {
   position: absolute;
-  border-radius: 0.15rem;
+  border-radius: 0.45rem;
   background: #fdc621;
-  box-shadow: 4px 4px 0 0 #111111;
+  box-shadow: 0 10px 20px -14px rgb(20 19 15 / 0.5);
 }
 
 .hero-orbit-chip-a {
-  width: 2.6rem;
-  height: 2.6rem;
+  width: 2.4rem;
+  height: 2.4rem;
   top: 11%;
   right: 16%;
-  background: #2ee6d6;
+  background: #fdc621;
   animation: hero-orbit-bob 4.8s ease-in-out infinite;
 }
 
 .hero-orbit-chip-b {
   width: 1.7rem;
-  height: 3.4rem;
+  height: 3.2rem;
   bottom: 18%;
   left: 10%;
-  background: #ff4d8d;
+  background: #14130f;
   animation: hero-orbit-bob 5.6s ease-in-out infinite 0.4s;
 }
 
@@ -798,9 +798,9 @@ footer.bg-ink .brand-shimmer,
   height: 2.1rem;
   bottom: 14%;
   right: 12%;
-  border-radius: 0.15rem;
+  border-radius: 0.45rem;
   background: #fff;
-  border: 2px solid #111111;
+  border: 1.5px solid rgb(20 19 15 / 0.12);
   animation: hero-orbit-bob 6.2s ease-in-out infinite 0.8s;
 }
 
@@ -976,6 +976,15 @@ footer.bg-ink .brand-shimmer,
   50% {
     transform: scaleX(1);
     opacity: 1;
+  }
+}
+
+@media (max-width: 767px) {
+  .hero-orbit {
+    width: min(92vw, 20.5rem);
+  }
+  .hero-shock-letters {
+    font-size: clamp(1.55rem, 8.2vw, 2.35rem);
   }
 }
 

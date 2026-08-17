@@ -28,7 +28,7 @@ export default function Clients() {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'radial-gradient(ellipse 50% 60% at 80% 20%, rgba(253,198,33,0.16), transparent 55%), radial-gradient(ellipse 35% 40% at 12% 80%, rgba(46,230,214,0.12), transparent 50%)',
+            'radial-gradient(ellipse 50% 60% at 80% 20%, rgba(253,198,33,0.16), transparent 55%)',
         }}
         aria-hidden
       />
@@ -37,7 +37,7 @@ export default function Clients() {
         <p className="text-xs font-extrabold uppercase tracking-[0.28em] text-brand">
           Some of our partnerships
         </p>
-        <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-white md:text-4xl">
+        <h2 className="mt-3 font-display text-[clamp(1.85rem,6vw,2.4rem)] font-bold tracking-tight text-white">
           Brands we work with
         </h2>
         <p className="mx-auto mt-3 max-w-lg text-sm text-white/70 md:text-base">

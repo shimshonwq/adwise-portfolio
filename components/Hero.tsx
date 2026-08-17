@@ -191,20 +191,17 @@ export default function Hero() {
       )}
 
       <div className="pointer-events-none absolute inset-0 -z-0" aria-hidden>
-        <div className="absolute left-[6%] top-[22%] h-16 w-16 bg-hot md:h-20 md:w-20" />
-        <div className="absolute bottom-[18%] left-[42%] h-10 w-10 bg-volt" />
-        <div className="absolute right-[8%] top-[58%] hidden h-14 w-14 bg-brand md:block" />
         <div className="hero-gold-glow absolute right-[-6%] top-[18%] h-[48vmin] w-[48vmin] blur-3xl md:right-[4%] md:top-[22%]" />
       </div>
 
-      <div className="site-shell relative z-10 grid min-h-[100svh] items-center gap-10 pb-16 pt-28 md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] md:gap-8 md:pb-20 md:pt-32 lg:gap-12">
+      <div className="site-shell relative z-10 grid min-h-[100svh] items-center gap-8 pb-14 pt-24 md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] md:gap-8 md:pb-20 md:pt-32 lg:gap-12">
         <div className={`${ready ? 'hero-content-ready' : 'hero-content-wait'}`}>
-          <p className="mb-5 text-xs font-extrabold uppercase tracking-[0.28em] text-ink">
-            <span className="bg-brand px-2 py-1">Made to be noticed</span>
+          <p className="mb-5 text-xs font-extrabold uppercase tracking-[0.22em] text-ink sm:tracking-[0.28em]">
+            <span className="inline-block rounded-md bg-brand px-2.5 py-1">Made to be noticed</span>
           </p>
 
           <h1
-            className="font-display text-[clamp(3rem,7.2vw,5.4rem)] font-bold leading-[1.02] tracking-tight brand-shimmer"
+            className="font-display text-[clamp(2.35rem,10.5vw,5.2rem)] font-bold leading-[1.08] tracking-tight text-ink"
             aria-label={HEADLINE}
           >
             {typed}
@@ -212,14 +209,14 @@ export default function Hero() {
           </h1>
 
           <motion.p
-            className="mt-6 max-w-md text-lg leading-relaxed text-ink/80 md:text-xl"
+            className="mt-6 max-w-md text-base leading-relaxed text-ink/80 md:text-xl"
             initial={{ y: 14, opacity: 0 }}
             animate={{ y: ready ? 0 : 14, opacity: ready ? 1 : 0 }}
             transition={{ delay: ready ? 0.35 : 0, duration: 0.55 }}
           >
             Logo design, brand graphics, and marketing that make businesses look sharp — and get
             noticed.{' '}
-            <span className="font-serif italic text-ink">Creative that actually works.</span>
+            <span className="font-serif italic text-brass">Creative that actually works.</span>
           </motion.p>
 
           <motion.div
@@ -239,7 +236,7 @@ export default function Hero() {
 
         <div className="relative mx-auto flex w-full max-w-[34rem] flex-col items-center justify-center md:max-w-none md:items-end md:justify-end">
           <HeroOrbit active={ready} />
-          <p className="mt-3 font-serif italic text-ink/55 md:mr-8">Scroll — ideas in motion.</p>
+          <p className="mt-3 font-serif italic text-brass md:mr-8">Scroll — ideas in motion.</p>
         </div>
       </div>
 

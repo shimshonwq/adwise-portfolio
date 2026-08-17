@@ -12,3 +12,5 @@ Standard install/run commands are in `README.md`.
 - The hero lightbulb (`HeroOrbit` in `components/Hero.tsx`) is scroll-driven. To verify it, load `/`, wait for the short opening (~1.2s), then scroll — the bulb and rings should tilt/shift.
 - Mobile hamburger overlay is a sibling of `<header>` (`z-[60]`), not inside a `backdrop-filter` header. Open it mid-page to confirm links are visible. Header uses a solid paper background when scrolled or open.
 - Opening animation respects `prefers-reduced-motion` and skips the veil.
+- Palette is gold, black, white, and brass on a warm ivory paper (`#e8dfd0`). Do not reintroduce cyan/pink “kids” accents.
+- Headlines on gold sections (`brand-field`) stay ink for contrast. Gold type is for dark sections only.

@@ -60,8 +60,7 @@ export default function Contact() {
           <AnimatedText
             as="h2"
             text="Get in touch"
-            shimmer
-            className="mt-3 font-display text-4xl font-bold tracking-tight md:text-5xl"
+            className="mt-3 font-display text-[clamp(2rem,7vw,3.25rem)] font-bold tracking-tight text-ink"
           />
           <p className="mt-5 max-w-md text-lg text-ink/70">
             Tell us what you’re building — or reach us on WhatsApp, email, call, or text.
@@ -88,7 +87,7 @@ export default function Contact() {
           action={`https://formsubmit.co/${siteConfig.email}`}
           method="POST"
           onSubmit={onSubmit}
-          className="soft-panel space-y-5 border-2 border-ink bg-ink p-8 text-white shadow-[8px_8px_0_0_#111] md:p-10"
+          className="soft-panel space-y-5 border border-white/10 bg-ink p-7 text-white md:p-10"
         >
           <div className="mb-2">
             <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-brand">
@@ -122,7 +121,7 @@ export default function Contact() {
                 required
                 value={formData.name}
                 onChange={onChange}
-                className="w-full border-2 border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-volt"
+                className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
                 placeholder="Your name"
               />
             </label>
@@ -134,7 +133,7 @@ export default function Contact() {
                 required
                 value={formData.email}
                 onChange={onChange}
-                className="w-full border-2 border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-volt"
+                className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
                 placeholder="you@company.com"
               />
             </label>
@@ -146,7 +145,7 @@ export default function Contact() {
               name="phone"
               value={formData.phone}
               onChange={onChange}
-              className="w-full border-2 border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-volt"
+              className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
               placeholder="(555) 000-0000"
             />
           </label>
@@ -158,7 +157,7 @@ export default function Contact() {
               rows={5}
               value={formData.message}
               onChange={onChange}
-              className="w-full resize-none border-2 border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-volt"
+              className="w-full resize-none rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
               placeholder="What are we building?"
             />
           </label>
@@ -171,7 +170,7 @@ export default function Contact() {
               type="button"
               onClick={onCaptchaPress}
               aria-pressed={captcha === 'verified'}
-              className={`flex w-full max-w-sm items-center gap-3 border-2 px-3 py-3 text-left transition ${
+              className={`flex w-full max-w-sm items-center gap-3 rounded-lg border px-3 py-3 text-left transition ${
                 status === 'captcha'
                   ? 'border-brand bg-brand/10'
                   : 'border-white bg-white hover:bg-white'

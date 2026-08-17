@@ -24,20 +24,19 @@ const steps = [
 
 export default function Process() {
   return (
-    <section id="process" className="scroll-mt-24 section-aurora py-24 md:py-28">
+    <section id="process" className="scroll-mt-24 section-aurora py-20 md:py-28">
       <div className="site-shell">
         <p className="eyebrow">This is how we do it</p>
         <AnimatedText
           as="h2"
           text="A structured approach to creative."
-          shimmer
-          className="mt-3 max-w-2xl font-display text-4xl font-bold tracking-tight md:text-5xl"
+          className="mt-3 max-w-2xl font-display text-[clamp(2rem,7vw,3.25rem)] font-bold tracking-tight text-ink"
         />
-        <p className="mt-5 max-w-lg font-serif text-xl italic text-ink/70">
+        <p className="mt-5 max-w-lg font-serif text-lg italic text-brass md:text-xl">
           Research. Planning. Execution. Creative that works like a business.
         </p>
 
-        <div className="mt-14 grid gap-5 md:grid-cols-3 md:gap-6">
+        <div className="mt-12 grid gap-5 md:mt-14 md:grid-cols-3 md:gap-6">
           {steps.map((step, index) => {
             const ink = step.tone === 'ink'
             const gold = step.tone === 'gold'
@@ -49,23 +48,23 @@ export default function Process() {
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 0.45, delay: index * 0.08 }}
                 whileHover={{ y: -6, transition: { duration: 0.25 } }}
-                className={`soft-panel border-2 p-8 shadow-[6px_6px_0_0_#111] md:p-9 ${
+                className={`soft-panel border p-7 md:p-9 ${
                   gold
-                    ? 'border-ink bg-brand text-ink'
+                    ? 'border-brand/40 bg-brand text-ink'
                     : ink
-                      ? 'border-ink bg-ink text-white'
-                      : 'border-ink bg-white text-ink'
+                      ? 'border-brand/30 bg-ink text-white'
+                      : 'border-line bg-white text-ink'
                 }`}
               >
                 <span
-                  className={`inline-flex h-11 w-11 items-center justify-center font-display text-sm font-bold ${
-                    ink ? 'bg-hot text-white' : gold ? 'bg-ink text-brand' : 'bg-volt text-ink'
+                  className={`inline-flex h-11 w-11 items-center justify-center rounded-lg font-display text-sm font-bold ${
+                    ink ? 'bg-brand text-ink' : gold ? 'bg-ink text-brand' : 'bg-ink text-brand'
                   }`}
                 >
                   {step.num}
                 </span>
                 <h3 className="mt-6 font-display text-2xl font-bold md:text-3xl">{step.title}</h3>
-                <p className={`mt-4 leading-relaxed ${ink ? 'text-white/70' : 'text-ink/65'}`}>
+                <p className={`mt-4 leading-relaxed ${ink ? 'text-white/75' : 'text-ink/70'}`}>
                   {step.body}
                 </p>
               </motion.article>

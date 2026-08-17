@@ -21,33 +21,32 @@ const services = [
     title: 'Graphic Design',
     description: 'Logos, identity, and print that hold up at every size and channel.',
     points: ['Logo & branding', 'Print & digital', 'Design systems'],
-    tone: 'volt' as const,
+    tone: 'gold' as const,
   },
 ]
 
 export default function Services() {
   return (
-    <section id="services" className="scroll-mt-24 brand-field py-24 md:py-32">
+    <section id="services" className="scroll-mt-24 brand-field py-20 md:py-32">
       <div className="site-shell">
-        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+        <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between md:gap-6">
           <div className="max-w-2xl">
-            <p className="eyebrow !text-ink/55">How we move you forward</p>
+            <p className="eyebrow !text-ink/60">How we move you forward</p>
             <AnimatedText
               as="h2"
               text="What we do"
-              shimmer
-              className="mt-3 font-display text-4xl font-bold tracking-tight md:text-5xl"
+              className="mt-3 font-display text-[clamp(2rem,7vw,3.25rem)] font-bold tracking-tight text-ink"
             />
           </div>
-          <p className="max-w-sm font-serif text-xl italic leading-relaxed text-ink/80 md:text-right">
+          <p className="max-w-sm font-serif text-lg italic leading-relaxed text-ink/80 md:text-right md:text-xl">
             One studio from first logo to launch campaign.
           </p>
         </div>
 
-        <div className="mt-14 grid gap-5 md:grid-cols-3 md:gap-6">
+        <div className="mt-12 grid gap-5 md:mt-14 md:grid-cols-3 md:gap-6">
           {services.map((service, index) => {
             const ink = service.tone === 'ink'
-            const volt = service.tone === 'volt'
+            const gold = service.tone === 'gold'
             return (
               <motion.article
                 key={service.num}
@@ -56,22 +55,24 @@ export default function Services() {
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 0.45, delay: index * 0.08 }}
                 whileHover={{ y: -6, transition: { duration: 0.25 } }}
-                className={`soft-panel relative overflow-hidden border-2 p-8 shadow-[6px_6px_0_0_#111] md:p-9 ${
+                className={`soft-panel relative overflow-hidden border p-7 md:p-9 ${
                   ink
-                    ? 'border-ink bg-ink text-white md:-translate-y-2'
-                    : volt
-                      ? 'border-ink bg-volt text-ink'
-                      : 'border-ink bg-white text-ink'
+                    ? 'border-ink/20 bg-ink text-white md:-translate-y-2'
+                    : gold
+                      ? 'border-ink/10 bg-paper text-ink'
+                      : 'border-ink/10 bg-white text-ink'
                 }`}
               >
                 <span
-                  className={`inline-flex h-11 w-11 items-center justify-center font-display text-sm font-bold ${
-                    ink ? 'bg-brand text-ink' : volt ? 'bg-ink text-volt' : 'bg-hot text-white'
+                  className={`inline-flex h-11 w-11 items-center justify-center rounded-lg font-display text-sm font-bold ${
+                    ink ? 'bg-brand text-ink' : gold ? 'bg-ink text-brand' : 'bg-brand text-ink'
                   }`}
                 >
                   {service.num}
                 </span>
-                <h3 className="mt-5 font-display text-3xl font-bold tracking-tight">{service.title}</h3>
+                <h3 className="mt-5 font-display text-[clamp(1.6rem,4vw,1.9rem)] font-bold tracking-tight">
+                  {service.title}
+                </h3>
                 <p className={`mt-4 leading-relaxed ${ink ? 'text-white/80' : 'text-ink/75'}`}>
                   {service.description}
                 </p>
@@ -83,7 +84,10 @@ export default function Services() {
                         ink ? 'text-white/80' : 'text-ink/75'
                       }`}
                     >
-                      <span className={`h-2 w-2 ${ink ? 'bg-brand' : 'bg-ink'}`} aria-hidden />
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${ink ? 'bg-brand' : 'bg-ink'}`}
+                        aria-hidden
+                      />
                       {point}
                     </li>
                   ))}

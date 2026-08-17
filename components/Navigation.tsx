@@ -28,7 +28,7 @@ export default function Navigation() {
           open ? 'z-[70]' : 'z-50'
         } ${
           scrolled || open
-            ? 'border-b-2 border-ink bg-paper/95'
+            ? 'border-b border-line bg-paper/95'
             : 'border-b border-transparent bg-transparent'
         }`}
       >
@@ -37,8 +37,8 @@ export default function Navigation() {
           <Logo href="/#top" size="sm" />
 
           <div
-            className={`hidden items-center gap-8 px-5 py-3 md:flex ${
-              scrolled ? '' : 'border-2 border-ink bg-white shadow-[4px_4px_0_0_#111]'
+            className={`hidden items-center gap-8 rounded-xl px-5 py-3 md:flex ${
+              scrolled ? '' : 'border border-ink/10 bg-white/80 shadow-sm backdrop-blur-md'
             }`}
           >
             {siteConfig.nav.map((item) => (
@@ -57,7 +57,7 @@ export default function Navigation() {
 
           <button
             type="button"
-            className="relative z-[70] flex h-10 w-10 flex-col items-center justify-center gap-1.5 border-2 border-ink bg-white md:hidden"
+            className="relative z-[70] flex h-10 w-10 flex-col items-center justify-center gap-1.5 rounded-lg border border-ink/15 bg-white md:hidden"
             aria-label={open ? 'Close menu' : 'Open menu'}
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
@@ -92,7 +92,7 @@ export default function Navigation() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.04 * i }}
-                  className="font-display text-4xl font-bold tracking-tight text-ink"
+                  className="font-display text-[clamp(2rem,9vw,2.75rem)] font-bold tracking-tight text-ink"
                 >
                   {item.label}
                 </motion.a>
