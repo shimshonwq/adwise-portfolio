@@ -454,6 +454,11 @@ footer.bg-ink .brand-shimmer,
   max-height: 100%;
 }
 
+.logo-box img.logo-keep-color {
+  /* Preserve gold / brand colors */
+  filter: none;
+}
+
 .hero-shock {
   position: fixed;
   inset: 0;

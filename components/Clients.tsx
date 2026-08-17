@@ -1,6 +1,8 @@
 type Client = {
   name: string
   src: string
+  /** Keep original brand colors (skip white filter) */
+  keepColor?: boolean
 }
 
 /** Client logos for the slow-sliding partnerships strip */
@@ -15,6 +17,7 @@ const clients: Client[] = [
   { name: 'Ride 24', src: '/clients/ride-24.png' },
   { name: 'Reel Show', src: '/clients/reel-show.png' },
   { name: 'Flavor Max', src: '/clients/flavor-max.png' },
+  { name: 'Mendel Style Events', src: '/clients/mendel-style.png', keepColor: true },
 ]
 
 /** Uniform slow-sliding client logo row — always moving */
@@ -59,7 +62,9 @@ export default function Clients() {
                 draggable={false}
                 width={260}
                 height={100}
-                className="h-14 w-[14rem] object-contain object-center opacity-95 select-none md:h-16 md:w-[15rem]"
+                className={`h-14 w-[14rem] object-contain object-center opacity-95 select-none md:h-16 md:w-[15rem] ${
+                  client.keepColor ? 'logo-keep-color' : ''
+                }`}
               />
             </div>
           ))}
