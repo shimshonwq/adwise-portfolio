@@ -35,7 +35,7 @@ export default function Services() {
             <AnimatedText
               as="h2"
               text="What we do"
-              className="mt-3 font-display text-[clamp(2rem,7vw,3.25rem)] font-bold tracking-tight text-ink"
+              className="mt-3 font-display text-[clamp(1.65rem,6vw,3.25rem)] font-bold tracking-tight text-ink"
             />
           </div>
           <p className="max-w-sm font-serif text-lg italic leading-relaxed text-ink/80 md:text-right md:text-xl">
@@ -73,7 +73,7 @@ export default function Services() {
                 <h3 className="mt-5 font-display text-[clamp(1.6rem,4vw,1.9rem)] font-bold tracking-tight">
                   {service.title}
                 </h3>
-                <p className={`mt-4 leading-relaxed ${ink ? 'text-white/80' : 'text-ink/75'}`}>
+                <p className={`mt-4 font-serif leading-relaxed ${ink ? 'text-white/80' : 'text-ink/75'}`}>
                   {service.description}
                 </p>
                 <ul className="mt-8 space-y-2.5">

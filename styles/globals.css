@@ -2,12 +2,12 @@
 
 /*
  * Adwise Media — gold, ink, ivory, brass
- * Display: Bricolage Grotesque · Body: Sora · Accent: Instrument Serif
+ * Display: Bricolage Grotesque · Body: Sora · Accent: EB Garamond
  */
 @theme {
   --font-display: var(--font-display-stack), var(--font-display-face), 'Bricolage Grotesque', ui-sans-serif, sans-serif;
   --font-body: var(--font-body-stack), var(--font-body-face), 'Sora', ui-sans-serif, sans-serif;
-  --font-serif: var(--font-serif-stack), var(--font-serif-face), 'Instrument Serif', ui-serif, Georgia, serif;
+  --font-serif: var(--font-serif-stack), var(--font-serif-face), 'EB Garamond', 'Garamond', ui-serif, Georgia, serif;
 
   --color-ink: #14130f;
   --color-ink-soft: #1f1c16;
@@ -58,7 +58,7 @@ h4,
 }
 
 .font-serif {
-  font-family: var(--font-serif-stack), var(--font-serif-face), 'Instrument Serif', ui-serif, Georgia, serif;
+  font-family: var(--font-serif-stack), var(--font-serif-face), 'EB Garamond', 'Garamond', ui-serif, Georgia, serif;
 }
 
 a {
@@ -452,22 +452,9 @@ footer.bg-ink .brand-shimmer,
 }
 
 .logo-marquee-track {
-  animation: logo-marquee 42s linear infinite;
   width: max-content;
   will-change: transform;
-}
-
-.logo-marquee-track.is-paused {
-  animation-play-state: paused;
-}
-
-@keyframes logo-marquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
+  touch-action: pan-y;
 }
 
 .logo-box {
@@ -475,12 +462,10 @@ footer.bg-ink .brand-shimmer,
 }
 
 .logo-box img {
-  /* Force flat white marks on the dark strip — no colored shine */
-  filter: brightness(0) invert(1);
-  /* Never crop marks inside the slot */
   object-fit: contain !important;
   max-width: 100%;
   max-height: 100%;
+  pointer-events: none;
 }
 
 .hero-shock {
@@ -980,11 +965,14 @@ footer.bg-ink .brand-shimmer,
 }
 
 @media (max-width: 767px) {
+  html {
+    font-size: 15px;
+  }
   .hero-orbit {
-    width: min(92vw, 20.5rem);
+    width: min(88vw, 18.5rem);
   }
   .hero-shock-letters {
-    font-size: clamp(1.55rem, 8.2vw, 2.35rem);
+    font-size: clamp(1.35rem, 7.2vw, 2.05rem);
   }
 }
 

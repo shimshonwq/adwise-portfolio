@@ -1,11 +1,11 @@
 import type { AppProps } from 'next/app'
-import { Bricolage_Grotesque, Instrument_Serif, Sora } from 'next/font/google'
+import { Bricolage_Grotesque, EB_Garamond, Sora } from 'next/font/google'
 import '../styles/globals.css'
 
 /**
  * Bricolage Grotesque — distinctive display.
  * Sora — clean geometric body.
- * Instrument Serif — italic accent voice.
+ * EB Garamond — editorial accent voice.
  */
 const displayFont = Bricolage_Grotesque({
   subsets: ['latin'],
@@ -20,11 +20,11 @@ const bodyFont = Sora({
   weight: ['400', '500', '600', '700'],
 })
 
-const serifFont = Instrument_Serif({
+const serifFont = EB_Garamond({
   subsets: ['latin'],
   variable: '--font-serif-face',
   display: 'swap',
-  weight: '400',
+  weight: ['400', '500', '600'],
   style: ['normal', 'italic'],
 })
 

@@ -30,7 +30,7 @@ export default function Process() {
         <AnimatedText
           as="h2"
           text="A structured approach to creative."
-          className="mt-3 max-w-2xl font-display text-[clamp(2rem,7vw,3.25rem)] font-bold tracking-tight text-ink"
+          className="mt-3 max-w-2xl font-display text-[clamp(1.65rem,6vw,3.25rem)] font-bold tracking-tight text-ink"
         />
         <p className="mt-5 max-w-lg font-serif text-lg italic text-brass md:text-xl">
           Research. Planning. Execution. Creative that works like a business.
@@ -63,8 +63,8 @@ export default function Process() {
                 >
                   {step.num}
                 </span>
-                <h3 className="mt-6 font-display text-2xl font-bold md:text-3xl">{step.title}</h3>
-                <p className={`mt-4 leading-relaxed ${ink ? 'text-white/75' : 'text-ink/70'}`}>
+                <h3 className="mt-6 font-display text-xl font-bold md:text-3xl">{step.title}</h3>
+                <p className={`mt-4 font-serif leading-relaxed ${ink ? 'text-white/75' : 'text-ink/70'}`}>
                   {step.body}
                 </p>
               </motion.article>

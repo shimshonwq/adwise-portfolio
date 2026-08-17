@@ -60,9 +60,9 @@ export default function Contact() {
           <AnimatedText
             as="h2"
             text="Get in touch"
-            className="mt-3 font-display text-[clamp(2rem,7vw,3.25rem)] font-bold tracking-tight text-ink"
+            className="mt-3 font-display text-[clamp(1.65rem,6vw,3.25rem)] font-bold tracking-tight text-ink"
           />
-          <p className="mt-5 max-w-md text-lg text-ink/70">
+          <p className="mt-5 max-w-md font-serif text-base italic text-ink/75 md:text-lg">
             Tell us what you’re building — or reach us on WhatsApp, email, call, or text.
           </p>
 
@@ -93,7 +93,7 @@ export default function Contact() {
             <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-brand">
               Project inquiry
             </p>
-            <p className="mt-2 text-sm text-white/70">Usually reply within one business day.</p>
+            <p className="mt-2 font-serif text-sm italic text-white/70">Usually reply within one business day.</p>
           </div>
 
           <input

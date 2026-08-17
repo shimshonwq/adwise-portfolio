@@ -30,13 +30,13 @@ export default function About() {
             as="h2"
             text="Local roots. Global reach."
             shimmer
-            className="mt-3 font-display text-[clamp(2rem,7vw,3.25rem)] font-bold tracking-tight"
+            className="mt-3 font-display text-[clamp(1.65rem,6vw,3.25rem)] font-bold tracking-tight"
           />
-          <p className="mt-6 text-base leading-relaxed text-white/85 md:text-lg">
+          <p className="mt-6 font-serif text-base leading-relaxed text-white/85 md:text-lg">
             We help ambitious businesses look professional and stay consistent — from the first logo
             sketch to finished signage and campaign rollout.
           </p>
-          <p className="mt-4 font-serif text-xl italic text-brand md:text-2xl">Made to be noticed.</p>
+          <p className="mt-4 font-serif text-lg italic text-brand md:text-2xl">Made to be noticed.</p>
         </div>
 
         <div className="space-y-4">
@@ -60,7 +60,7 @@ export default function About() {
                 }`}
               >
                 <h3 className="font-display text-xl font-bold">{item.title}</h3>
-                <p className={`mt-2 ${gold || paper ? 'text-ink/70' : 'text-white/70'}`}>{item.body}</p>
+                <p className={`mt-2 font-serif ${gold || paper ? 'text-ink/70' : 'text-white/70'}`}>{item.body}</p>
               </motion.div>
             )
           })}

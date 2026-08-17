@@ -201,7 +201,7 @@ export default function Hero() {
           </p>
 
           <h1
-            className="font-display text-[clamp(2.35rem,10.5vw,5.2rem)] font-bold leading-[1.08] tracking-tight text-ink"
+            className="font-display text-[clamp(1.9rem,8.4vw,5.2rem)] font-bold leading-[1.08] tracking-tight text-ink"
             aria-label={HEADLINE}
           >
             {typed}
@@ -209,7 +209,7 @@ export default function Hero() {
           </h1>
 
           <motion.p
-            className="mt-6 max-w-md text-base leading-relaxed text-ink/80 md:text-xl"
+            className="mt-6 max-w-md font-serif text-[0.98rem] leading-relaxed text-ink/80 md:text-xl"
             initial={{ y: 14, opacity: 0 }}
             animate={{ y: ready ? 0 : 14, opacity: ready ? 1 : 0 }}
             transition={{ delay: ready ? 0.35 : 0, duration: 0.55 }}

@@ -92,7 +92,7 @@ export default function Navigation() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.04 * i }}
-                  className="font-display text-[clamp(2rem,9vw,2.75rem)] font-bold tracking-tight text-ink"
+                  className="font-display text-[clamp(1.55rem,7vw,2.5rem)] font-bold tracking-tight text-ink"
                 >
                   {item.label}
                 </motion.a>

@@ -34,7 +34,7 @@ export default function Spotlight() {
         </motion.p>
 
         <div className="mx-auto mt-8 max-w-4xl px-1">
-          <h2 className="text-center font-display text-[clamp(2.4rem,10vw,6.2rem)] font-bold leading-[1.02] tracking-tight">
+          <h2 className="text-center font-display text-[clamp(1.85rem,8vw,6.2rem)] font-bold leading-[1.02] tracking-tight">
             {taglineLines.map((line, i) => (
               <motion.span
                 key={line}
@@ -66,11 +66,11 @@ export default function Spotlight() {
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.15 }}
         >
-          <p className="text-base leading-relaxed text-white/85 md:text-xl">
+          <p className="font-serif text-base leading-relaxed text-white/85 md:text-xl">
             Safe design gets safe results. We build logos, graphics, and campaigns that turn heads —
             and move the business forward.
           </p>
-          <p className="mt-4 font-serif text-xl italic text-brand md:text-2xl">Unexpected on purpose.</p>
+          <p className="mt-4 font-serif text-lg italic text-brand md:text-2xl">Unexpected on purpose.</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3 md:mt-9 md:gap-4">
             <Link href="#contact" className="btn btn-on-dark">
               Begin the unexpected
