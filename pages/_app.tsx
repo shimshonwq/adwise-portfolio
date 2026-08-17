@@ -5,7 +5,7 @@ import '../styles/globals.css'
 /**
  * Bricolage Grotesque — distinctive display.
  * Sora — clean geometric body.
- * EB Garamond — editorial accent voice.
+ * EB Garamond italic — editorial accent voice.
  */
 const displayFont = Bricolage_Grotesque({
   subsets: ['latin'],
@@ -25,7 +25,7 @@ const serifFont = EB_Garamond({
   variable: '--font-serif-face',
   display: 'swap',
   weight: ['400', '500', '600'],
-  style: ['normal', 'italic'],
+  style: 'italic',
 })
 
 export default function App({ Component, pageProps }: AppProps) {

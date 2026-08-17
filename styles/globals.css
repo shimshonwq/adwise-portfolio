@@ -59,6 +59,7 @@ h4,
 
 .font-serif {
   font-family: var(--font-serif-stack), var(--font-serif-face), 'EB Garamond', 'Garamond', ui-serif, Georgia, serif;
+  font-style: italic;
 }
 
 a {
