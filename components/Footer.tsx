@@ -1,5 +1,4 @@
 import Logo from './Logo'
-import ContactChannels from './ContactChannels'
 import { siteConfig } from '../config/site.config'
 
 export default function Footer() {
@@ -16,7 +15,6 @@ export default function Footer() {
           <p className="mt-3 max-w-xs text-sm">
             <span className="font-serif text-lg italic text-brand">{siteConfig.tagline}</span>
           </p>
-          <ContactChannels variant="onDark" className="mt-6" />
         </div>
 
         <div className="flex flex-wrap gap-12 text-sm">
