@@ -88,7 +88,7 @@ export default function Contact() {
           action={`https://formsubmit.co/${siteConfig.email}`}
           method="POST"
           onSubmit={onSubmit}
-          className="soft-panel space-y-5 border border-ink/15 bg-ink p-8 text-white md:p-10"
+          className="soft-panel space-y-5 border-2 border-ink bg-ink p-8 text-white shadow-[8px_8px_0_0_#111] md:p-10"
         >
           <div className="mb-2">
             <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-brand">
@@ -122,7 +122,7 @@ export default function Contact() {
                 required
                 value={formData.name}
                 onChange={onChange}
-                className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
+                className="w-full border-2 border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-volt"
                 placeholder="Your name"
               />
             </label>
@@ -134,7 +134,7 @@ export default function Contact() {
                 required
                 value={formData.email}
                 onChange={onChange}
-                className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
+                className="w-full border-2 border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-volt"
                 placeholder="you@company.com"
               />
             </label>
@@ -146,7 +146,7 @@ export default function Contact() {
               name="phone"
               value={formData.phone}
               onChange={onChange}
-              className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
+              className="w-full border-2 border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-volt"
               placeholder="(555) 000-0000"
             />
           </label>
@@ -158,7 +158,7 @@ export default function Contact() {
               rows={5}
               value={formData.message}
               onChange={onChange}
-              className="w-full resize-none rounded-2xl border border-white/15 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
+              className="w-full resize-none border-2 border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-volt"
               placeholder="What are we building?"
             />
           </label>
@@ -171,14 +171,14 @@ export default function Contact() {
               type="button"
               onClick={onCaptchaPress}
               aria-pressed={captcha === 'verified'}
-              className={`flex w-full max-w-sm items-center gap-3 rounded-xl border px-3 py-3 text-left transition ${
+              className={`flex w-full max-w-sm items-center gap-3 border-2 px-3 py-3 text-left transition ${
                 status === 'captcha'
-                  ? 'border-brand/60 bg-brand/10'
-                  : 'border-white/20 bg-white hover:bg-white'
+                  ? 'border-brand bg-brand/10'
+                  : 'border-white bg-white hover:bg-white'
               }`}
             >
               <span
-                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded border-2 ${
+                className={`flex h-7 w-7 shrink-0 items-center justify-center border-2 ${
                   captcha === 'verified'
                     ? 'border-emerald-600 bg-emerald-500 text-white'
                     : 'border-black/35 bg-white'

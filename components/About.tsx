@@ -6,14 +6,17 @@ const principles = [
   {
     title: 'Strategy first',
     body: 'Every decision ties back to a goal — not decoration for its own sake.',
+    tone: 'ink' as const,
   },
   {
     title: 'Craft obsessed',
     body: 'Clean details that make a brand feel considered and consistent.',
+    tone: 'gold' as const,
   },
   {
     title: 'Built to last',
     body: 'Work that reads on a sign, a screen, a truck, and a business card.',
+    tone: 'volt' as const,
   },
 ]
 
@@ -33,27 +36,34 @@ export default function About() {
             We help ambitious businesses look professional and stay consistent — from the first logo
             sketch to finished signage and campaign rollout.
           </p>
+          <p className="mt-4 font-serif text-2xl italic text-volt">Made to be noticed.</p>
         </div>
 
         <div className="space-y-4">
-          {principles.map((item, index) => (
-            <motion.div
-              key={item.title}
-              initial={{ y: 14 }}
-              whileInView={{ y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.4, delay: index * 0.07 }}
-              whileHover={{ x: 6, transition: { duration: 0.2 } }}
-              className={`soft-panel border p-6 md:p-7 ${
-                index === 1
-                  ? 'border-brand/50 bg-brand text-ink'
-                  : 'border-white/10 bg-white/5 text-white'
-              }`}
-            >
-              <h3 className="font-display text-xl font-bold">{item.title}</h3>
-              <p className={`mt-2 ${index === 1 ? 'text-ink/70' : 'text-white/65'}`}>{item.body}</p>
-            </motion.div>
-          ))}
+          {principles.map((item, index) => {
+            const gold = item.tone === 'gold'
+            const volt = item.tone === 'volt'
+            return (
+              <motion.div
+                key={item.title}
+                initial={{ y: 14 }}
+                whileInView={{ y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.4, delay: index * 0.07 }}
+                whileHover={{ x: 6, transition: { duration: 0.2 } }}
+                className={`soft-panel border-2 p-6 md:p-7 ${
+                  gold
+                    ? 'border-brand bg-brand text-ink shadow-[5px_5px_0_0_#fdc621]'
+                    : volt
+                      ? 'border-volt bg-volt text-ink shadow-[5px_5px_0_0_#ff4d8d]'
+                      : 'border-white/25 bg-white/5 text-white shadow-[5px_5px_0_0_#2ee6d6]'
+                }`}
+              >
+                <h3 className="font-display text-xl font-bold">{item.title}</h3>
+                <p className={`mt-2 ${gold || volt ? 'text-ink/70' : 'text-white/65'}`}>{item.body}</p>
+              </motion.div>
+            )
+          })}
         </div>
       </div>
     </section>

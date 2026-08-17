@@ -3,7 +3,6 @@ import Link from 'next/link'
 
 const taglineLines = ['Thinking', 'Your', 'Next', 'Thing']
 
-/** Manifesto-style spotlight — inspired by MOTG’s unexpected brand moment */
 export default function Spotlight() {
   return (
     <section className="spotlight-stage relative overflow-hidden py-24 md:py-36">
@@ -11,7 +10,7 @@ export default function Spotlight() {
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(145deg, #1a1608 0%, #0e0e0e 28%, #2a2208 55%, #1a1608 78%, #0e0e0e 100%)',
+            'linear-gradient(145deg, #1a1608 0%, #111111 28%, #2a2208 55%, #1a1608 78%, #111111 100%)',
         }}
         aria-hidden
       />
@@ -19,10 +18,12 @@ export default function Spotlight() {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'radial-gradient(ellipse 60% 55% at 50% 40%, rgba(253,198,33,0.28), transparent 58%), radial-gradient(circle at 12% 85%, rgba(253,198,33,0.12), transparent 35%), radial-gradient(circle at 88% 15%, rgba(255,255,255,0.07), transparent 30%)',
+            'radial-gradient(ellipse 55% 50% at 50% 40%, rgba(253,198,33,0.32), transparent 58%), radial-gradient(circle at 10% 88%, rgba(255,77,141,0.22), transparent 32%), radial-gradient(circle at 90% 12%, rgba(46,230,214,0.2), transparent 30%)',
         }}
         aria-hidden
       />
+      <div className="pointer-events-none absolute left-8 top-10 h-12 w-12 bg-hot md:left-16" aria-hidden />
+      <div className="pointer-events-none absolute bottom-12 right-10 h-10 w-10 bg-volt md:right-20" aria-hidden />
 
       <div className="site-shell relative z-10">
         <motion.p
@@ -52,7 +53,7 @@ export default function Spotlight() {
         </div>
 
         <motion.div
-          className="mx-auto mt-12 h-px w-24 bg-gradient-to-r from-transparent via-brand to-transparent"
+          className="mx-auto mt-12 h-2 w-40 bg-gradient-to-r from-brand via-volt to-hot"
           initial={{ scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
           viewport={{ once: true }}
@@ -71,7 +72,8 @@ export default function Spotlight() {
             Safe design gets safe results. We build logos, graphics, and campaigns that turn heads —
             and move the business forward.
           </p>
-          <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
+          <p className="mt-4 font-serif text-2xl italic text-volt">Unexpected on purpose.</p>
+          <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
             <Link href="#contact" className="btn btn-on-dark">
               Begin the unexpected
             </Link>

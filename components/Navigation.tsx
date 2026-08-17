@@ -28,23 +28,24 @@ export default function Navigation() {
           open ? 'z-[70]' : 'z-50'
         } ${
           scrolled || open
-            ? 'border-b border-line bg-paper/95'
+            ? 'border-b-2 border-ink bg-paper/95'
             : 'border-b border-transparent bg-transparent'
         }`}
       >
+        <div className="color-rail" aria-hidden />
         <nav className="site-shell flex h-16 items-center justify-between md:h-20">
           <Logo href="/#top" size="sm" />
 
           <div
-            className={`hidden items-center gap-8 rounded-full px-5 py-3 md:flex ${
-              scrolled ? '' : 'border border-ink/8 bg-white/70 shadow-sm backdrop-blur-md'
+            className={`hidden items-center gap-8 px-5 py-3 md:flex ${
+              scrolled ? '' : 'border-2 border-ink bg-white shadow-[4px_4px_0_0_#111]'
             }`}
           >
             {siteConfig.nav.map((item) => (
               <a
                 key={item.href}
                 href={`/${item.href}`}
-                className="text-sm font-medium tracking-wide text-ink/65 transition-colors hover:text-ink"
+                className="text-sm font-medium tracking-wide text-ink/70 transition-colors hover:text-ink"
               >
                 {item.label}
               </a>
@@ -56,7 +57,7 @@ export default function Navigation() {
 
           <button
             type="button"
-            className="relative z-[70] flex h-10 w-10 flex-col items-center justify-center gap-1.5 md:hidden"
+            className="relative z-[70] flex h-10 w-10 flex-col items-center justify-center gap-1.5 border-2 border-ink bg-white md:hidden"
             aria-label={open ? 'Close menu' : 'Open menu'}
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
@@ -72,7 +73,6 @@ export default function Navigation() {
         </nav>
       </header>
 
-      {/* Portal-like sibling: must NOT sit under backdrop-filter header or fixed menu clips mid-page */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -82,6 +82,7 @@ export default function Navigation() {
             transition={{ duration: 0.2 }}
             className="fixed inset-0 z-[60] bg-paper md:hidden"
           >
+            <div className="color-rail" aria-hidden />
             <div className="site-shell flex h-full flex-col justify-center gap-3 pt-20 pb-10">
               {siteConfig.nav.map((item, i) => (
                 <motion.a

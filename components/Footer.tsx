@@ -14,7 +14,7 @@ export default function Footer() {
             Logos, graphics, and marketing for businesses worldwide.
           </p>
           <p className="mt-3 max-w-xs text-sm">
-            <span className="brand-shimmer font-display font-bold">{siteConfig.tagline}</span>
+            <span className="font-serif text-lg italic text-volt">{siteConfig.tagline}</span>
           </p>
           <ContactChannels variant="onDark" className="mt-6" />
         </div>

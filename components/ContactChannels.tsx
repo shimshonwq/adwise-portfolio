@@ -40,10 +40,10 @@ export default function ContactChannels({
 }: ContactChannelsProps) {
   const shell =
     variant === 'onDark'
-      ? 'border-white/25 text-white hover:border-brand hover:bg-brand hover:text-ink'
+      ? 'border-white text-white hover:border-brand hover:bg-brand hover:text-ink'
       : variant === 'light'
-        ? 'border-ink/15 text-ink hover:border-ink hover:bg-ink hover:text-white'
-        : 'border-line text-ink hover:border-ink hover:bg-ink hover:text-white'
+        ? 'border-ink text-ink hover:border-ink hover:bg-ink hover:text-white'
+        : 'border-ink text-ink hover:border-ink hover:bg-ink hover:text-white'
 
   return (
     <div className={`flex flex-wrap gap-3 ${className}`}>
@@ -57,7 +57,7 @@ export default function ContactChannels({
             rel={channel.key === 'whatsapp' ? 'noopener noreferrer' : undefined}
             aria-label={channel.label}
             title={channel.label}
-            className={`inline-flex h-12 w-12 items-center justify-center rounded-full border text-lg transition-all hover:-translate-y-0.5 ${shell}`}
+            className={`inline-flex h-12 w-12 items-center justify-center border-2 text-lg transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 ${shell}`}
           >
             <Icon />
           </a>

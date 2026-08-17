@@ -22,7 +22,7 @@ export default function ProjectsComingSoon() {
             initial={{ y: 16 }}
             animate={{ y: 0 }}
             transition={{ duration: 0.5 }}
-            className="coming-soon-panel max-w-2xl"
+            className="coming-soon-panel max-w-2xl border-2 border-brand shadow-[8px_8px_0_0_#2ee6d6]"
           >
             <p className="text-sm font-bold uppercase tracking-[0.22em] text-brand">Our work</p>
             <h1 className="mt-4 font-display text-4xl font-bold md:text-5xl">
