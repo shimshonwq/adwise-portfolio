@@ -129,8 +129,10 @@ export default function Clients() {
             {loop.map((client, i) => (
               <div
                 key={`${client.name}-${i}`}
-                className={`logo-box flex h-[5.5rem] w-[15.25rem] shrink-0 items-center justify-center px-3.5 md:h-[6.35rem] md:w-[17.25rem] ${
-                  client.onDark ? 'logo-box--dark' : ''
+                className={`logo-box flex h-[5.5rem] shrink-0 items-center justify-center md:h-[6.35rem] ${
+                  client.onDark
+                    ? 'logo-box--dark w-auto px-5 md:px-6'
+                    : 'w-[14.75rem] px-3.5 md:w-[16.5rem]'
                 }`}
                 title={client.name}
               >
@@ -141,7 +143,11 @@ export default function Clients() {
                   draggable={false}
                   width={260}
                   height={100}
-                  className="h-[3.85rem] w-[13.4rem] object-contain object-center select-none md:h-[4.55rem] md:w-[15.2rem]"
+                  className={`object-contain object-center select-none ${
+                    client.onDark
+                      ? 'h-[3.6rem] w-auto max-w-[13.5rem] md:h-[4.25rem] md:max-w-[15.5rem]'
+                      : 'h-[3.85rem] w-[13.4rem] md:h-[4.55rem] md:w-[15.2rem]'
+                  }`}
                 />
               </div>
             ))}
