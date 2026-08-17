@@ -11,12 +11,12 @@ type Phase = 'void' | 'burst' | 'assemble' | 'lock' | 'exit' | 'done'
 /** Lightbulb + craft marks that react to page scroll */
 function HeroOrbit({ active }: { active: boolean }) {
   const { scrollY } = useScroll()
-  const yRaw = useTransform(scrollY, [0, 640], [0, 230])
-  const xRaw = useTransform(scrollY, [0, 640], [0, 52])
-  const rotateRaw = useTransform(scrollY, [0, 720], [0, 46])
-  const bulbRaw = useTransform(scrollY, [0, 720], [0, -70])
-  const ringRaw = useTransform(scrollY, [0, 720], [0, 280])
-  const scaleRaw = useTransform(scrollY, [0, 600], [1, 0.8])
+  const yRaw = useTransform(scrollY, [0, 640], [0, 195])
+  const xRaw = useTransform(scrollY, [0, 640], [0, 48])
+  const rotateRaw = useTransform(scrollY, [0, 720], [0, 50])
+  const bulbRaw = useTransform(scrollY, [0, 720], [0, -78])
+  const ringRaw = useTransform(scrollY, [0, 720], [0, 260])
+  const scaleRaw = useTransform(scrollY, [0, 600], [1, 0.82])
 
   const y = useSpring(yRaw, { stiffness: 70, damping: 22, mass: 0.6 })
   const x = useSpring(xRaw, { stiffness: 70, damping: 22, mass: 0.6 })
