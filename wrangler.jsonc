@@ -1,6 +1,7 @@
 {
   // Cloudflare Workers (static assets) + CMS API on /api/*
   "name": "adwise-portfolio",
+  "account_id": "77773650553f3b5b25a723e62a86afee",
   "main": "worker/index.js",
   "compatibility_date": "2026-07-15",
   "assets": {

@@ -8,7 +8,7 @@ export const AUTH_REPO_PATH = 'data/admin-auth.json'
 export const AUTH_LOCAL_PATH = '.data/admin-auth.json'
 export const ADMIN_COOKIE = 'adwise_admin'
 export const SESSION_MAX_AGE_SEC = 60 * 60 * 24 * 14
-export const PBKDF2_ITERATIONS = 210_000
+export const PBKDF2_ITERATIONS = 100_000
 
 const MIN_PASSWORD_LEN = 12
 

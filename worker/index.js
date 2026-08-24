@@ -24,7 +24,7 @@ import {
   writeJsonFile,
 } from './github-store.js'
 
-const LOGIN_MAX_ATTEMPTS = 5
+const CONTENT_KV_KEY = 'content:v1'
 const LEGACY_LOGOS_KEY = 'logos:v1'
 const MAX_BYTES = 2.5 * 1024 * 1024
 const LOGIN_MAX_ATTEMPTS = 5
