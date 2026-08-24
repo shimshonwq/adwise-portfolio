@@ -6,6 +6,7 @@ import {
   type LogoItem,
   type ThemeColors,
 } from '../../lib/content'
+import { BODY_FONTS, DISPLAY_FONTS, SERIF_FONTS } from '../../lib/fonts'
 import {
   LOGO_ACCEPT_ATTR,
   LOGO_BEST_HEIGHT,
@@ -88,6 +89,49 @@ function Guide({
         </p>
       )}
     </div>
+  )
+}
+
+function PasswordField({
+  label,
+  value,
+  onChange,
+  autoFocus,
+  autoComplete,
+  minLength,
+}: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  autoFocus?: boolean
+  autoComplete?: string
+  minLength?: number
+}) {
+  const [show, setShow] = useState(false)
+  return (
+    <label className="block text-sm">
+      <span className="mb-1.5 block font-medium text-ink/70">{label}</span>
+      <span className="relative block">
+        <input
+          type={show ? 'text' : 'password'}
+          autoFocus={autoFocus}
+          autoComplete={autoComplete}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          minLength={minLength}
+          required
+          className="w-full rounded-lg border border-ink/15 bg-paper px-3 py-2.5 pr-11 text-sm outline-none focus:border-brand"
+        />
+        <button
+          type="button"
+          onClick={() => setShow((v) => !v)}
+          className="absolute right-2 top-1/2 -translate-y-1/2 rounded px-2 py-1 text-xs font-semibold text-ink/55 hover:text-ink"
+          aria-label={show ? 'Hide password' : 'Show password'}
+        >
+          {show ? 'Hide' : 'Show'}
+        </button>
+      </span>
+    </label>
   )
 }
 
@@ -434,6 +478,30 @@ export default function AdminCms() {
     }
   }
 
+  const replaceLogo = async (id: string, file: File) => {
+    setBusy(true)
+    setError(null)
+    try {
+      const dims = await measureImage(file)
+      const err = validateLogoFile(file, dims.width, dims.height)
+      if (err) throw new Error(err)
+      const dataUrl = await readFileAsDataUrl(file)
+      const res = await fetch(`/api/admin/logos/${encodeURIComponent(id)}/`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dataUrl, width: dims.width, height: dims.height }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Replace failed')
+      applyApiResult(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Replace failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const onPickFile = async (file: File | null) => {
     setUploadFile(file)
     setUploadPreview(null)
@@ -535,28 +603,19 @@ export default function AdminCms() {
         {phase === 'login' && (
           <form
             onSubmit={onLogin}
-            className="soft-panel mx-auto max-w-md space-y-5 border border-ink/10 bg-white p-7 md:p-9"
+            className="soft-panel mx-auto max-w-sm space-y-5 border border-ink/10 bg-white p-8 md:p-10"
           >
-            <Guide
-              title="Log in to edit the website"
-              what="Your secret password unlocks the editor."
-              how="Type your password in the box, then press Log in."
-              happens="You stay signed in on this browser until you log out or change your password."
-              tip="After you log in the first time, open the Password tab and pick a password only you know."
+            <div className="text-center">
+              <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-brass">Admin</p>
+              <h2 className="mt-2 font-display text-2xl font-bold">Log in</h2>
+            </div>
+            <PasswordField
+              label="Password"
+              value={password}
+              onChange={setPassword}
+              autoFocus
+              autoComplete="current-password"
             />
-            <label className="block text-sm">
-              <span className="mb-1.5 block font-medium text-ink/70">Password</span>
-              <input
-                type="password"
-                autoFocus
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-lg border border-ink/15 bg-paper px-3 py-2.5 text-sm outline-none focus:border-brand"
-                placeholder="Admin password"
-                required
-              />
-            </label>
             <button type="submit" disabled={busy} className="btn btn-primary w-full">
               {busy ? 'Signing in…' : 'Log in'}
             </button>
@@ -732,6 +791,19 @@ export default function AdminCms() {
                         >
                           {logo.visible === false ? 'Show' : 'Hide'}
                         </button>
+                        <label className="btn btn-secondary !px-2 !py-1 text-xs cursor-pointer">
+                          Replace
+                          <input
+                            type="file"
+                            accept={LOGO_ACCEPT_ATTR}
+                            className="hidden"
+                            onChange={(e) => {
+                              const f = e.target.files?.[0]
+                              if (f) replaceLogo(logo.id, f)
+                              e.target.value = ''
+                            }}
+                          />
+                        </label>
                         <button
                           type="button"
                           disabled={busy}
@@ -750,17 +822,18 @@ export default function AdminCms() {
             {tab === 'colors' && (
               <div className="max-w-3xl">
                 <Guide
-                  title="Change the website colors"
-                  what="These colors paint almost the whole site — background paper, gold buttons, dark text, and accents."
-                  how="Click a color square to pick, or type a hex code like #fdc621. Then press Save colors."
-                  happens="Visitors see the new palette after Cloudflare rebuilds (about 1–3 minutes)."
-                  tip="Keep gold for brand and dark ink for text so the site stays readable. Reset restores the original Adwise look."
+                  title="Change colors and fonts"
+                  what="Site-wide colors plus headline, body, and accent fonts."
+                  how="Pick colors, choose fonts from the lists, or choose Custom and paste a font name + optional Google Fonts CSS link."
+                  happens="The whole site restyles after Cloudflare rebuilds (about 1–3 minutes). Preview colors/fonts update when you save."
+                  tip="Reset to default restores the original Adwise look."
                 />
                 <SectionSave
                   busy={busy}
                   onSave={() => saveContent(content)}
-                  title="Brand colors"
-                  note="These map to the site’s CSS theme variables."
+                  onReset={() => setContent({ ...content, theme: { ...DEFAULT_THEME } })}
+                  title="Brand colors & fonts"
+                  note="These paint almost every page."
                 >
                   <div className="grid gap-3 sm:grid-cols-2">
                     <ColorField
@@ -812,13 +885,98 @@ export default function AdminCms() {
                       hint="Quiet secondary text"
                     />
                   </div>
-                  <button
-                    type="button"
-                    className="btn btn-secondary text-sm"
-                    onClick={() => setContent({ ...content, theme: { ...DEFAULT_THEME } })}
-                  >
-                    Reset to original Adwise colors
-                  </button>
+
+                  <h3 className="pt-2 font-display text-lg font-bold">Fonts</h3>
+                  <p className="text-sm text-ink/60">
+                    Headline font, body font, and italic accent font. Custom = paste a font family
+                    name (example: Poppins) and optional Google Fonts CSS URL.
+                  </p>
+                  <label className="block text-sm">
+                    <span className="mb-1.5 block font-medium text-ink/70">Headline / display font</span>
+                    <select
+                      className="w-full rounded-lg border border-ink/15 bg-paper px-3 py-2.5 text-sm"
+                      value={theme.fontDisplay || 'bricolage'}
+                      onChange={(e) => setTheme({ fontDisplay: e.target.value })}
+                    >
+                      {DISPLAY_FONTS.map((f) => (
+                        <option key={f.id} value={f.id}>
+                          {f.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  {theme.fontDisplay === 'custom' && (
+                    <>
+                      <Field
+                        label="Custom display font name"
+                        value={theme.fontDisplayCustom || ''}
+                        onChange={(v) => setTheme({ fontDisplayCustom: v })}
+                        hint='Example: Poppins'
+                      />
+                      <Field
+                        label="Custom display font CSS URL (optional)"
+                        value={theme.fontDisplayUrl || ''}
+                        onChange={(v) => setTheme({ fontDisplayUrl: v })}
+                        hint="Paste a fonts.googleapis.com CSS link"
+                      />
+                    </>
+                  )}
+                  <label className="block text-sm">
+                    <span className="mb-1.5 block font-medium text-ink/70">Body font</span>
+                    <select
+                      className="w-full rounded-lg border border-ink/15 bg-paper px-3 py-2.5 text-sm"
+                      value={theme.fontBody || 'sora'}
+                      onChange={(e) => setTheme({ fontBody: e.target.value })}
+                    >
+                      {BODY_FONTS.map((f) => (
+                        <option key={f.id} value={f.id}>
+                          {f.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  {theme.fontBody === 'custom' && (
+                    <>
+                      <Field
+                        label="Custom body font name"
+                        value={theme.fontBodyCustom || ''}
+                        onChange={(v) => setTheme({ fontBodyCustom: v })}
+                      />
+                      <Field
+                        label="Custom body font CSS URL (optional)"
+                        value={theme.fontBodyUrl || ''}
+                        onChange={(v) => setTheme({ fontBodyUrl: v })}
+                      />
+                    </>
+                  )}
+                  <label className="block text-sm">
+                    <span className="mb-1.5 block font-medium text-ink/70">Accent / italic font</span>
+                    <select
+                      className="w-full rounded-lg border border-ink/15 bg-paper px-3 py-2.5 text-sm"
+                      value={theme.fontSerif || 'eb-garamond'}
+                      onChange={(e) => setTheme({ fontSerif: e.target.value })}
+                    >
+                      {SERIF_FONTS.map((f) => (
+                        <option key={f.id} value={f.id}>
+                          {f.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  {theme.fontSerif === 'custom' && (
+                    <>
+                      <Field
+                        label="Custom accent font name"
+                        value={theme.fontSerifCustom || ''}
+                        onChange={(v) => setTheme({ fontSerifCustom: v })}
+                      />
+                      <Field
+                        label="Custom accent font CSS URL (optional)"
+                        value={theme.fontSerifUrl || ''}
+                        onChange={(v) => setTheme({ fontSerifUrl: v })}
+                      />
+                    </>
+                  )}
                 </SectionSave>
               </div>
             )}
@@ -831,7 +989,7 @@ export default function AdminCms() {
                   how="Edit any box. Menu links use #work style anchors for homepage sections."
                   happens="Saved to GitHub; the live site updates after rebuild."
                 />
-                <SectionSave busy={busy} onSave={() => saveContent(content)} title="Site & contact">
+                <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, site: { ...DEFAULT_CONTENT.site } })} title="Site & contact">
                   <Field label="Business name" value={content.site.name} onChange={(v) => setContent({ ...content, site: { ...content.site, name: v } })} />
                   <Field label="Short name" value={content.site.shortName} onChange={(v) => setContent({ ...content, site: { ...content.site, shortName: v } })} hint="Used in About eyebrow like “About Adwise”" />
                   <Field label="Tagline" value={content.site.tagline} onChange={(v) => setContent({ ...content, site: { ...content.site, tagline: v } })} />
@@ -873,7 +1031,7 @@ export default function AdminCms() {
                   how="Edit the boxes. Links can be #work or #contact."
                   happens="Homepage hero updates after the rebuild."
                 />
-                <SectionSave busy={busy} onSave={() => saveContent(content)} title="Hero">
+                <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, hero: { ...DEFAULT_CONTENT.hero } })} title="Hero">
                   <Field label="Opening name (big letters)" value={content.hero.openName} onChange={(v) => setContent({ ...content, hero: { ...content.hero, openName: v } })} />
                   <Field label="Eyebrow / badge" value={content.hero.eyebrow} onChange={(v) => setContent({ ...content, hero: { ...content.hero, eyebrow: v } })} />
                   <Field label="Headline" value={content.hero.headline} onChange={(v) => setContent({ ...content, hero: { ...content.hero, headline: v } })} />
@@ -896,7 +1054,7 @@ export default function AdminCms() {
                   how="Edit eyebrow, title, subtitle, and the empty message."
                   happens="Section text updates after rebuild."
                 />
-                <SectionSave busy={busy} onSave={() => saveContent(content)} title="Clients section">
+                <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, clients: { ...DEFAULT_CONTENT.clients } })} title="Clients section">
                   <Field label="Eyebrow" value={content.clients.eyebrow} onChange={(v) => setContent({ ...content, clients: { ...content.clients, eyebrow: v } })} />
                   <Field label="Title" value={content.clients.title} onChange={(v) => setContent({ ...content, clients: { ...content.clients, title: v } })} />
                   <Field label="Subtitle" value={content.clients.subtitle} onChange={(v) => setContent({ ...content, clients: { ...content.clients, subtitle: v } })} multiline />
@@ -914,7 +1072,7 @@ export default function AdminCms() {
                   happens="Service cards update after rebuild."
                   tip="You can add or remove a card with the buttons under each card."
                 />
-                <SectionSave busy={busy} onSave={() => saveContent(content)} title="Services">
+                <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, services: structuredClone(DEFAULT_CONTENT.services) })} title="Services">
                   <Field label="Eyebrow" value={content.services.eyebrow} onChange={(v) => setContent({ ...content, services: { ...content.services, eyebrow: v } })} />
                   <Field label="Title" value={content.services.title} onChange={(v) => setContent({ ...content, services: { ...content.services, title: v } })} />
                   <Field label="Subtitle" value={content.services.subtitle} onChange={(v) => setContent({ ...content, services: { ...content.services, subtitle: v } })} multiline />
@@ -1005,7 +1163,7 @@ export default function AdminCms() {
                   how="Title lines = one word/line per row in the box."
                   happens="Spotlight section updates after rebuild."
                 />
-                <SectionSave busy={busy} onSave={() => saveContent(content)} title="Spotlight">
+                <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, spotlight: structuredClone(DEFAULT_CONTENT.spotlight) })} title="Spotlight">
                   <Field label="Eyebrow" value={content.spotlight.eyebrow} onChange={(v) => setContent({ ...content, spotlight: { ...content.spotlight, eyebrow: v } })} />
                   <Field label="Title lines (one per line)" value={content.spotlight.titleLines.join('\n')} multiline onChange={(v) => setContent({ ...content, spotlight: { ...content.spotlight, titleLines: v.split('\n').map((s) => s.trim()).filter(Boolean) } })} />
                   <Field label="Body" value={content.spotlight.body} multiline onChange={(v) => setContent({ ...content, spotlight: { ...content.spotlight, body: v } })} />
@@ -1026,7 +1184,7 @@ export default function AdminCms() {
                   how="Edit each step’s number, title, body, and color tone. Add or remove steps as needed."
                   happens="Process section updates after rebuild."
                 />
-                <SectionSave busy={busy} onSave={() => saveContent(content)} title="Process">
+                <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, process: structuredClone(DEFAULT_CONTENT.process) })} title="Process">
                   <Field label="Eyebrow" value={content.process.eyebrow} onChange={(v) => setContent({ ...content, process: { ...content.process, eyebrow: v } })} />
                   <Field label="Title" value={content.process.title} onChange={(v) => setContent({ ...content, process: { ...content.process, title: v } })} />
                   <Field label="Subtitle" value={content.process.subtitle} multiline onChange={(v) => setContent({ ...content, process: { ...content.process, subtitle: v } })} />
@@ -1110,7 +1268,7 @@ export default function AdminCms() {
                   how="Use {shortName} in the eyebrow to insert your short business name automatically."
                   happens="About section updates after rebuild."
                 />
-                <SectionSave busy={busy} onSave={() => saveContent(content)} title="About">
+                <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, about: structuredClone(DEFAULT_CONTENT.about) })} title="About">
                   <Field label="Eyebrow" value={content.about.eyebrow} onChange={(v) => setContent({ ...content, about: { ...content.about, eyebrow: v } })} hint="Tip: write About {shortName}" />
                   <Field label="Title" value={content.about.title} onChange={(v) => setContent({ ...content, about: { ...content.about, title: v } })} />
                   <Field label="Body" value={content.about.body} multiline onChange={(v) => setContent({ ...content, about: { ...content.about, body: v } })} />
@@ -1189,7 +1347,7 @@ export default function AdminCms() {
                   how="Change the words visitors see when they fill out the form."
                   happens="Contact section updates after rebuild. Form still emails your site email via FormSubmit."
                 />
-                <SectionSave busy={busy} onSave={() => saveContent(content)} title="Contact">
+                <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, contact: { ...DEFAULT_CONTENT.contact } })} title="Contact">
                   <Field label="Eyebrow" value={content.contact.eyebrow} onChange={(v) => setContent({ ...content, contact: { ...content.contact, eyebrow: v } })} />
                   <Field label="Title" value={content.contact.title} onChange={(v) => setContent({ ...content, contact: { ...content.contact, title: v } })} />
                   <Field label="Intro" value={content.contact.intro} multiline onChange={(v) => setContent({ ...content, contact: { ...content.contact, intro: v } })} />
@@ -1219,13 +1377,13 @@ export default function AdminCms() {
                   how="Edit the titles and paragraphs, then save."
                   happens="Those pages update after rebuild."
                 />
-                <SectionSave busy={busy} onSave={() => saveContent(content)} title="Projects page">
+                <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, projectsPage: { ...DEFAULT_CONTENT.projectsPage } })} title="Projects page">
                   <Field label="Eyebrow" value={content.projectsPage?.eyebrow || ''} onChange={(v) => setContent({ ...content, projectsPage: { ...content.projectsPage, eyebrow: v } })} />
                   <Field label="Title" value={content.projectsPage?.title || ''} onChange={(v) => setContent({ ...content, projectsPage: { ...content.projectsPage, title: v } })} />
                   <Field label="Body" value={content.projectsPage?.body || ''} multiline onChange={(v) => setContent({ ...content, projectsPage: { ...content.projectsPage, body: v } })} />
                 </SectionSave>
                 <div className="h-4" />
-                <SectionSave busy={busy} onSave={() => saveContent(content)} title="404 page">
+                <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, notFoundPage: { ...DEFAULT_CONTENT.notFoundPage } })} title="404 page">
                   <Field label="Title" value={content.notFoundPage?.title || ''} onChange={(v) => setContent({ ...content, notFoundPage: { ...content.notFoundPage, title: v } })} />
                   <Field label="Body" value={content.notFoundPage?.body || ''} multiline onChange={(v) => setContent({ ...content, notFoundPage: { ...content.notFoundPage, body: v } })} />
                   <Field label="Button text" value={content.notFoundPage?.ctaLabel || ''} onChange={(v) => setContent({ ...content, notFoundPage: { ...content.notFoundPage, ctaLabel: v } })} />
@@ -1244,41 +1402,26 @@ export default function AdminCms() {
                   how="Type your current password, then a new one twice. New password needs 12+ characters with upper, lower, number, and a symbol."
                   happens="The old password stops working everywhere. Other browsers are signed out. Only the new password works."
                 />
-                <label className="block text-sm">
-                  <span className="mb-1.5 block font-medium text-ink/70">Current password</span>
-                  <input
-                    type="password"
-                    autoComplete="current-password"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="w-full rounded-lg border border-ink/15 bg-paper px-3 py-2.5 text-sm outline-none focus:border-brand"
-                    required
-                  />
-                </label>
-                <label className="block text-sm">
-                  <span className="mb-1.5 block font-medium text-ink/70">New password</span>
-                  <input
-                    type="password"
-                    autoComplete="new-password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full rounded-lg border border-ink/15 bg-paper px-3 py-2.5 text-sm outline-none focus:border-brand"
-                    required
-                    minLength={12}
-                  />
-                </label>
-                <label className="block text-sm">
-                  <span className="mb-1.5 block font-medium text-ink/70">Confirm new password</span>
-                  <input
-                    type="password"
-                    autoComplete="new-password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full rounded-lg border border-ink/15 bg-paper px-3 py-2.5 text-sm outline-none focus:border-brand"
-                    required
-                    minLength={12}
-                  />
-                </label>
+                <PasswordField
+                  label="Current password"
+                  value={currentPassword}
+                  onChange={setCurrentPassword}
+                  autoComplete="current-password"
+                />
+                <PasswordField
+                  label="New password"
+                  value={newPassword}
+                  onChange={setNewPassword}
+                  autoComplete="new-password"
+                  minLength={12}
+                />
+                <PasswordField
+                  label="Confirm new password"
+                  value={confirmPassword}
+                  onChange={setConfirmPassword}
+                  autoComplete="new-password"
+                  minLength={12}
+                />
                 <button type="submit" disabled={busy} className="btn btn-primary">
                   {busy ? 'Updating…' : 'Update password'}
                 </button>
@@ -1296,12 +1439,14 @@ function SectionSave({
   note,
   children,
   onSave,
+  onReset,
   busy,
 }: {
   title: string
   note?: string
   children: React.ReactNode
   onSave: () => void
+  onReset?: () => void
   busy: boolean
 }) {
   return (
@@ -1311,14 +1456,42 @@ function SectionSave({
           <h2 className="font-display text-xl font-bold">{title}</h2>
           {note && <p className="mt-1 font-serif text-sm italic text-ink/60">{note}</p>}
         </div>
-        <button type="button" disabled={busy} onClick={onSave} className="btn btn-primary text-sm">
+        <div className="flex flex-wrap gap-2">
+          {onReset && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => {
+                if (confirm('Reset this section to the original default text/settings?')) onReset()
+              }}
+              className="btn btn-secondary text-sm"
+            >
+              Reset to default
+            </button>
+          )}
+          <button type="button" disabled={busy} onClick={onSave} className="btn btn-primary text-sm">
+            {busy ? 'Saving…' : 'Save changes'}
+          </button>
+        </div>
+      </div>
+      {children}
+      <div className="flex flex-wrap gap-2">
+        {onReset && (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => {
+              if (confirm('Reset this section to the original default text/settings?')) onReset()
+            }}
+            className="btn btn-secondary"
+          >
+            Reset to default
+          </button>
+        )}
+        <button type="button" disabled={busy} onClick={onSave} className="btn btn-primary">
           {busy ? 'Saving…' : 'Save changes'}
         </button>
       </div>
-      {children}
-      <button type="button" disabled={busy} onClick={onSave} className="btn btn-primary">
-        {busy ? 'Saving…' : 'Save changes'}
-      </button>
     </div>
   )
 }

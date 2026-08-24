@@ -29,6 +29,7 @@ import {
   deleteRepoFile,
 } from './github-store.mjs'
 import { validateLogoUpload, extForLogoMime, LOGO_MAX_BYTES } from './logo-rules.mjs'
+import { sanitizeDeep } from './text-sanitize.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -146,6 +147,7 @@ async function readContent() {
 }
 
 async function persistContent(content, message = 'CMS: update site content') {
+  content = sanitizeDeep(content)
   writeLocalContent(content)
   if (githubConfigured()) {
     const result = await publishSiteContent(content, message)
@@ -394,6 +396,32 @@ const server = http.createServer(async (req, res) => {
         content.logos[idx].name = String(body.name).trim() || content.logos[idx].name
       }
       if (body.visible !== undefined) content.logos[idx].visible = Boolean(body.visible)
+      if (body.dataUrl) {
+        const dataUrl = String(body.dataUrl)
+        const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/)
+        if (!match) return json(res, 400, { error: 'Upload a PNG, JPG, or WebP' })
+        const mime = match[1]
+        const buf = Buffer.from(match[2], 'base64')
+        const width = body.width != null ? Number(body.width) : null
+        const height = body.height != null ? Number(body.height) : null
+        const bad = validateLogoUpload({
+          mime,
+          size: buf.length,
+          width: Number.isFinite(width) ? width : null,
+          height: Number.isFinite(height) ? height : null,
+        })
+        if (bad) return json(res, 400, { error: bad })
+        const ext = extForLogoMime(mime)
+        if (!ext) return json(res, 400, { error: 'Upload a PNG, JPG, or WebP' })
+        const file = `${id}.${ext}`
+        const src = `/uploads/logos/${file}`
+        ensureDirs()
+        fs.writeFileSync(path.join(UPLOAD_DIR, file), buf)
+        if (githubConfigured()) {
+          await writeBinaryFile(`public${src}`, buf, `CMS: replace logo ${id}`)
+        }
+        content.logos[idx].src = src
+      }
       const result = await persistContent(content, `CMS: update logo ${id}`)
       return json(res, 200, okPayload(result))
     }

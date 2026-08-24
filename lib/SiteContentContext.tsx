@@ -16,6 +16,7 @@ import {
   type CmsContent,
   type LogoItem,
 } from './content'
+import { googleFontsHref } from './fonts'
 
 type SiteContentValue = {
   content: CmsContent
@@ -32,6 +33,8 @@ const SiteContentContext = createContext<SiteContentValue>({
   refresh: async () => {},
   ready: false,
 })
+
+const FONT_LINK_ID = 'adwise-cms-fonts'
 
 async function fetchContent(): Promise<CmsContent> {
   try {
@@ -55,14 +58,49 @@ async function fetchContent(): Promise<CmsContent> {
 
 function applyTheme(content: CmsContent) {
   if (typeof document === 'undefined') return
-  const vars = themeToCssVars(content.theme || DEFAULT_CONTENT.theme)
+  const theme = content.theme || DEFAULT_CONTENT.theme
+  const vars = themeToCssVars(theme)
   const root = document.documentElement
   for (const [key, value] of Object.entries(vars)) {
     root.style.setProperty(key, value)
   }
-  const brand = content.theme?.brand || DEFAULT_CONTENT.theme.brand
+  const brand = theme.brand || DEFAULT_CONTENT.theme.brand
   const meta = document.querySelector('meta[name="theme-color"]')
   if (meta) meta.setAttribute('content', brand)
+
+  const href = googleFontsHref(theme)
+  let link = document.getElementById(FONT_LINK_ID) as HTMLLinkElement | null
+  if (href) {
+    if (!link) {
+      link = document.createElement('link')
+      link.id = FONT_LINK_ID
+      link.rel = 'stylesheet'
+      document.head.appendChild(link)
+    }
+    if (link.href !== href) link.href = href
+  } else if (link) {
+    link.remove()
+  }
+
+  for (const [key, url] of [
+    ['adwise-font-display-custom', theme.fontDisplayUrl],
+    ['adwise-font-body-custom', theme.fontBodyUrl],
+    ['adwise-font-serif-custom', theme.fontSerifUrl],
+  ] as const) {
+    let el = document.getElementById(key) as HTMLLinkElement | null
+    const u = String(url || '').trim()
+    if (u && u.startsWith('http')) {
+      if (!el) {
+        el = document.createElement('link')
+        el.id = key
+        el.rel = 'stylesheet'
+        document.head.appendChild(el)
+      }
+      if (el.href !== u) el.href = u
+    } else if (el) {
+      el.remove()
+    }
+  }
 }
 
 export function SiteContentProvider({ children }: { children: ReactNode }) {
