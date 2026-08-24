@@ -24,6 +24,7 @@ import {
   writeJsonFile,
 } from './github-store.js'
 import { validateLogoUpload, extForLogoMime, LOGO_MAX_BYTES } from './logo-rules.js'
+import { sanitizeDeep } from './text-sanitize.js'
 
 const CONTENT_KV_KEY = 'content:v1'
 const LEGACY_LOGOS_KEY = 'logos:v1'
@@ -196,6 +197,7 @@ async function writeContentKv(env, content) {
 }
 
 async function persistContent(env, content, message = 'CMS: update site content') {
+  content = sanitizeDeep(content)
   if (hasGithub(env)) {
     await publishSiteContent(env, content, message)
     return { content, publishMessage: PUBLISH_MSG, published: true }
@@ -419,6 +421,29 @@ async function handleApi(request, env) {
       content.logos[idx].name = String(body.name).trim() || content.logos[idx].name
     }
     if (body.visible !== undefined) content.logos[idx].visible = Boolean(body.visible)
+    if (body.dataUrl) {
+      const parsed = dataUrlToBytes(String(body.dataUrl))
+      if (!parsed) return json({ error: 'Upload a PNG, JPG, or WebP' }, 400)
+      const width = body.width != null ? Number(body.width) : null
+      const height = body.height != null ? Number(body.height) : null
+      const bad = validateLogoUpload({
+        mime: parsed.mime,
+        size: parsed.bytes.length,
+        width: Number.isFinite(width) ? width : null,
+        height: Number.isFinite(height) ? height : null,
+      })
+      if (bad) return json({ error: bad }, 400)
+      const ext = extForLogoMime(parsed.mime)
+      if (!ext) return json({ error: 'Upload a PNG, JPG, or WebP' }, 400)
+      const file = `${id}.${ext}`
+      const src = `/uploads/logos/${file}`
+      if (hasGithub(env)) {
+        await writeBinaryFile(env, `public${src}`, parsed.bytes, `CMS: replace logo ${id}`)
+        content.logos[idx].src = src
+      } else {
+        content.logos[idx].src = String(body.dataUrl)
+      }
+    }
     const result = await persistContent(env, content, `CMS: update logo ${id}`)
     return json(okPayload(result))
   }

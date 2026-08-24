@@ -1,4 +1,6 @@
 import defaultJson from '../data/cms-default.json'
+import { sanitizeDeep } from './text-sanitize'
+import { resolveFontStack } from './fonts'
 
 export type LogoItem = {
   id: string
@@ -19,6 +21,15 @@ export type ThemeColors = {
   brandDeep: string
   brass: string
   muted: string
+  fontDisplay: string
+  fontBody: string
+  fontSerif: string
+  fontDisplayCustom: string
+  fontBodyCustom: string
+  fontSerifCustom: string
+  fontDisplayUrl: string
+  fontBodyUrl: string
+  fontSerifUrl: string
 }
 
 export type CmsContent = {
@@ -157,6 +168,15 @@ export const DEFAULT_THEME: ThemeColors = {
   brandDeep: '#c49200',
   brass: '#8f7343',
   muted: '#5c5548',
+  fontDisplay: 'bricolage',
+  fontBody: 'sora',
+  fontSerif: 'eb-garamond',
+  fontDisplayCustom: '',
+  fontBodyCustom: '',
+  fontSerifCustom: '',
+  fontDisplayUrl: '',
+  fontBodyUrl: '',
+  fontSerifUrl: '',
 }
 
 /** Visible logos in display order */
@@ -188,14 +208,17 @@ export function themeToCssVars(theme: ThemeColors): Record<string, string> {
     '--color-brand-deep': t.brandDeep,
     '--color-brass': t.brass,
     '--color-muted': t.muted,
+    '--font-display-stack': resolveFontStack('display', t.fontDisplay, t.fontDisplayCustom),
+    '--font-body-stack': resolveFontStack('body', t.fontBody, t.fontBodyCustom),
+    '--font-serif-stack': resolveFontStack('serif', t.fontSerif, t.fontSerifCustom),
   }
 }
 
 export function normalizeContent(raw: unknown): CmsContent {
   const base = structuredClone(DEFAULT_CONTENT)
-  if (!raw || typeof raw !== 'object') return base
+  if (!raw || typeof raw !== 'object') return sanitizeDeep(base)
   const incoming = raw as Partial<CmsContent>
-  return {
+  const merged: CmsContent = {
     ...base,
     ...incoming,
     version: 1,
@@ -232,4 +255,5 @@ export function normalizeContent(raw: unknown): CmsContent {
     notFoundPage: { ...base.notFoundPage, ...(incoming.notFoundPage || {}) },
     logos: Array.isArray(incoming.logos) ? incoming.logos : base.logos,
   }
+  return sanitizeDeep(merged)
 }
