@@ -1,30 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { DEFAULT_LOGOS, type LogoItem } from '../lib/logos'
+import { useSiteContent } from '../lib/SiteContentContext'
 
-async function loadLogos(): Promise<LogoItem[]> {
-  try {
-    const res = await fetch('/api/logos/', { cache: 'no-store' })
-    if (res.ok) {
-      const data = await res.json()
-      if (Array.isArray(data.logos)) return data.logos
-    }
-  } catch {
-    /* fall through */
-  }
-  try {
-    const res = await fetch('/data/logos.json', { cache: 'no-store' })
-    if (res.ok) {
-      const data = await res.json()
-      if (Array.isArray(data)) return data
-    }
-  } catch {
-    /* fall through */
-  }
-  return DEFAULT_LOGOS
-}
-
-/** White partnerships strip — auto-slides, draggable; logos from admin API */
+/** White partnerships strip — auto-slides, draggable; logos + copy from CMS */
 export default function Clients() {
+  const { content, logos } = useSiteContent()
   const trackRef = useRef<HTMLDivElement>(null)
   const offsetRef = useRef(0)
   const draggingRef = useRef(false)
@@ -32,19 +11,10 @@ export default function Clients() {
   const loopWidthRef = useRef(0)
   const rafRef = useRef(0)
   const [dragging, setDragging] = useState(false)
-  const [clients, setClients] = useState<LogoItem[]>(DEFAULT_LOGOS)
 
-  useEffect(() => {
-    let cancelled = false
-    loadLogos().then((list) => {
-      if (!cancelled) setClients(list)
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
+  const clients = logos
   const loop = clients.length ? [...clients, ...clients] : []
+  const copy = content.clients
 
   useEffect(() => {
     const reduce =
@@ -109,13 +79,13 @@ export default function Clients() {
 
       <div className="site-shell relative z-10 text-center">
         <p className="text-xs font-extrabold uppercase tracking-[0.28em] text-brass">
-          Some of our partnerships
+          {copy.eyebrow}
         </p>
         <h2 className="mt-3 font-display text-[clamp(1.55rem,5.4vw,2.4rem)] font-bold tracking-tight text-ink">
-          Brands we work with
+          {copy.title}
         </h2>
         <p className="mx-auto mt-3 max-w-lg font-serif text-base italic text-ink/70 md:text-lg">
-          Logos and campaigns for the brands we help grow.
+          {copy.subtitle}
         </p>
       </div>
 
@@ -154,7 +124,7 @@ export default function Clients() {
         ) : (
           <div className="flex h-[5.25rem] items-center justify-center px-6 md:h-[5.75rem]">
             <p className="font-serif text-sm italic text-ink/45 md:text-base">
-              Original brand marks, coming soon.
+              {copy.emptyMessage}
             </p>
           </div>
         )}

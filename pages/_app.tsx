@@ -1,5 +1,6 @@
 import type { AppProps } from 'next/app'
 import { Bricolage_Grotesque, EB_Garamond, Sora } from 'next/font/google'
+import { SiteContentProvider } from '../lib/SiteContentContext'
 import '../styles/globals.css'
 
 /**
@@ -40,7 +41,9 @@ export default function App({ Component, pageProps }: AppProps) {
         } as React.CSSProperties
       }
     >
-      <Component {...pageProps} />
+      <SiteContentProvider>
+        <Component {...pageProps} />
+      </SiteContentProvider>
     </div>
   )
 }
