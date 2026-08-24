@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-24T22:47:34.814Z",
+  "updatedAt": "2026-08-24T22:47:38.705Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -31,19 +31,19 @@
       }
     ],
     "footerBlurb": "Logos, graphics, and marketing for businesses worldwide.",
-    "footerMeta": "Marketing Â· Content Â· Design"
+    "footerMeta": "Marketing ÃÂ· Content ÃÂ· Design"
   },
   "hero": {
     "openName": "ADWISE MEDIA",
     "eyebrow": "Made to be noticed",
     "headline": "Turn heads. Grow brands.",
-    "body": "Logo design, brand graphics, and marketing that make businesses look sharp â and get noticed.",
+    "body": "Logo design, brand graphics, and marketing that make businesses look sharp Ã¢ÂÂ and get noticed.",
     "bodyAccent": "Creative that actually works.",
     "ctaPrimaryLabel": "Our clients",
     "ctaPrimaryHref": "#work",
     "ctaSecondaryLabel": "Start a project",
     "ctaSecondaryHref": "#contact",
-    "orbitCaption": "Scroll â ideas in motion."
+    "orbitCaption": "Scroll Ã¢ÂÂ ideas in motion."
   },
   "clients": {
     "eyebrow": "Some of our partnerships",
@@ -60,7 +60,7 @@
         "id": "marketing",
         "num": "01",
         "title": "Marketing",
-        "description": "Campaigns and creative that get attention â social, paid, and always on-brand.",
+        "description": "Campaigns and creative that get attention Ã¢ÂÂ social, paid, and always on-brand.",
         "points": [
           "Social strategy",
           "Paid advertising",
@@ -102,7 +102,7 @@
       "Next",
       "Thing"
     ],
-    "body": "Safe design gets safe results. We build logos, graphics, and campaigns that turn heads â and move the business forward.",
+    "body": "Safe design gets safe results. We build logos, graphics, and campaigns that turn heads Ã¢ÂÂ and move the business forward.",
     "accent": "Unexpected on purpose.",
     "ctaPrimaryLabel": "Begin the unexpected",
     "ctaPrimaryHref": "/#contact",
@@ -118,7 +118,7 @@
         "id": "research",
         "num": "01",
         "title": "Research",
-        "body": "We learn the business, audience, and goal â so creative isnât a guess.",
+        "body": "We learn the business, audience, and goal Ã¢ÂÂ so creative isnÃ¢ÂÂt a guess.",
         "tone": "white"
       },
       {
@@ -132,7 +132,7 @@
         "id": "launch",
         "num": "03",
         "title": "Launch",
-        "body": "We ship, measure, and refine â so the work keeps earning attention after go-live.",
+        "body": "We ship, measure, and refine Ã¢ÂÂ so the work keeps earning attention after go-live.",
         "tone": "ink"
       }
     ]
@@ -140,13 +140,13 @@
   "about": {
     "eyebrow": "About {shortName}",
     "title": "Local roots. Global reach.",
-    "body": "We help ambitious businesses look professional and stay consistent â from the first logo sketch to finished signage and campaign rollout.",
+    "body": "We help ambitious businesses look professional and stay consistent Ã¢ÂÂ from the first logo sketch to finished signage and campaign rollout.",
     "accent": "Made to be noticed.",
     "principles": [
       {
         "id": "strategy",
         "title": "Strategy first",
-        "body": "Every decision ties back to a goal â not decoration for its own sake.",
+        "body": "Every decision ties back to a goal Ã¢ÂÂ not decoration for its own sake.",
         "tone": "ink"
       },
       {
@@ -166,11 +166,11 @@
   "contact": {
     "eyebrow": "Contact",
     "title": "Get in touch",
-    "intro": "Tell us what youâre building â or reach us on WhatsApp, email, call, or text.",
+    "intro": "Tell us what youÃ¢ÂÂre building Ã¢ÂÂ or reach us on WhatsApp, email, call, or text.",
     "formEyebrow": "Project inquiry",
     "formNote": "Usually reply within one business day.",
-    "successMessage": "Thanks! Weâll be in touch shortly.",
-    "errorMessage": "Something went wrong â email or call us instead."
+    "successMessage": "Thanks! WeÃ¢ÂÂll be in touch shortly.",
+    "errorMessage": "Something went wrong Ã¢ÂÂ email or call us instead."
   },
   "logos": [
     {
@@ -185,7 +185,7 @@
       "name": "Shloimy Friedlander",
       "src": "/clients/shloimy.png",
       "order": 1,
-      "visible": false
+      "visible": true
     },
     {
       "id": "coffee-break",
