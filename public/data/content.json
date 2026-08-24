@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-24T23:03:05.089Z",
+  "updatedAt": null,
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -31,19 +31,24 @@
       }
     ],
     "footerBlurb": "Logos, graphics, and marketing for businesses worldwide.",
-    "footerMeta": "Marketing ÃÂÃÂ· Content ÃÂÃÂ· Design"
+    "footerMeta": "Marketing · Content · Design",
+    "navCtaHref": "/#contact",
+    "footerExploreHeading": "Explore",
+    "footerContactHeading": "Contact",
+    "seoTitleSuffix": "Logo Design & Marketing",
+    "seoKeywords": "logo design, graphic design, marketing, brand identity, Adwise Media"
   },
   "hero": {
     "openName": "ADWISE MEDIA",
     "eyebrow": "Made to be noticed",
     "headline": "Turn heads. Grow brands.",
-    "body": "Logo design, brand graphics, and marketing that make businesses look sharp ÃÂ¢ÃÂÃÂ and get noticed.",
+    "body": "Logo design, brand graphics, and marketing that make businesses look sharp — and get noticed.",
     "bodyAccent": "Creative that actually works.",
     "ctaPrimaryLabel": "Our clients",
     "ctaPrimaryHref": "#work",
     "ctaSecondaryLabel": "Start a project",
     "ctaSecondaryHref": "#contact",
-    "orbitCaption": "Scroll ÃÂ¢ÃÂÃÂ ideas in motion."
+    "orbitCaption": "Scroll — ideas in motion."
   },
   "clients": {
     "eyebrow": "Some of our partnerships",
@@ -60,7 +65,7 @@
         "id": "marketing",
         "num": "01",
         "title": "Marketing",
-        "description": "Campaigns and creative that get attention ÃÂ¢ÃÂÃÂ social, paid, and always on-brand.",
+        "description": "Campaigns and creative that get attention — social, paid, and always on-brand.",
         "points": [
           "Social strategy",
           "Paid advertising",
@@ -102,7 +107,7 @@
       "Next",
       "Thing"
     ],
-    "body": "Safe design gets safe results. We build logos, graphics, and campaigns that turn heads ÃÂ¢ÃÂÃÂ and move the business forward.",
+    "body": "Safe design gets safe results. We build logos, graphics, and campaigns that turn heads — and move the business forward.",
     "accent": "Unexpected on purpose.",
     "ctaPrimaryLabel": "Begin the unexpected",
     "ctaPrimaryHref": "/#contact",
@@ -118,7 +123,7 @@
         "id": "research",
         "num": "01",
         "title": "Research",
-        "body": "We learn the business, audience, and goal ÃÂ¢ÃÂÃÂ so creative isnÃÂ¢ÃÂÃÂt a guess.",
+        "body": "We learn the business, audience, and goal — so creative isn’t a guess.",
         "tone": "white"
       },
       {
@@ -132,7 +137,7 @@
         "id": "launch",
         "num": "03",
         "title": "Launch",
-        "body": "We ship, measure, and refine ÃÂ¢ÃÂÃÂ so the work keeps earning attention after go-live.",
+        "body": "We ship, measure, and refine — so the work keeps earning attention after go-live.",
         "tone": "ink"
       }
     ]
@@ -140,13 +145,13 @@
   "about": {
     "eyebrow": "About {shortName}",
     "title": "Local roots. Global reach.",
-    "body": "We help ambitious businesses look professional and stay consistent ÃÂ¢ÃÂÃÂ from the first logo sketch to finished signage and campaign rollout.",
+    "body": "We help ambitious businesses look professional and stay consistent — from the first logo sketch to finished signage and campaign rollout.",
     "accent": "Made to be noticed.",
     "principles": [
       {
         "id": "strategy",
         "title": "Strategy first",
-        "body": "Every decision ties back to a goal ÃÂ¢ÃÂÃÂ not decoration for its own sake.",
+        "body": "Every decision ties back to a goal — not decoration for its own sake.",
         "tone": "ink"
       },
       {
@@ -166,11 +171,21 @@
   "contact": {
     "eyebrow": "Contact",
     "title": "Get in touch",
-    "intro": "Tell us what youÃÂ¢ÃÂÃÂre building ÃÂ¢ÃÂÃÂ or reach us on WhatsApp, email, call, or text.",
+    "intro": "Tell us what you’re building — or reach us on WhatsApp, email, call, or text.",
     "formEyebrow": "Project inquiry",
     "formNote": "Usually reply within one business day.",
-    "successMessage": "Thanks! WeÃÂ¢ÃÂÃÂll be in touch shortly.",
-    "errorMessage": "Something went wrong ÃÂ¢ÃÂÃÂ email or call us instead."
+    "successMessage": "Thanks! We’ll be in touch shortly.",
+    "errorMessage": "Something went wrong — email or call us instead.",
+    "nameLabel": "Name",
+    "emailLabel": "Email",
+    "phoneLabel": "Phone",
+    "messageLabel": "Message",
+    "submitLabel": "Send message",
+    "sendingLabel": "Sending…",
+    "namePlaceholder": "Your name",
+    "emailPlaceholder": "you@company.com",
+    "phonePlaceholder": "Optional",
+    "messagePlaceholder": "What are you building?"
   },
   "logos": [
     {
@@ -266,6 +281,23 @@
     }
   ],
   "theme": {
-    "brand": "#fdc621"
+    "ink": "#14130f",
+    "inkSoft": "#1f1c16",
+    "paper": "#e8dfd0",
+    "paperDeep": "#d9cdb8",
+    "brand": "#fdc621",
+    "brandDeep": "#c49200",
+    "brass": "#8f7343",
+    "muted": "#5c5548"
+  },
+  "projectsPage": {
+    "eyebrow": "Portfolio",
+    "title": "Our work",
+    "body": "Case studies and project stories are coming soon. Meanwhile, explore the brands on our homepage."
+  },
+  "notFoundPage": {
+    "title": "This page took a wrong turn",
+    "body": "The link may be old, or the page may have moved. Head home and keep exploring.",
+    "ctaLabel": "Back to home"
   }
 }

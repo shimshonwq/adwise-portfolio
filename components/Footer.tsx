@@ -3,7 +3,8 @@ import { useSiteContent } from '../lib/SiteContentContext'
 
 export default function Footer() {
   const { content, channels } = useSiteContent()
-  const { name, tagline, nav, email, phoneDisplay, footerBlurb, footerMeta, url } = content.site
+  const { name, tagline, nav, email, phoneDisplay, footerBlurb, footerMeta, url, footerExploreHeading, footerContactHeading } =
+    content.site
   const siteHost = (() => {
     try {
       return new URL(url).hostname.replace(/^www\./, '')
@@ -28,7 +29,7 @@ export default function Footer() {
 
         <div className="flex flex-wrap gap-12 text-sm">
           <div>
-            <p className="font-semibold text-brand">Explore</p>
+            <p className="font-semibold text-brand">{footerExploreHeading}</p>
             <ul className="mt-3 space-y-2 text-white/55">
               {nav.map((item) => (
                 <li key={item.href}>
@@ -40,7 +41,7 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <p className="font-semibold text-brand">Contact</p>
+            <p className="font-semibold text-brand">{footerContactHeading}</p>
             <ul className="mt-3 space-y-2 text-white/55">
               <li>
                 <a href={channels.email} className="hover:text-white">

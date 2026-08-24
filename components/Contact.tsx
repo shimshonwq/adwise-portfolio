@@ -117,18 +117,18 @@ export default function Contact() {
 
           <div className="grid gap-5 sm:grid-cols-2">
             <label className="block text-sm">
-              <span className="mb-2 block text-white/55">Name</span>
+              <span className="mb-2 block text-white/55">{copy.nameLabel}</span>
               <input
                 name="name"
                 required
                 value={formData.name}
                 onChange={onChange}
                 className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
-                placeholder="Your name"
+                placeholder={copy.namePlaceholder}
               />
             </label>
             <label className="block text-sm">
-              <span className="mb-2 block text-white/55">Email</span>
+              <span className="mb-2 block text-white/55">{copy.emailLabel}</span>
               <input
                 type="email"
                 name="email"
@@ -136,23 +136,23 @@ export default function Contact() {
                 value={formData.email}
                 onChange={onChange}
                 className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
-                placeholder="you@company.com"
+                placeholder={copy.emailPlaceholder}
               />
             </label>
           </div>
           <label className="block text-sm">
-            <span className="mb-2 block text-white/55">Phone number</span>
+            <span className="mb-2 block text-white/55">{copy.phoneLabel}</span>
             <input
               type="tel"
               name="phone"
               value={formData.phone}
               onChange={onChange}
               className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
-              placeholder="(555) 000-0000"
+              placeholder={copy.phonePlaceholder}
             />
           </label>
           <label className="block text-sm">
-            <span className="mb-2 block text-white/55">Message</span>
+            <span className="mb-2 block text-white/55">{copy.messageLabel}</span>
             <textarea
               name="message"
               required
@@ -160,7 +160,7 @@ export default function Contact() {
               value={formData.message}
               onChange={onChange}
               className="w-full resize-none rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
-              placeholder="What are we building?"
+              placeholder={copy.messagePlaceholder}
             />
           </label>
 
@@ -222,7 +222,7 @@ export default function Contact() {
             disabled={status === 'submitting' || captcha === 'checking'}
             className="btn btn-on-dark mt-2"
           >
-            {status === 'submitting' ? 'Sending…' : 'Send message'}
+            {status === 'submitting' ? copy.sendingLabel : copy.submitLabel}
           </button>
 
           {status === 'success' && (
