@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import Logo from './Logo'
-import { siteConfig } from '../config/site.config'
+import { useSiteContent } from '../lib/SiteContentContext'
 
 export default function Navigation() {
+  const { content } = useSiteContent()
+  const { nav, navCta } = content.site
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
@@ -41,7 +43,7 @@ export default function Navigation() {
               scrolled ? '' : 'border border-ink/10 bg-white/80 shadow-sm backdrop-blur-md'
             }`}
           >
-            {siteConfig.nav.map((item) => (
+            {nav.map((item) => (
               <a
                 key={item.href}
                 href={`/${item.href}`}
@@ -51,7 +53,7 @@ export default function Navigation() {
               </a>
             ))}
             <a href="/#contact" className="btn btn-primary !py-2.5 !px-5">
-              Start a project
+              {navCta}
             </a>
           </div>
 
@@ -84,7 +86,7 @@ export default function Navigation() {
           >
             <div className="color-rail" aria-hidden />
             <div className="site-shell flex h-full flex-col justify-center gap-3 pt-20 pb-10">
-              {siteConfig.nav.map((item, i) => (
+              {nav.map((item, i) => (
                 <motion.a
                   key={item.href}
                   href={`/${item.href}`}
@@ -102,7 +104,7 @@ export default function Navigation() {
                 onClick={() => setOpen(false)}
                 className="btn btn-brand mt-8 w-fit"
               >
-                Start a project
+                {navCta}
               </a>
             </div>
           </motion.div>

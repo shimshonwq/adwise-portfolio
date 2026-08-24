@@ -1,31 +1,11 @@
 import { FaWhatsapp, FaEnvelope, FaPhoneAlt, FaSms } from 'react-icons/fa'
-import { siteConfig } from '../config/site.config'
+import { useSiteContent } from '../lib/SiteContentContext'
 
-const channels = [
-  {
-    key: 'whatsapp',
-    label: 'WhatsApp',
-    href: siteConfig.contactChannels.whatsapp,
-    icon: FaWhatsapp,
-  },
-  {
-    key: 'email',
-    label: 'Email',
-    href: siteConfig.contactChannels.email,
-    icon: FaEnvelope,
-  },
-  {
-    key: 'call',
-    label: 'Call',
-    href: siteConfig.contactChannels.call,
-    icon: FaPhoneAlt,
-  },
-  {
-    key: 'sms',
-    label: 'SMS',
-    href: siteConfig.contactChannels.sms,
-    icon: FaSms,
-  },
+const channelMeta = [
+  { key: 'whatsapp', label: 'WhatsApp', icon: FaWhatsapp },
+  { key: 'email', label: 'Email', icon: FaEnvelope },
+  { key: 'call', label: 'Call', icon: FaPhoneAlt },
+  { key: 'sms', label: 'SMS', icon: FaSms },
 ] as const
 
 interface ContactChannelsProps {
@@ -38,6 +18,7 @@ export default function ContactChannels({
   variant = 'dark',
   className = '',
 }: ContactChannelsProps) {
+  const { channels } = useSiteContent()
   const shell =
     variant === 'onDark'
       ? 'border-white text-white hover:border-brand hover:bg-brand hover:text-ink'
@@ -47,12 +28,13 @@ export default function ContactChannels({
 
   return (
     <div className={`flex flex-wrap gap-3 ${className}`}>
-      {channels.map((channel) => {
+      {channelMeta.map((channel) => {
         const Icon = channel.icon
+        const href = channels[channel.key]
         return (
           <a
             key={channel.key}
-            href={channel.href}
+            href={href}
             target={channel.key === 'whatsapp' ? '_blank' : undefined}
             rel={channel.key === 'whatsapp' ? 'noopener noreferrer' : undefined}
             aria-label={channel.label}

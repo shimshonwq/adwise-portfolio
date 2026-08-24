@@ -1,51 +1,36 @@
 import { motion } from 'framer-motion'
-import { siteConfig } from '../config/site.config'
+import { useSiteContent } from '../lib/SiteContentContext'
 import AnimatedText from './AnimatedText'
 
-const principles = [
-  {
-    title: 'Strategy first',
-    body: 'Every decision ties back to a goal — not decoration for its own sake.',
-    tone: 'ink' as const,
-  },
-  {
-    title: 'Craft obsessed',
-    body: 'Clean details that make a brand feel considered and consistent.',
-    tone: 'gold' as const,
-  },
-  {
-    title: 'Built to last',
-    body: 'Work that reads on a sign, a screen, a truck, and a business card.',
-    tone: 'paper' as const,
-  },
-]
-
 export default function About() {
+  const { content } = useSiteContent()
+  const copy = content.about
+  const eyebrow = copy.eyebrow.replace('{shortName}', content.site.shortName)
+
   return (
     <section id="about" className="scroll-mt-24 section-ink-gold py-20 md:py-32">
       <div className="site-shell grid gap-12 md:grid-cols-[1.1fr_0.9fr] md:items-start md:gap-14">
         <div>
-          <p className="eyebrow !text-brand">About {siteConfig.shortName}</p>
+          <p className="eyebrow !text-brand">{eyebrow}</p>
           <AnimatedText
             as="h2"
-            text="Local roots. Global reach."
+            text={copy.title}
             shimmer
             className="mt-3 font-display text-[clamp(1.65rem,6vw,3.25rem)] font-bold tracking-tight"
           />
           <p className="mt-6 font-serif text-base leading-relaxed text-white/85 md:text-lg">
-            We help ambitious businesses look professional and stay consistent — from the first logo
-            sketch to finished signage and campaign rollout.
+            {copy.body}
           </p>
-          <p className="mt-4 font-serif text-lg italic text-brand md:text-2xl">Made to be noticed.</p>
+          <p className="mt-4 font-serif text-lg italic text-brand md:text-2xl">{copy.accent}</p>
         </div>
 
         <div className="space-y-4">
-          {principles.map((item, index) => {
+          {copy.principles.map((item, index) => {
             const gold = item.tone === 'gold'
             const paper = item.tone === 'paper'
             return (
               <motion.div
-                key={item.title}
+                key={item.id}
                 initial={{ y: 14 }}
                 whileInView={{ y: 0 }}
                 viewport={{ once: true, amount: 0.3 }}

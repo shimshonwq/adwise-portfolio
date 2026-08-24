@@ -1,10 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion, useScroll, useSpring, useTransform } from 'framer-motion'
-import { siteConfig } from '../config/site.config'
-
-const OPEN_NAME = 'ADWISE MEDIA'
-const LETTERS = OPEN_NAME.split('')
-const HEADLINE = 'Turn heads. Grow brands.'
+import { useSiteContent } from '../lib/SiteContentContext'
 
 type Phase = 'void' | 'burst' | 'assemble' | 'lock' | 'exit' | 'done'
 
@@ -81,6 +77,13 @@ function HeroOrbit({ active }: { active: boolean }) {
 
 /** Cinematic opening — gold shock, then a quick typewriter headline */
 export default function Hero() {
+  const { content } = useSiteContent()
+  const { hero } = content
+  const { tagline } = content.site
+  const openName = hero.openName
+  const headline = hero.headline
+  const letters = useMemo(() => openName.split(''), [openName])
+
   const [phase, setPhase] = useState<Phase>('void')
   const [ready, setReady] = useState(false)
   const [typed, setTyped] = useState('')
@@ -88,13 +91,13 @@ export default function Hero() {
 
   const scatters = useMemo(
     () =>
-      LETTERS.map((_, i) => ({
+      letters.map((_, i) => ({
         x: 0,
         y: 14 + (i % 3) * 2,
         r: 0,
         delay: 0.012 * i,
       })),
-    [],
+    [letters],
   )
 
   useEffect(() => {
@@ -104,7 +107,7 @@ export default function Hero() {
     if (reduce) {
       setPhase('done')
       setReady(true)
-      setTyped(HEADLINE)
+      setTyped(headline)
       setTypingDone(true)
       return
     }
@@ -133,14 +136,14 @@ export default function Hero() {
     setTyped('')
     const id = window.setInterval(() => {
       i += 1
-      setTyped(HEADLINE.slice(0, i))
-      if (i >= HEADLINE.length) {
+      setTyped(headline.slice(0, i))
+      if (i >= headline.length) {
         window.clearInterval(id)
         setTypingDone(true)
       }
     }, 28)
     return () => window.clearInterval(id)
-  }, [ready, typingDone])
+  }, [ready, typingDone, headline])
 
   const showVeil = phase !== 'done'
 
@@ -154,8 +157,8 @@ export default function Hero() {
           )}
 
           <div className="hero-shock-copy">
-            <p className="hero-shock-letters" aria-label="Adwise Media">
-              {LETTERS.map((ch, i) => {
+            <p className="hero-shock-letters" aria-label={content.site.name}>
+              {letters.map((ch, i) => {
                 const s = scatters[i]
                 const assembled = phase === 'assemble' || phase === 'lock' || phase === 'exit'
                 const locked = phase === 'lock' || phase === 'exit'
@@ -184,7 +187,7 @@ export default function Hero() {
                 phase === 'lock' || phase === 'exit' ? 'is-visible' : ''
               }`}
             >
-              {siteConfig.tagline}
+              {tagline}
             </p>
           </div>
         </div>
@@ -197,12 +200,12 @@ export default function Hero() {
       <div className="site-shell relative z-10 grid min-h-[100svh] items-center gap-8 pb-14 pt-24 md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] md:gap-8 md:pb-20 md:pt-32 lg:gap-12">
         <div className={`${ready ? 'hero-content-ready' : 'hero-content-wait'}`}>
           <p className="mb-5 text-xs font-extrabold uppercase tracking-[0.22em] text-ink sm:tracking-[0.28em]">
-            <span className="inline-block rounded-md bg-brand px-2.5 py-1">Made to be noticed</span>
+            <span className="inline-block rounded-md bg-brand px-2.5 py-1">{hero.eyebrow}</span>
           </p>
 
           <h1
             className="font-display text-[clamp(1.9rem,8.4vw,5.2rem)] font-bold leading-[1.08] tracking-tight text-ink"
-            aria-label={HEADLINE}
+            aria-label={headline}
           >
             {typed}
             {!typingDone && ready && <span className="hero-type-caret" aria-hidden />}
@@ -214,9 +217,8 @@ export default function Hero() {
             animate={{ y: ready ? 0 : 14, opacity: ready ? 1 : 0 }}
             transition={{ delay: ready ? 0.35 : 0, duration: 0.55 }}
           >
-            Logo design, brand graphics, and marketing that make businesses look sharp — and get
-            noticed.{' '}
-            <span className="font-serif italic text-brass">Creative that actually works.</span>
+            {hero.body}{' '}
+            <span className="font-serif italic text-brass">{hero.bodyAccent}</span>
           </motion.p>
 
           <motion.div
@@ -225,22 +227,22 @@ export default function Hero() {
             animate={{ y: ready ? 0 : 14, opacity: ready ? 1 : 0 }}
             transition={{ delay: ready ? 0.45 : 0, duration: 0.55 }}
           >
-            <a href="#work" className="btn btn-primary">
-              Our clients
+            <a href={hero.ctaPrimaryHref} className="btn btn-primary">
+              {hero.ctaPrimaryLabel}
             </a>
-            <a href="#contact" className="btn btn-brand">
-              Start a project
+            <a href={hero.ctaSecondaryHref} className="btn btn-brand">
+              {hero.ctaSecondaryLabel}
             </a>
           </motion.div>
         </div>
 
         <div className="relative mx-auto flex w-full max-w-[34rem] flex-col items-center justify-center md:max-w-none md:items-end md:justify-end">
           <HeroOrbit active={ready} />
-          <p className="mt-3 font-serif italic text-brass md:mr-8">Scroll — ideas in motion.</p>
+          <p className="mt-3 font-serif italic text-brass md:mr-8">{hero.orbitCaption}</p>
         </div>
       </div>
 
-      <span className="sr-only">{siteConfig.tagline}</span>
+      <span className="sr-only">{tagline}</span>
     </section>
   )
 }

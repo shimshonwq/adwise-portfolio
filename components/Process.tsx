@@ -1,48 +1,31 @@
 import { motion } from 'framer-motion'
+import { useSiteContent } from '../lib/SiteContentContext'
 import AnimatedText from './AnimatedText'
 
-const steps = [
-  {
-    num: '01',
-    title: 'Research',
-    body: 'We learn the business, audience, and goal — so creative isn’t a guess.',
-    tone: 'white' as const,
-  },
-  {
-    num: '02',
-    title: 'Create',
-    body: 'Strategy becomes logos, visuals, and campaigns that look sharp and stay on-brand.',
-    tone: 'gold' as const,
-  },
-  {
-    num: '03',
-    title: 'Launch',
-    body: 'We ship, measure, and refine — so the work keeps earning attention after go-live.',
-    tone: 'ink' as const,
-  },
-]
-
 export default function Process() {
+  const { content } = useSiteContent()
+  const copy = content.process
+
   return (
     <section id="process" className="scroll-mt-24 section-aurora py-20 md:py-28">
       <div className="site-shell">
-        <p className="eyebrow">This is how we do it</p>
+        <p className="eyebrow">{copy.eyebrow}</p>
         <AnimatedText
           as="h2"
-          text="A structured approach to creative."
+          text={copy.title}
           className="mt-3 max-w-2xl font-display text-[clamp(1.65rem,6vw,3.25rem)] font-bold tracking-tight text-ink"
         />
         <p className="mt-5 max-w-lg font-serif text-lg italic text-brass md:text-xl">
-          Research. Planning. Execution. Creative that works like a business.
+          {copy.subtitle}
         </p>
 
         <div className="mt-12 grid gap-5 md:mt-14 md:grid-cols-3 md:gap-6">
-          {steps.map((step, index) => {
+          {copy.steps.map((step, index) => {
             const ink = step.tone === 'ink'
             const gold = step.tone === 'gold'
             return (
               <motion.article
-                key={step.num}
+                key={step.id}
                 initial={{ y: 16 }}
                 whileInView={{ y: 0 }}
                 viewport={{ once: true, amount: 0.3 }}

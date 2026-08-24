@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { siteConfig } from '../config/site.config'
+import { useSiteContent } from '../lib/SiteContentContext'
 import ContactChannels from './ContactChannels'
 import AnimatedText from './AnimatedText'
 
@@ -8,6 +8,8 @@ type Status = 'idle' | 'submitting' | 'success' | 'error' | 'captcha'
 type CaptchaPhase = 'idle' | 'checking' | 'verified'
 
 export default function Contact() {
+  const { content, channels } = useSiteContent()
+  const { site, contact: copy } = content
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' })
   const [status, setStatus] = useState<Status>('idle')
   const [captcha, setCaptcha] = useState<CaptchaPhase>('idle')
@@ -56,24 +58,24 @@ export default function Contact() {
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.45 }}
         >
-          <p className="eyebrow !text-ink/55">Contact</p>
+          <p className="eyebrow !text-ink/55">{copy.eyebrow}</p>
           <AnimatedText
             as="h2"
-            text="Get in touch"
+            text={copy.title}
             className="mt-3 font-display text-[clamp(1.65rem,6vw,3.25rem)] font-bold tracking-tight text-ink"
           />
           <p className="mt-5 max-w-md font-serif text-base italic text-ink/75 md:text-lg">
-            Tell us what you’re building — or reach us on WhatsApp, email, call, or text.
+            {copy.intro}
           </p>
 
           <div className="mt-8 space-y-2 text-ink">
-            <a href={siteConfig.contactChannels.email} className="block font-semibold hover:underline">
-              {siteConfig.email}
+            <a href={channels.email} className="block font-semibold hover:underline">
+              {site.email}
             </a>
-            <a href={siteConfig.contactChannels.call} className="block font-semibold hover:underline">
-              {siteConfig.phoneDisplay}
+            <a href={channels.call} className="block font-semibold hover:underline">
+              {site.phoneDisplay}
             </a>
-            <p className="text-ink/55">{siteConfig.location}</p>
+            <p className="text-ink/55">{site.location}</p>
           </div>
 
           <ContactChannels variant="light" className="mt-8" />
@@ -84,26 +86,26 @@ export default function Contact() {
           whileInView={{ y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.45, delay: 0.06 }}
-          action={`https://formsubmit.co/${siteConfig.email}`}
+          action={`https://formsubmit.co/${site.email}`}
           method="POST"
           onSubmit={onSubmit}
           className="soft-panel space-y-5 border border-white/10 bg-ink p-7 text-white md:p-10"
         >
           <div className="mb-2">
             <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-brand">
-              Project inquiry
+              {copy.formEyebrow}
             </p>
-            <p className="mt-2 font-serif text-sm italic text-white/70">Usually reply within one business day.</p>
+            <p className="mt-2 font-serif text-sm italic text-white/70">{copy.formNote}</p>
           </div>
 
           <input
             type="hidden"
             name="_subject"
-            value={`New inquiry from ${formData.name || 'website'} — Adwise Media`}
+            value={`New inquiry from ${formData.name || 'website'} — ${site.name}`}
           />
           <input type="hidden" name="_template" value="table" />
           <input type="hidden" name="_captcha" value="true" />
-          <input type="hidden" name="_next" value={`${siteConfig.url}/?sent=1#contact`} />
+          <input type="hidden" name="_next" value={`${site.url}/?sent=1#contact`} />
           <input
             type="text"
             name="_honey"
@@ -224,12 +226,10 @@ export default function Contact() {
           </button>
 
           {status === 'success' && (
-            <p className="text-sm text-brand">Thanks! We’ll be in touch shortly.</p>
+            <p className="text-sm text-brand">{copy.successMessage}</p>
           )}
           {status === 'error' && (
-            <p className="text-sm text-red-300">
-              Something went wrong — email {siteConfig.email} or call {siteConfig.phoneDisplay}.
-            </p>
+            <p className="text-sm text-red-300">{copy.errorMessage}</p>
           )}
         </motion.form>
       </div>

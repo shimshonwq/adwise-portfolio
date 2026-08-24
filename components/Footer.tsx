@@ -1,7 +1,16 @@
 import Logo from './Logo'
-import { siteConfig } from '../config/site.config'
+import { useSiteContent } from '../lib/SiteContentContext'
 
 export default function Footer() {
+  const { content, channels } = useSiteContent()
+  const { name, tagline, nav, email, phoneDisplay, footerBlurb, footerMeta, url } = content.site
+  const siteHost = (() => {
+    try {
+      return new URL(url).hostname.replace(/^www\./, '')
+    } catch {
+      return url.replace(/^https?:\/\//, '').replace(/\/$/, '')
+    }
+  })()
   const year = new Date().getFullYear()
 
   return (
@@ -10,10 +19,10 @@ export default function Footer() {
         <div>
           <Logo href="/#top" size="sm" bright />
           <p className="mt-4 max-w-xs font-serif text-sm italic leading-relaxed text-white/70">
-            Logos, graphics, and marketing for businesses worldwide.
+            {footerBlurb}
           </p>
           <p className="mt-3 max-w-xs text-sm">
-            <span className="font-serif text-lg italic text-brand">{siteConfig.tagline}</span>
+            <span className="font-serif text-lg italic text-brand">{tagline}</span>
           </p>
         </div>
 
@@ -21,7 +30,7 @@ export default function Footer() {
           <div>
             <p className="font-semibold text-brand">Explore</p>
             <ul className="mt-3 space-y-2 text-white/55">
-              {siteConfig.nav.map((item) => (
+              {nav.map((item) => (
                 <li key={item.href}>
                   <a href={`/${item.href}`} className="hover:text-white">
                     {item.label}
@@ -34,18 +43,18 @@ export default function Footer() {
             <p className="font-semibold text-brand">Contact</p>
             <ul className="mt-3 space-y-2 text-white/55">
               <li>
-                <a href={siteConfig.contactChannels.email} className="hover:text-white">
-                  {siteConfig.email}
+                <a href={channels.email} className="hover:text-white">
+                  {email}
                 </a>
               </li>
               <li>
-                <a href={siteConfig.contactChannels.call} className="hover:text-white">
-                  {siteConfig.phoneDisplay}
+                <a href={channels.call} className="hover:text-white">
+                  {phoneDisplay}
                 </a>
               </li>
               <li>
                 <a
-                  href={siteConfig.contactChannels.whatsapp}
+                  href={channels.whatsapp}
                   className="hover:text-white"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -54,8 +63,8 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href={siteConfig.url} className="hover:text-white">
-                  adwisemedia.co
+                <a href={url} className="hover:text-white">
+                  {siteHost}
                 </a>
               </li>
             </ul>
@@ -65,9 +74,9 @@ export default function Footer() {
 
       <div className="site-shell mt-12 flex flex-col gap-2 border-t border-white/10 pt-6 text-sm text-white/55 sm:flex-row sm:justify-between">
         <p>
-          © {year} {siteConfig.name}
+          © {year} {name}
         </p>
-        <p>Marketing · Content · Design</p>
+        <p>{footerMeta}</p>
       </div>
     </footer>
   )

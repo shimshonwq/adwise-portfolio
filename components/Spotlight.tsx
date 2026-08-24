@@ -1,9 +1,11 @@
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-
-const taglineLines = ['Thinking', 'Your', 'Next', 'Thing']
+import { useSiteContent } from '../lib/SiteContentContext'
 
 export default function Spotlight() {
+  const { content } = useSiteContent()
+  const copy = content.spotlight
+
   return (
     <section className="spotlight-stage relative overflow-hidden py-20 md:py-36">
       <div
@@ -30,14 +32,14 @@ export default function Spotlight() {
           whileInView={{ y: 0 }}
           viewport={{ once: true }}
         >
-          Our manifesto
+          {copy.eyebrow}
         </motion.p>
 
         <div className="mx-auto mt-8 max-w-4xl px-1">
           <h2 className="text-center font-display text-[clamp(1.85rem,8vw,6.2rem)] font-bold leading-[1.02] tracking-tight">
-            {taglineLines.map((line, i) => (
+            {copy.titleLines.map((line, i) => (
               <motion.span
-                key={line}
+                key={`${line}-${i}`}
                 className="block brand-shimmer"
                 initial={{ y: 36, opacity: 0 }}
                 whileInView={{ y: 0, opacity: 1 }}
@@ -67,16 +69,15 @@ export default function Spotlight() {
           transition={{ duration: 0.5, delay: 0.15 }}
         >
           <p className="font-serif text-base leading-relaxed text-white/85 md:text-xl">
-            Safe design gets safe results. We build logos, graphics, and campaigns that turn heads —
-            and move the business forward.
+            {copy.body}
           </p>
-          <p className="mt-4 font-serif text-lg italic text-brand md:text-2xl">Unexpected on purpose.</p>
+          <p className="mt-4 font-serif text-lg italic text-brand md:text-2xl">{copy.accent}</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3 md:mt-9 md:gap-4">
-            <Link href="#contact" className="btn btn-on-dark">
-              Begin the unexpected
+            <Link href={copy.ctaPrimaryHref} className="btn btn-on-dark">
+              {copy.ctaPrimaryLabel}
             </Link>
-            <Link href="#process" className="btn btn-secondary-light">
-              See how we work
+            <Link href={copy.ctaSecondaryHref} className="btn btn-secondary-light">
+              {copy.ctaSecondaryLabel}
             </Link>
           </div>
         </motion.div>
