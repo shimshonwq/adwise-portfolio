@@ -1,12 +1,20 @@
 /**
- * Local CMS API — full site content + logos. Used by `npm run dev`.
- * Persists to `.data/content.json`. Uploads go to `public/uploads/logos/`.
+ * Local CMS API — publishes to GitHub when configured (recommended), else `.data/`.
  */
 import http from 'node:http'
 import fs from 'node:fs'
 import path from 'node:path'
 import crypto from 'node:crypto'
 import { fileURLToPath } from 'node:url'
+import {
+  CONTENT_REPO_PATH,
+  githubConfigured,
+  logoRepoPath,
+  publishSiteContent,
+  readSiteContentFromGitHub,
+  writeBinaryFile,
+  deleteRepoFile,
+} from './github-store.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -36,12 +44,16 @@ loadEnvFile(path.join(ROOT, '.env'))
 const DATA_DIR = path.join(ROOT, '.data')
 const STORE_PATH = path.join(DATA_DIR, 'content.json')
 const DEFAULT_PATH = path.join(ROOT, 'data', 'cms-default.json')
+const PUBLIC_CONTENT = path.join(ROOT, 'public', 'data', 'content.json')
 const UPLOAD_DIR = path.join(ROOT, 'public', 'uploads', 'logos')
 const PORT = Number(process.env.ADMIN_API_PORT || 8787)
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'adwise-admin'
 const ADMIN_COOKIE = 'adwise_admin'
 const SESSION_MAX_AGE_SEC = 60 * 60 * 24 * 14
 const MAX_BYTES = 2.5 * 1024 * 1024
+
+const PUBLISH_MSG =
+  'Saved to GitHub — Cloudflare will rebuild the site in about 1–3 minutes.'
 
 function ensureDirs() {
   fs.mkdirSync(DATA_DIR, { recursive: true })
@@ -52,43 +64,58 @@ function defaultContent() {
   return JSON.parse(fs.readFileSync(DEFAULT_PATH, 'utf8'))
 }
 
-function readContent() {
-  ensureDirs()
-  if (!fs.existsSync(STORE_PATH)) {
-    const seed = defaultContent()
-    // Migrate legacy logos-only store if present
-    const legacy = path.join(DATA_DIR, 'logos.json')
-    if (fs.existsSync(legacy)) {
-      try {
-        const logos = JSON.parse(fs.readFileSync(legacy, 'utf8'))
-        if (Array.isArray(logos) && logos.length) {
-          seed.logos = logos.map((l, i) => ({
-            id: l.id || `logo-${i}`,
-            name: l.name || 'Logo',
-            src: l.src,
-            order: typeof l.order === 'number' ? l.order : i,
-            visible: l.visible !== false,
-          }))
-        }
-      } catch {
-        /* ignore */
-      }
-    }
-    writeContent(seed)
-    return seed
-  }
-  try {
-    return JSON.parse(fs.readFileSync(STORE_PATH, 'utf8'))
-  } catch {
-    return defaultContent()
-  }
-}
-
-function writeContent(content) {
+function writeLocalContent(content) {
   ensureDirs()
   content.version = 1
   content.updatedAt = new Date().toISOString()
-  fs.writeFileSync(STORE_PATH, JSON.stringify(content, null, 2))
+  const text = JSON.stringify(content, null, 2)
+  fs.writeFileSync(STORE_PATH, text)
+  fs.writeFileSync(PUBLIC_CONTENT, text)
+}
+
+async function readContent() {
+  if (githubConfigured()) {
+    try {
+      const fromGh = await readSiteContentFromGitHub()
+      if (fromGh?.site) {
+        writeLocalContent(fromGh)
+        return fromGh
+      }
+    } catch (err) {
+      console.warn('[cms-api] GitHub read failed, using local cache:', err.message)
+    }
+  }
+  ensureDirs()
+  if (fs.existsSync(STORE_PATH)) {
+    try {
+      return JSON.parse(fs.readFileSync(STORE_PATH, 'utf8'))
+    } catch {
+      /* fall through */
+    }
+  }
+  if (fs.existsSync(PUBLIC_CONTENT)) {
+    try {
+      return JSON.parse(fs.readFileSync(PUBLIC_CONTENT, 'utf8'))
+    } catch {
+      /* fall through */
+    }
+  }
+  const seed = defaultContent()
+  writeLocalContent(seed)
+  return seed
+}
+
+async function persistContent(content, message = 'CMS: update site content') {
+  writeLocalContent(content)
+  if (githubConfigured()) {
+    const result = await publishSiteContent(content, message)
+    return { content, publishMessage: result.message || PUBLISH_MSG, published: true }
+  }
+  return {
+    content,
+    publishMessage: 'Saved locally (set GITHUB_TOKEN to publish to GitHub).',
+    published: false,
+  }
 }
 
 function visibleLogos(content) {
@@ -137,13 +164,12 @@ function parseCookies(header) {
 }
 
 function json(res, status, body, extraHeaders = {}) {
-  const data = JSON.stringify(body)
   res.writeHead(status, {
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-store',
     ...extraHeaders,
   })
-  res.end(data)
+  res.end(JSON.stringify(body))
 }
 
 function setCookie(token) {
@@ -191,21 +217,37 @@ function reindexOrders(logos) {
   return logos.map((l, i) => ({ ...l, order: i }))
 }
 
+function okPayload(result) {
+  return {
+    ok: true,
+    content: result.content,
+    logos: result.content.logos,
+    publishMessage: result.publishMessage,
+    published: result.published,
+  }
+}
+
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url || '/', `http://127.0.0.1:${PORT}`)
   const pathname = url.pathname.replace(/\/+$/, '') || '/'
 
-  if (req.method === 'OPTIONS') {
-    return json(res, 204, {})
-  }
+  if (req.method === 'OPTIONS') return json(res, 204, {})
 
   try {
     if (req.method === 'GET' && pathname === '/api/content') {
-      return json(res, 200, { content: readContent() })
+      return json(res, 200, { content: await readContent() })
     }
 
     if (req.method === 'GET' && pathname === '/api/logos') {
-      return json(res, 200, { logos: visibleLogos(readContent()) })
+      return json(res, 200, { logos: visibleLogos(await readContent()) })
+    }
+
+    if (req.method === 'GET' && pathname === '/api/admin/status') {
+      return json(res, 200, {
+        storage: githubConfigured() ? 'github' : 'local',
+        repo: process.env.GITHUB_REPO || 'shimshonwq/adwise-portfolio',
+        branch: process.env.GITHUB_BRANCH || 'main',
+      })
     }
 
     if (req.method === 'POST' && pathname === '/api/admin/login') {
@@ -229,7 +271,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (req.method === 'GET' && pathname === '/api/admin/content') {
-      return json(res, 200, { content: readContent() })
+      return json(res, 200, { content: await readContent() })
     }
 
     if (req.method === 'PUT' && pathname === '/api/admin/content') {
@@ -238,12 +280,12 @@ const server = http.createServer(async (req, res) => {
       if (!next?.site || !Array.isArray(next.logos)) {
         return json(res, 400, { error: 'Invalid content payload' })
       }
-      writeContent(next)
-      return json(res, 200, { ok: true, content: readContent() })
+      const result = await persistContent(next, 'CMS: update site content')
+      return json(res, 200, okPayload(result))
     }
 
     if (req.method === 'GET' && pathname === '/api/admin/logos') {
-      const content = readContent()
+      const content = await readContent()
       return json(res, 200, {
         logos: [...content.logos].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
       })
@@ -260,37 +302,38 @@ const server = http.createServer(async (req, res) => {
       if (buf.length > MAX_BYTES) return json(res, 400, { error: 'File too large (max 2.5MB)' })
       const id = `${slugify(name)}-${Date.now().toString(36)}`
       const file = `${id}.${extFor(match[1])}`
+      const src = `/uploads/logos/${file}`
+      ensureDirs()
       fs.writeFileSync(path.join(UPLOAD_DIR, file), buf)
-      const content = readContent()
+      if (githubConfigured()) {
+        await writeBinaryFile(`public${src}`, buf, `CMS: add logo ${name}`)
+      }
+      const content = await readContent()
       const maxOrder = content.logos.reduce((m, l) => Math.max(m, l.order ?? 0), -1)
-      content.logos.push({
-        id,
-        name,
-        src: `/uploads/logos/${file}`,
-        order: maxOrder + 1,
-        visible: true,
-      })
-      writeContent(content)
-      return json(res, 200, { ok: true, logos: content.logos, content })
+      content.logos.push({ id, name, src, order: maxOrder + 1, visible: true })
+      const result = await persistContent(content, `CMS: add logo ${name}`)
+      return json(res, 200, okPayload(result))
     }
 
     if (req.method === 'PATCH' && pathname.startsWith('/api/admin/logos/')) {
       const id = decodeURIComponent(pathname.slice('/api/admin/logos/'.length))
       const body = JSON.parse((await readBody(req)).toString('utf8') || '{}')
-      const content = readContent()
+      const content = await readContent()
       const idx = content.logos.findIndex((l) => l.id === id)
       if (idx === -1) return json(res, 404, { error: 'Logo not found' })
-      if (body.name !== undefined) content.logos[idx].name = String(body.name).trim() || content.logos[idx].name
+      if (body.name !== undefined) {
+        content.logos[idx].name = String(body.name).trim() || content.logos[idx].name
+      }
       if (body.visible !== undefined) content.logos[idx].visible = Boolean(body.visible)
-      writeContent(content)
-      return json(res, 200, { ok: true, logos: content.logos, content })
+      const result = await persistContent(content, `CMS: update logo ${id}`)
+      return json(res, 200, okPayload(result))
     }
 
     if (req.method === 'PUT' && pathname === '/api/admin/logos/reorder') {
       const body = JSON.parse((await readBody(req)).toString('utf8') || '{}')
       const ids = body.ids
       if (!Array.isArray(ids)) return json(res, 400, { error: 'ids array required' })
-      const content = readContent()
+      const content = await readContent()
       const map = new Map(content.logos.map((l) => [l.id, l]))
       const next = []
       for (const id of ids) {
@@ -301,16 +344,27 @@ const server = http.createServer(async (req, res) => {
       }
       for (const left of map.values()) next.push(left)
       content.logos = reindexOrders(next)
-      writeContent(content)
-      return json(res, 200, { ok: true, logos: content.logos, content })
+      const result = await persistContent(content, 'CMS: reorder logos')
+      return json(res, 200, okPayload(result))
     }
 
     if (req.method === 'DELETE' && pathname.startsWith('/api/admin/logos/')) {
       const id = decodeURIComponent(pathname.slice('/api/admin/logos/'.length))
-      const content = readContent()
+      const content = await readContent()
+      const removed = content.logos.find((l) => l.id === id)
       content.logos = reindexOrders(content.logos.filter((l) => l.id !== id))
-      writeContent(content)
-      return json(res, 200, { ok: true, logos: content.logos, content })
+      if (githubConfigured() && removed) {
+        const repoPath = logoRepoPath(removed.src)
+        if (repoPath) {
+          try {
+            await deleteRepoFile(repoPath, `CMS: remove logo file ${id}`)
+          } catch {
+            /* file may not be in repo */
+          }
+        }
+      }
+      const result = await persistContent(content, `CMS: remove logo ${id}`)
+      return json(res, 200, okPayload(result))
     }
 
     return json(res, 404, { error: 'Not found' })
@@ -321,5 +375,6 @@ const server = http.createServer(async (req, res) => {
 
 ensureDirs()
 server.listen(PORT, '127.0.0.1', () => {
-  console.log(`[cms-api] http://127.0.0.1:${PORT}`)
+  const mode = githubConfigured() ? 'GitHub publish' : 'local only'
+  console.log(`[cms-api] http://127.0.0.1:${PORT} (${mode})`)
 })

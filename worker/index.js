@@ -1,15 +1,24 @@
 /**
- * Cloudflare Worker — /api/* for CMS content + logos.
- * Stores full site content in KV (binding: LOGOS — reused as CMS store).
- * Set ADMIN_PASSWORD secret. Create KV and bind as LOGOS (see wrangler.jsonc).
+ * Cloudflare Worker — /api/* for CMS admin.
+ * Recommended: GITHUB_TOKEN + GITHUB_REPO secrets → commits to GitHub, Cloudflare rebuilds.
+ * Optional fallback: KV binding LOGOS (legacy).
  */
 import DEFAULT_CONTENT from './cms-default.json'
+import {
+  deleteFile,
+  logoRepoPath,
+  publishSiteContent,
+  readSiteContent,
+  writeBinaryFile,
+} from './github-store.js'
 
 const ADMIN_COOKIE = 'adwise_admin'
 const SESSION_MAX_AGE_SEC = 60 * 60 * 24 * 14
 const CONTENT_KV_KEY = 'content:v1'
 const LEGACY_LOGOS_KEY = 'logos:v1'
 const MAX_BYTES = 2.5 * 1024 * 1024
+const PUBLISH_MSG =
+  'Saved to GitHub — Cloudflare will rebuild the site in about 1–3 minutes.'
 
 function json(body, status = 200, headers = {}) {
   return new Response(JSON.stringify(body), {
@@ -20,6 +29,10 @@ function json(body, status = 200, headers = {}) {
       ...headers,
     },
   })
+}
+
+function hasGithub(env) {
+  return Boolean(env.GITHUB_TOKEN || env.github_token)
 }
 
 function b64url(bytes) {
@@ -88,6 +101,14 @@ function slugify(name) {
   )
 }
 
+function extFor(mime) {
+  if (mime === 'image/png') return 'png'
+  if (mime === 'image/jpeg') return 'jpg'
+  if (mime === 'image/webp') return 'webp'
+  if (mime === 'image/svg+xml') return 'svg'
+  return 'png'
+}
+
 function visibleLogos(content) {
   return [...(content.logos || [])]
     .filter((l) => l.visible !== false)
@@ -102,30 +123,70 @@ function seedContent() {
   return JSON.parse(JSON.stringify(DEFAULT_CONTENT))
 }
 
-async function readContent(env) {
-  if (!env.LOGOS) return seedContent()
+async function readContentKv(env) {
+  if (!env.LOGOS) return null
   const raw = await env.LOGOS.get(CONTENT_KV_KEY, 'json')
   if (raw?.site && Array.isArray(raw.logos)) return raw
-  // Migrate legacy logos-only store
   const legacy = await env.LOGOS.get(LEGACY_LOGOS_KEY, 'json')
+  if (!Array.isArray(legacy) || !legacy.length) return null
   const content = seedContent()
-  if (Array.isArray(legacy) && legacy.length) {
-    content.logos = legacy.map((l, i) => ({
-      id: l.id || `logo-${i}`,
-      name: l.name || 'Logo',
-      src: l.src,
-      order: typeof l.order === 'number' ? l.order : i,
-      visible: l.visible !== false,
-    }))
-  }
+  content.logos = legacy.map((l, i) => ({
+    id: l.id || `logo-${i}`,
+    name: l.name || 'Logo',
+    src: l.src,
+    order: typeof l.order === 'number' ? l.order : i,
+    visible: l.visible !== false,
+  }))
   return content
 }
 
-async function writeContent(env, content) {
-  if (!env.LOGOS) throw new Error('Logo/CMS storage is not configured (KV binding LOGOS)')
+async function readContent(env) {
+  if (hasGithub(env)) {
+    try {
+      const fromGh = await readSiteContent(env)
+      if (fromGh?.site) return fromGh
+    } catch (err) {
+      console.error('GitHub read failed:', err)
+    }
+  }
+  const fromKv = await readContentKv(env)
+  if (fromKv) return fromKv
+  return seedContent()
+}
+
+async function writeContentKv(env, content) {
+  if (!env.LOGOS) throw new Error('KV not configured')
   content.version = 1
   content.updatedAt = new Date().toISOString()
   await env.LOGOS.put(CONTENT_KV_KEY, JSON.stringify(content))
+}
+
+async function persistContent(env, content, message = 'CMS: update site content') {
+  if (hasGithub(env)) {
+    await publishSiteContent(env, content, message)
+    return { content, publishMessage: PUBLISH_MSG, published: true }
+  }
+  await writeContentKv(env, content)
+  return { content, publishMessage: 'Saved.', published: true }
+}
+
+function okPayload(result) {
+  return {
+    ok: true,
+    content: result.content,
+    logos: result.content.logos,
+    publishMessage: result.publishMessage,
+    published: result.published,
+  }
+}
+
+function dataUrlToBytes(dataUrl) {
+  const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/)
+  if (!match) return null
+  const binary = atob(match[2])
+  const bytes = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+  return { mime: match[1], bytes }
 }
 
 async function handleApi(request, env) {
@@ -146,8 +207,22 @@ async function handleApi(request, env) {
     return json({ logos: visibleLogos(await readContent(env)) })
   }
 
+  if (request.method === 'GET' && pathname === '/api/admin/status') {
+    return json({
+      storage: hasGithub(env) ? 'github' : env.LOGOS ? 'kv' : 'none',
+      repo: env.GITHUB_REPO || env.github_repo || 'shimshonwq/adwise-portfolio',
+      branch: env.GITHUB_BRANCH || env.github_branch || 'main',
+    })
+  }
+
   if (!password && pathname.startsWith('/api/admin')) {
-    return json({ error: 'Set ADMIN_PASSWORD secret in Cloudflare to enable admin.' }, 503)
+    return json(
+      {
+        error:
+          'Set ADMIN_PASSWORD secret. For saves, also set GITHUB_TOKEN + GITHUB_REPO (recommended).',
+      },
+      503,
+    )
   }
 
   if (request.method === 'POST' && pathname === '/api/admin/login') {
@@ -172,6 +247,16 @@ async function handleApi(request, env) {
     return json({ error: 'Please log in' }, 401)
   }
 
+  if (!hasGithub(env) && !env.LOGOS && pathname.startsWith('/api/admin') && pathname !== '/api/admin/status') {
+    return json(
+      {
+        error:
+          'Storage not configured. Set GITHUB_TOKEN + GITHUB_REPO secrets (recommended), or KV binding LOGOS.',
+      },
+      503,
+    )
+  }
+
   if (request.method === 'GET' && pathname === '/api/admin/content') {
     return json({ content: await readContent(env) })
   }
@@ -182,8 +267,8 @@ async function handleApi(request, env) {
     if (!next?.site || !Array.isArray(next.logos)) {
       return json({ error: 'Invalid content payload' }, 400)
     }
-    await writeContent(env, next)
-    return json({ ok: true, content: await readContent(env) })
+    const result = await persistContent(env, next, 'CMS: update site content')
+    return json(okPayload(result))
   }
 
   if (request.method === 'GET' && pathname === '/api/admin/logos') {
@@ -198,23 +283,28 @@ async function handleApi(request, env) {
     const name = String(body.name || '').trim()
     const dataUrl = String(body.dataUrl || '')
     if (!name) return json({ error: 'Name is required' }, 400)
-    const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/)
-    if (!match) return json({ error: 'Upload a PNG, JPG, WebP, or SVG' }, 400)
-    if (match[2].length * 0.75 > MAX_BYTES) {
+    const parsed = dataUrlToBytes(dataUrl)
+    if (!parsed) return json({ error: 'Upload a PNG, JPG, WebP, or SVG' }, 400)
+    if (parsed.bytes.length > MAX_BYTES) {
       return json({ error: 'File too large (max 2.5MB)' }, 400)
+    }
+    const id = `${slugify(name)}-${Date.now().toString(36)}`
+    const file = `${id}.${extFor(parsed.mime)}`
+    const src = `/uploads/logos/${file}`
+    if (hasGithub(env)) {
+      await writeBinaryFile(env, `public${src}`, parsed.bytes, `CMS: add logo ${name}`)
     }
     const content = await readContent(env)
     const maxOrder = content.logos.reduce((m, l) => Math.max(m, l.order ?? 0), -1)
-    const id = `${slugify(name)}-${Date.now().toString(36)}`
     content.logos.push({
       id,
       name,
-      src: dataUrl,
+      src: hasGithub(env) ? src : dataUrl,
       order: maxOrder + 1,
       visible: true,
     })
-    await writeContent(env, content)
-    return json({ ok: true, logos: content.logos, content })
+    const result = await persistContent(env, content, `CMS: add logo ${name}`)
+    return json(okPayload(result))
   }
 
   if (request.method === 'PATCH' && pathname.startsWith('/api/admin/logos/')) {
@@ -227,8 +317,8 @@ async function handleApi(request, env) {
       content.logos[idx].name = String(body.name).trim() || content.logos[idx].name
     }
     if (body.visible !== undefined) content.logos[idx].visible = Boolean(body.visible)
-    await writeContent(env, content)
-    return json({ ok: true, logos: content.logos, content })
+    const result = await persistContent(env, content, `CMS: update logo ${id}`)
+    return json(okPayload(result))
   }
 
   if (request.method === 'PUT' && pathname === '/api/admin/logos/reorder') {
@@ -246,16 +336,27 @@ async function handleApi(request, env) {
     }
     for (const left of map.values()) next.push(left)
     content.logos = reindexOrders(next)
-    await writeContent(env, content)
-    return json({ ok: true, logos: content.logos, content })
+    const result = await persistContent(env, content, 'CMS: reorder logos')
+    return json(okPayload(result))
   }
 
   if (request.method === 'DELETE' && pathname.startsWith('/api/admin/logos/')) {
     const id = decodeURIComponent(pathname.slice('/api/admin/logos/'.length))
     const content = await readContent(env)
+    const removed = content.logos.find((l) => l.id === id)
     content.logos = reindexOrders(content.logos.filter((l) => l.id !== id))
-    await writeContent(env, content)
-    return json({ ok: true, logos: content.logos, content })
+    if (hasGithub(env) && removed) {
+      const repoPath = logoRepoPath(removed.src)
+      if (repoPath) {
+        try {
+          await deleteFile(env, repoPath, `CMS: remove logo file ${id}`)
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+    const result = await persistContent(env, content, `CMS: remove logo ${id}`)
+    return json(okPayload(result))
   }
 
   return json({ error: 'Not found' }, 404)

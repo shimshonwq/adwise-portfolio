@@ -10,44 +10,54 @@ npm run dev
 npm run build
 ```
 
-`npm run dev` starts Next.js **and** the local CMS API (`scripts/admin-api.mjs` on port 8787).
+`npm run dev` starts Next.js and the CMS API (`scripts/admin-api.mjs`).
 
-## Cloudflare
-
-- Build: `npm run build`
-- Publish uses `wrangler.jsonc` → `./out` + Worker for `/api/*`
-- Production branch: `main`
-- Domain: `adwisemedia.co`
-
-## Admin CMS (edit from anywhere)
+## Admin CMS — edit from anywhere
 
 Hidden URL: **`/login`** (not linked from the public site).
 
-Control logos (add / remove / rename / reorder / hide), site contact info, hero, services, spotlight, process, about, contact copy, nav labels, and footer — from one simple password-protected screen.
+Edit logos (reorder, rename, hide, upload), contact info, hero, services, and all section copy.
 
-### Local
+### How saves work (GitHub — recommended)
 
-1. `npm run dev`
-2. Open `http://localhost:3000/login/`
-3. Password: `ADMIN_PASSWORD` in `.env.local`, or default **`adwise-admin`**
-4. Edit a tab → **Save changes** (logo tools save immediately)
+1. You save in `/login`
+2. The admin API **commits to GitHub** (`public/data/content.json` + uploaded logos)
+3. **Cloudflare rebuilds** automatically (usually 1–3 minutes)
+4. The live site updates — no KV, no manual deploy
 
-### Production (so `/login` works on your phone / any computer)
+This is the same idea as editing the repo yourself, but through a simple form.
 
-1. `npx wrangler kv namespace create LOGOS`
-2. `npx wrangler kv namespace create LOGOS --preview`
-3. Paste both ids into `wrangler.jsonc` under `kv_namespaces` (see comments in that file)
-4. `npx wrangler secret put ADMIN_PASSWORD` — pick a strong password
-5. Deploy (`npm run deploy` or your Cloudflare pipeline)
+### Local setup
 
-Then open **`https://adwisemedia.co/login/`** from anywhere. Saves update the live site immediately (no rebuild required).
+1. Copy `.env.example` → `.env.local`
+2. Set `GITHUB_TOKEN` (repo **Contents: Read and write**)
+3. `npm run dev` → `http://localhost:3000/login/` (password `adwise-admin`)
 
-## Content
+### Production setup
+
+Cloudflare Worker handles `/login` and `/api/*`. Set secrets:
+
+```bash
+npx wrangler secret put ADMIN_PASSWORD
+npx wrangler secret put GITHUB_TOKEN
+npx wrangler secret put GITHUB_REPO    # shimshonwq/adwise-portfolio
+```
+
+Ensure Cloudflare Pages is connected to GitHub and rebuilds on push to `main`.
+
+Then open **`https://adwisemedia.co/login/`** from any device.
+
+## Cloudflare deploy
+
+- Build: `npm run build` → static `./out`
+- Worker: `worker/index.js` for admin API
+- Publish: `npm run deploy` or Cloudflare Git integration
+
+## Content files
 
 | What | Where |
 | --- | --- |
-| Live site copy & logos | `/login` admin (preferred) |
-| CMS defaults / seed | `data/cms-default.json` |
-| Case studies | `data/projects.ts` + `public/projects/` |
-| Brand mark file | `public/logo.png` |
-| Fallback contact (SEO / JsonLd) | `config/site.config.ts` |
+| Live CMS data (in git) | `public/data/content.json` |
+| Defaults / seed | `data/cms-default.json` |
+| Admin UI | `/login` |
+| Case studies | `data/projects.ts` |

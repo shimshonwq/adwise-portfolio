@@ -85,9 +85,23 @@ export default function AdminCms() {
   const [error, setError] = useState<string | null>(null)
   const [uploadName, setUploadName] = useState('')
   const [uploadFile, setUploadFile] = useState<File | null>(null)
+  const [storageMode, setStorageMode] = useState<'github' | 'local' | 'kv' | 'unknown'>('unknown')
   const fileRef = useRef<HTMLInputElement>(null)
 
   const logos = useMemo(() => sortedLogos(content.logos || []), [content.logos])
+
+  const applyApiResult = (data: {
+    content?: CmsContent
+    publishMessage?: string
+  }) => {
+    if (data.content) setContent(data.content)
+    flash(
+      data.publishMessage ||
+        (storageMode === 'github'
+          ? 'Saved to GitHub — Cloudflare will rebuild in about 1–3 minutes.'
+          : 'Saved.'),
+    )
+  }
 
   const loadContent = useCallback(async () => {
     const res = await fetch('/api/admin/content/', { credentials: 'include' })
@@ -105,6 +119,17 @@ export default function AdminCms() {
         if (cancelled) return
         if (data.ok) {
           await loadContent()
+          try {
+            const st = await fetch('/api/admin/status/', { credentials: 'include' })
+            if (st.ok) {
+              const status = await st.json()
+              if (status.storage === 'github' || status.storage === 'local' || status.storage === 'kv') {
+                setStorageMode(status.storage)
+              }
+            }
+          } catch {
+            /* ignore */
+          }
           if (!cancelled) setPhase('app')
         } else setPhase('login')
       } catch {
@@ -152,7 +177,7 @@ export default function AdminCms() {
     setPhase('login')
   }
 
-  const saveContent = async (next: CmsContent, okMsg = 'Saved — live site updates right away.') => {
+  const saveContent = async (next: CmsContent) => {
     setBusy(true)
     setError(null)
     try {
@@ -164,8 +189,7 @@ export default function AdminCms() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Save failed')
-      setContent(data.content)
-      flash(okMsg)
+      applyApiResult(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed')
     } finally {
@@ -191,9 +215,7 @@ export default function AdminCms() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Reorder failed')
-      if (data.content) setContent(data.content)
-      else await loadContent()
-      flash('Logo order updated.')
+      applyApiResult(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Reorder failed')
     } finally {
@@ -213,9 +235,7 @@ export default function AdminCms() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Update failed')
-      if (data.content) setContent(data.content)
-      else await loadContent()
-      flash('Logo updated.')
+      applyApiResult(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Update failed')
     } finally {
@@ -233,9 +253,7 @@ export default function AdminCms() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Could not remove')
-      if (data.content) setContent(data.content)
-      else await loadContent()
-      flash('Logo removed.')
+      applyApiResult(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not remove')
     } finally {
@@ -264,12 +282,10 @@ export default function AdminCms() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Upload failed')
-      if (data.content) setContent(data.content)
-      else await loadContent()
+      applyApiResult(data)
       setUploadName('')
       setUploadFile(null)
       if (fileRef.current) fileRef.current.value = ''
-      flash('Logo added to the bar.')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed')
     } finally {
@@ -290,9 +306,15 @@ export default function AdminCms() {
               Edit your website
             </h1>
             <p className="mt-2 max-w-xl font-serif text-base italic text-ink/70">
-              Change logos, contact info, headlines, and section copy. Saves update the live site —
-              no code needed. Only at /login (not linked publicly).
+              Change logos, contact info, headlines, and section copy. Saves go to{' '}
+              {storageMode === 'github' ? 'GitHub' : 'your site store'} — Cloudflare rebuilds
+              automatically (about 1–3 minutes). Only at /login (not linked publicly).
             </p>
+            {storageMode === 'local' && phase === 'app' && (
+              <p className="mt-2 text-sm text-amber-900">
+                Local mode: set GITHUB_TOKEN in .env.local to publish commits like production.
+              </p>
+            )}
           </div>
           {phase === 'app' && (
             <div className="flex flex-wrap gap-2">
