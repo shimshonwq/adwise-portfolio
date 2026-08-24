@@ -2,8 +2,8 @@
   "version": 1,
   "algo": "pbkdf2-sha256",
   "iterations": 210000,
-  "salt": "smAmCV4JHI54wUDspeIa7A==",
-  "hash": "HEZsYqvgTXotsjgM2ucR47KJx4nfhko+HtAX1lg4Yzc=",
-  "sessionKey": "bCn42mYNw+dddrADO/Hmpj4YYXRI3/5FB0Le3zeHNHY=",
-  "updatedAt": "2026-08-24T19:56:15.790Z"
+  "salt": "CE6yMu79lXVw1Lf7/JGEgg==",
+  "hash": "Vv3C2hSPKj6oMPI4H/JeoArR1Rery2nFLUS88U9U1+g=",
+  "sessionKey": "NPUV7wvuOgeuZ4vEjq34kl5dS3XlXnCIUOxty9B94J8=",
+  "updatedAt": "2026-08-24T19:56:44.855Z"
 }
