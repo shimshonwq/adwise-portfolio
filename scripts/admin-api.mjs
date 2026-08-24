@@ -28,6 +28,7 @@ import {
   writeBinaryFile,
   deleteRepoFile,
 } from './github-store.mjs'
+import { validateLogoUpload, extForLogoMime, LOGO_MAX_BYTES } from './logo-rules.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -39,7 +40,7 @@ const DEFAULT_PATH = path.join(ROOT, 'data', 'cms-default.json')
 const PUBLIC_CONTENT = path.join(ROOT, 'public', 'data', 'content.json')
 const UPLOAD_DIR = path.join(ROOT, 'public', 'uploads', 'logos')
 const PORT = Number(process.env.ADMIN_API_PORT || 8787)
-const MAX_BYTES = 2.5 * 1024 * 1024
+const MAX_BYTES = LOGO_MAX_BYTES
 const LOGIN_MAX_ATTEMPTS = 5
 const LOGIN_WINDOW_MS = 15 * 60 * 1000
 
@@ -203,11 +204,7 @@ function slugify(name) {
 }
 
 function extFor(mime) {
-  if (mime === 'image/png') return 'png'
-  if (mime === 'image/jpeg') return 'jpg'
-  if (mime === 'image/webp') return 'webp'
-  if (mime === 'image/svg+xml') return 'svg'
-  return 'png'
+  return extForLogoMime(mime) || 'png'
 }
 
 async function readBody(req) {
@@ -358,11 +355,22 @@ const server = http.createServer(async (req, res) => {
       const dataUrl = String(body.dataUrl || '')
       if (!name) return json(res, 400, { error: 'Name is required' })
       const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/)
-      if (!match) return json(res, 400, { error: 'Upload a PNG, JPG, WebP, or SVG' })
+      if (!match) return json(res, 400, { error: 'Upload a PNG, JPG, or WebP' })
+      const mime = match[1]
       const buf = Buffer.from(match[2], 'base64')
-      if (buf.length > MAX_BYTES) return json(res, 400, { error: 'File too large (max 2.5MB)' })
+      const width = body.width != null ? Number(body.width) : null
+      const height = body.height != null ? Number(body.height) : null
+      const bad = validateLogoUpload({
+        mime,
+        size: buf.length,
+        width: Number.isFinite(width) ? width : null,
+        height: Number.isFinite(height) ? height : null,
+      })
+      if (bad) return json(res, 400, { error: bad })
+      const ext = extForLogoMime(mime)
+      if (!ext) return json(res, 400, { error: 'Upload a PNG, JPG, or WebP' })
       const id = `${slugify(name)}-${Date.now().toString(36)}`
-      const file = `${id}.${extFor(match[1])}`
+      const file = `${id}.${ext}`
       const src = `/uploads/logos/${file}`
       ensureDirs()
       fs.writeFileSync(path.join(UPLOAD_DIR, file), buf)

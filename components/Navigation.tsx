@@ -5,7 +5,7 @@ import { useSiteContent } from '../lib/SiteContentContext'
 
 export default function Navigation() {
   const { content } = useSiteContent()
-  const { nav, navCta } = content.site
+  const { nav, navCta, navCtaHref } = content.site
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
@@ -52,7 +52,7 @@ export default function Navigation() {
                 {item.label}
               </a>
             ))}
-            <a href="/#contact" className="btn btn-primary !py-2.5 !px-5">
+            <a href={navCtaHref || '/#contact'} className="btn btn-primary !py-2.5 !px-5">
               {navCta}
             </a>
           </div>
@@ -100,7 +100,7 @@ export default function Navigation() {
                 </motion.a>
               ))}
               <a
-                href="/#contact"
+                href={navCtaHref || '/#contact'}
                 onClick={() => setOpen(false)}
                 className="btn btn-brand mt-8 w-fit"
               >

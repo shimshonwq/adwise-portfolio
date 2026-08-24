@@ -10,6 +10,8 @@ import {
 import {
   contactChannelsFromSite,
   DEFAULT_CONTENT,
+  normalizeContent,
+  themeToCssVars,
   visibleLogos,
   type CmsContent,
   type LogoItem,
@@ -36,19 +38,31 @@ async function fetchContent(): Promise<CmsContent> {
     const res = await fetch('/api/content/', { cache: 'no-store' })
     if (res.ok) {
       const data = await res.json()
-      if (data?.content) return data.content as CmsContent
-      if (data?.site) return data as CmsContent
+      if (data?.content) return normalizeContent(data.content)
+      if (data?.site) return normalizeContent(data)
     }
   } catch {
     /* fall through */
   }
   try {
     const res = await fetch('/data/content.json', { cache: 'no-store' })
-    if (res.ok) return (await res.json()) as CmsContent
+    if (res.ok) return normalizeContent(await res.json())
   } catch {
     /* fall through */
   }
   return DEFAULT_CONTENT
+}
+
+function applyTheme(content: CmsContent) {
+  if (typeof document === 'undefined') return
+  const vars = themeToCssVars(content.theme || DEFAULT_CONTENT.theme)
+  const root = document.documentElement
+  for (const [key, value] of Object.entries(vars)) {
+    root.style.setProperty(key, value)
+  }
+  const brand = content.theme?.brand || DEFAULT_CONTENT.theme.brand
+  const meta = document.querySelector('meta[name="theme-color"]')
+  if (meta) meta.setAttribute('content', brand)
 }
 
 export function SiteContentProvider({ children }: { children: ReactNode }) {
@@ -58,12 +72,17 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     const next = await fetchContent()
     setContent(next)
+    applyTheme(next)
     setReady(true)
   }, [])
 
   useEffect(() => {
     refresh()
   }, [refresh])
+
+  useEffect(() => {
+    applyTheme(content)
+  }, [content])
 
   const value = useMemo<SiteContentValue>(
     () => ({

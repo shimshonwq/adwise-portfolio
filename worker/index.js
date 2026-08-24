@@ -23,10 +23,11 @@ import {
   writeBinaryFile,
   writeJsonFile,
 } from './github-store.js'
+import { validateLogoUpload, extForLogoMime, LOGO_MAX_BYTES } from './logo-rules.js'
 
 const CONTENT_KV_KEY = 'content:v1'
 const LEGACY_LOGOS_KEY = 'logos:v1'
-const MAX_BYTES = 2.5 * 1024 * 1024
+const MAX_BYTES = LOGO_MAX_BYTES
 const LOGIN_MAX_ATTEMPTS = 5
 const LOGIN_WINDOW_MS = 15 * 60 * 1000
 const PUBLISH_MSG =
@@ -139,11 +140,7 @@ function slugify(name) {
 }
 
 function extFor(mime) {
-  if (mime === 'image/png') return 'png'
-  if (mime === 'image/jpeg') return 'jpg'
-  if (mime === 'image/webp') return 'webp'
-  if (mime === 'image/svg+xml') return 'svg'
-  return 'png'
+  return extForLogoMime(mime) || 'png'
 }
 
 function visibleLogos(content) {
@@ -381,12 +378,20 @@ async function handleApi(request, env) {
     const dataUrl = String(body.dataUrl || '')
     if (!name) return json({ error: 'Name is required' }, 400)
     const parsed = dataUrlToBytes(dataUrl)
-    if (!parsed) return json({ error: 'Upload a PNG, JPG, WebP, or SVG' }, 400)
-    if (parsed.bytes.length > MAX_BYTES) {
-      return json({ error: 'File too large (max 2.5MB)' }, 400)
-    }
+    if (!parsed) return json({ error: 'Upload a PNG, JPG, or WebP' }, 400)
+    const width = body.width != null ? Number(body.width) : null
+    const height = body.height != null ? Number(body.height) : null
+    const bad = validateLogoUpload({
+      mime: parsed.mime,
+      size: parsed.bytes.length,
+      width: Number.isFinite(width) ? width : null,
+      height: Number.isFinite(height) ? height : null,
+    })
+    if (bad) return json({ error: bad }, 400)
+    const ext = extForLogoMime(parsed.mime)
+    if (!ext) return json({ error: 'Upload a PNG, JPG, or WebP' }, 400)
     const id = `${slugify(name)}-${Date.now().toString(36)}`
-    const file = `${id}.${extFor(parsed.mime)}`
+    const file = `${id}.${ext}`
     const src = `/uploads/logos/${file}`
     if (hasGithub(env)) {
       await writeBinaryFile(env, `public${src}`, parsed.bytes, `CMS: add logo ${name}`)
