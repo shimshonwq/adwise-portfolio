@@ -1,64 +1,54 @@
 import { motion } from 'framer-motion'
-import { siteConfig } from '../config/site.config'
+import { useSiteContent } from '../lib/SiteContentContext'
 import AnimatedText from './AnimatedText'
 
-const principles = [
-  {
-    title: 'Strategy first',
-    body: 'Every mark and campaign ladders up to a clear goal — not decoration for decoration’s sake.',
-  },
-  {
-    title: 'Craft obsessed',
-    body: 'Premium details that make brands feel expensive, consistent, and unforgettable.',
-  },
-  {
-    title: 'Built to last',
-    body: 'Identities that work on a sign, a phone screen, a truck, and a business card.',
-  },
-]
-
 export default function About() {
+  const { content } = useSiteContent()
+  const copy = content.about
+  const eyebrow = copy.eyebrow.replace('{shortName}', content.site.shortName)
+
   return (
-    <section id="about" className="scroll-mt-24 section-ink-gold py-24 md:py-32">
-      <div className="site-shell grid gap-14 md:grid-cols-[1.1fr_0.9fr] md:items-start">
+    <section id="about" className="scroll-mt-24 section-ink-gold py-20 md:py-32">
+      <div className="site-shell grid gap-12 md:grid-cols-[1.1fr_0.9fr] md:items-start md:gap-14">
         <div>
-          <p className="eyebrow !text-brand">About {siteConfig.shortName}</p>
+          <p className="eyebrow !text-brand">{eyebrow}</p>
           <AnimatedText
             as="h2"
-            text="Logos & graphics that work for business."
+            text={copy.title}
             shimmer
-            className="mt-3 font-display text-4xl font-bold tracking-tight md:text-5xl"
+            className="mt-3 font-display text-[clamp(1.65rem,6vw,3.25rem)] font-bold tracking-tight"
           />
-          <p className="mt-6 text-lg leading-relaxed text-white/70">
-            {siteConfig.name} designs logos, brand graphics, and marketing visuals for companies that
-            want to look professional and memorable. From first sketch to finished signage, we blend
-            strategy with craft.
+          <p className="mt-6 font-serif text-base leading-relaxed text-white/85 md:text-lg">
+            {copy.body}
           </p>
-          <p className="mt-4 text-lg leading-relaxed text-white/70">
-            <span className="brand-shimmer font-display font-bold">{siteConfig.tagline}</span> isn’t
-            just a line — it’s how we work.
-          </p>
+          <p className="mt-4 font-serif text-lg italic text-brand md:text-2xl">{copy.accent}</p>
         </div>
 
         <div className="space-y-4">
-          {principles.map((item, index) => (
-            <motion.div
-              key={item.title}
-              initial={{ y: 14 }}
-              whileInView={{ y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.4, delay: index * 0.07 }}
-              whileHover={{ x: 6, transition: { duration: 0.2 } }}
-              className={`soft-panel border p-6 md:p-7 ${
-                index === 1
-                  ? 'border-brand/50 bg-brand text-ink'
-                  : 'border-white/10 bg-white/5 text-white'
-              }`}
-            >
-              <h3 className="font-display text-xl font-bold">{item.title}</h3>
-              <p className={`mt-2 ${index === 1 ? 'text-ink/70' : 'text-white/65'}`}>{item.body}</p>
-            </motion.div>
-          ))}
+          {copy.principles.map((item, index) => {
+            const gold = item.tone === 'gold'
+            const paper = item.tone === 'paper'
+            return (
+              <motion.div
+                key={item.id}
+                initial={{ y: 14 }}
+                whileInView={{ y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.4, delay: index * 0.07 }}
+                whileHover={{ x: 6, transition: { duration: 0.2 } }}
+                className={`soft-panel border p-6 md:p-7 ${
+                  gold
+                    ? 'border-brand/50 bg-brand text-ink'
+                    : paper
+                      ? 'border-white/15 bg-paper text-ink'
+                      : 'border-white/10 bg-white/5 text-white'
+                }`}
+              >
+                <h3 className="font-display text-xl font-bold">{item.title}</h3>
+                <p className={`mt-2 font-serif ${gold || paper ? 'text-ink/70' : 'text-white/70'}`}>{item.body}</p>
+              </motion.div>
+            )
+          })}
         </div>
       </div>
     </section>

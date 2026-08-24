@@ -1,0 +1,161 @@
+{
+  "version": 1,
+  "updatedAt": null,
+  "site": {
+    "name": "Adwise Media",
+    "shortName": "Adwise",
+    "tagline": "Thinking Your Next Thing",
+    "description": "Logo design, brand graphics, and marketing for businesses that want to look sharp and get noticed.",
+    "url": "https://adwisemedia.co",
+    "email": "adwisecreativity@gmail.com",
+    "phone": "8455515506",
+    "phoneDisplay": "(845) 551-5506",
+    "location": "Available worldwide",
+    "navCta": "Start a project",
+    "nav": [
+      { "href": "#work", "label": "Clients" },
+      { "href": "#services", "label": "Services" },
+      { "href": "#about", "label": "About" },
+      { "href": "#contact", "label": "Contact" }
+    ],
+    "footerBlurb": "Logos, graphics, and marketing for businesses worldwide.",
+    "footerMeta": "Marketing · Content · Design"
+  },
+  "hero": {
+    "openName": "ADWISE MEDIA",
+    "eyebrow": "Made to be noticed",
+    "headline": "Turn heads. Grow brands.",
+    "body": "Logo design, brand graphics, and marketing that make businesses look sharp — and get noticed.",
+    "bodyAccent": "Creative that actually works.",
+    "ctaPrimaryLabel": "Our clients",
+    "ctaPrimaryHref": "#work",
+    "ctaSecondaryLabel": "Start a project",
+    "ctaSecondaryHref": "#contact",
+    "orbitCaption": "Scroll — ideas in motion."
+  },
+  "clients": {
+    "eyebrow": "Some of our partnerships",
+    "title": "Brands we work with",
+    "subtitle": "Logos and campaigns for the brands we help grow.",
+    "emptyMessage": "Original brand marks, coming soon."
+  },
+  "services": {
+    "eyebrow": "How we move you forward",
+    "title": "What we do",
+    "subtitle": "One studio from first logo to launch campaign.",
+    "items": [
+      {
+        "id": "marketing",
+        "num": "01",
+        "title": "Marketing",
+        "description": "Campaigns and creative that get attention — social, paid, and always on-brand.",
+        "points": ["Social strategy", "Paid advertising", "Campaign management"],
+        "tone": "white"
+      },
+      {
+        "id": "content",
+        "num": "02",
+        "title": "Content Creation",
+        "description": "Video, photography, and copy your audience actually wants to watch.",
+        "points": ["Short-form video", "Editorial & copy", "Content calendars"],
+        "tone": "ink"
+      },
+      {
+        "id": "design",
+        "num": "03",
+        "title": "Graphic Design",
+        "description": "Logos, identity, and print that hold up at every size and channel.",
+        "points": ["Logo & branding", "Print & digital", "Design systems"],
+        "tone": "gold"
+      }
+    ]
+  },
+  "spotlight": {
+    "eyebrow": "Our manifesto",
+    "titleLines": ["Thinking", "Your", "Next", "Thing"],
+    "body": "Safe design gets safe results. We build logos, graphics, and campaigns that turn heads — and move the business forward.",
+    "accent": "Unexpected on purpose.",
+    "ctaPrimaryLabel": "Begin the unexpected",
+    "ctaPrimaryHref": "/#contact",
+    "ctaSecondaryLabel": "See how we work",
+    "ctaSecondaryHref": "/#process"
+  },
+  "process": {
+    "eyebrow": "This is how we do it",
+    "title": "A structured approach to creative.",
+    "subtitle": "Research. Planning. Execution. Creative that works like a business.",
+    "steps": [
+      {
+        "id": "research",
+        "num": "01",
+        "title": "Research",
+        "body": "We learn the business, audience, and goal — so creative isn’t a guess.",
+        "tone": "white"
+      },
+      {
+        "id": "create",
+        "num": "02",
+        "title": "Create",
+        "body": "Strategy becomes logos, visuals, and campaigns that look sharp and stay on-brand.",
+        "tone": "gold"
+      },
+      {
+        "id": "launch",
+        "num": "03",
+        "title": "Launch",
+        "body": "We ship, measure, and refine — so the work keeps earning attention after go-live.",
+        "tone": "ink"
+      }
+    ]
+  },
+  "about": {
+    "eyebrow": "About {shortName}",
+    "title": "Local roots. Global reach.",
+    "body": "We help ambitious businesses look professional and stay consistent — from the first logo sketch to finished signage and campaign rollout.",
+    "accent": "Made to be noticed.",
+    "principles": [
+      {
+        "id": "strategy",
+        "title": "Strategy first",
+        "body": "Every decision ties back to a goal — not decoration for its own sake.",
+        "tone": "ink"
+      },
+      {
+        "id": "craft",
+        "title": "Craft obsessed",
+        "body": "Clean details that make a brand feel considered and consistent.",
+        "tone": "gold"
+      },
+      {
+        "id": "lasting",
+        "title": "Built to last",
+        "body": "Work that reads on a sign, a screen, a truck, and a business card.",
+        "tone": "paper"
+      }
+    ]
+  },
+  "contact": {
+    "eyebrow": "Contact",
+    "title": "Get in touch",
+    "intro": "Tell us what you’re building — or reach us on WhatsApp, email, call, or text.",
+    "formEyebrow": "Project inquiry",
+    "formNote": "Usually reply within one business day.",
+    "successMessage": "Thanks! We’ll be in touch shortly.",
+    "errorMessage": "Something went wrong — email or call us instead."
+  },
+  "logos": [
+    { "id": "kalmys", "name": "Kalmys", "src": "/clients/kalmys.png", "order": 0, "visible": true },
+    { "id": "shloimy", "name": "Shloimy Friedlander", "src": "/clients/shloimy.png", "order": 1, "visible": true },
+    { "id": "coffee-break", "name": "Coffee Break", "src": "/clients/coffee-break.png", "order": 2, "visible": true },
+    { "id": "flavor-max", "name": "Flavor Max", "src": "/clients/flavor-max.png", "order": 3, "visible": true },
+    { "id": "ride-24", "name": "Ride 24", "src": "/clients/ride-24.png", "order": 4, "visible": true },
+    { "id": "planit", "name": "Planit Architecture", "src": "/clients/planit.png", "order": 5, "visible": true },
+    { "id": "icontact", "name": "iContact Studio", "src": "/clients/icontact.png", "order": 6, "visible": true },
+    { "id": "garden-gourmet", "name": "Garden Gourmet", "src": "/clients/garden-gourmet.png", "order": 7, "visible": true },
+    { "id": "hvn", "name": "HVN", "src": "/clients/hvn.png", "order": 8, "visible": true },
+    { "id": "vish-vash", "name": "Vish Vash", "src": "/clients/vish-vash.png", "order": 9, "visible": true },
+    { "id": "shvitz", "name": "The Shvitz", "src": "/clients/shvitz.png", "order": 10, "visible": true },
+    { "id": "greenpower", "name": "Green Power Electric", "src": "/clients/greenpower.png", "order": 11, "visible": true },
+    { "id": "mendel-style", "name": "Mendel Style Events", "src": "/clients/mendel-style.png", "order": 12, "visible": true }
+  ]
+}

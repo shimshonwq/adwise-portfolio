@@ -1,37 +1,49 @@
 import type { AppProps } from 'next/app'
-import { Manrope, Syne } from 'next/font/google'
+import { Bricolage_Grotesque, EB_Garamond, Sora } from 'next/font/google'
+import { SiteContentProvider } from '../lib/SiteContentContext'
 import '../styles/globals.css'
 
 /**
- * Syne gives the site a sharper premium display voice.
- * Applied via style.fontFamily so headings always pick it up reliably.
+ * Bricolage Grotesque — distinctive display.
+ * Sora — clean geometric body.
+ * EB Garamond italic — editorial accent voice.
  */
-const displayFont = Syne({
+const displayFont = Bricolage_Grotesque({
   subsets: ['latin'],
   variable: '--font-display-face',
   display: 'swap',
-  weight: ['500', '600', '700', '800'],
 })
 
-const bodyFont = Manrope({
+const bodyFont = Sora({
   subsets: ['latin'],
   variable: '--font-body-face',
   display: 'swap',
-  weight: ['400', '500', '600', '700', '800'],
+  weight: ['400', '500', '600', '700'],
+})
+
+const serifFont = EB_Garamond({
+  subsets: ['latin'],
+  variable: '--font-serif-face',
+  display: 'swap',
+  weight: ['400', '500', '600'],
+  style: 'italic',
 })
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <div
-      className={`${displayFont.variable} ${bodyFont.variable} ${bodyFont.className}`}
+      className={`${displayFont.variable} ${bodyFont.variable} ${serifFont.variable} ${bodyFont.className}`}
       style={
         {
           '--font-display-stack': displayFont.style.fontFamily,
           '--font-body-stack': bodyFont.style.fontFamily,
+          '--font-serif-stack': serifFont.style.fontFamily,
         } as React.CSSProperties
       }
     >
-      <Component {...pageProps} />
+      <SiteContentProvider>
+        <Component {...pageProps} />
+      </SiteContentProvider>
     </div>
   )
 }

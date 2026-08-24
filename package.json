@@ -5,7 +5,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/dev.mjs",
+    "dev:next": "next dev",
+    "dev:api": "node scripts/admin-api.mjs",
+    "bootstrap:admin": "node scripts/bootstrap-admin-auth.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

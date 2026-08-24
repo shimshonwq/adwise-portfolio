@@ -1,18 +1,18 @@
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { siteConfig } from '../config/site.config'
+import { useSiteContent } from '../lib/SiteContentContext'
 
-const taglineLines = ['Thinkink', 'Your', 'Next', 'Thing']
-
-/** Mid-page brand spotlight — clean stacked tagline on a soft gold/ink gradient */
 export default function Spotlight() {
+  const { content } = useSiteContent()
+  const copy = content.spotlight
+
   return (
-    <section className="spotlight-stage relative overflow-hidden py-20 md:py-28">
+    <section className="spotlight-stage relative overflow-hidden py-20 md:py-36">
       <div
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(145deg, #1a1608 0%, #0e0e0e 28%, #2a2208 55%, #1a1608 78%, #0e0e0e 100%)',
+            'linear-gradient(145deg, #1c1810 0%, #14130f 28%, #241e10 55%, #1c1810 78%, #14130f 100%)',
         }}
         aria-hidden
       />
@@ -20,31 +20,31 @@ export default function Spotlight() {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'radial-gradient(ellipse 55% 50% at 50% 40%, rgba(253,198,33,0.22), transparent 60%), radial-gradient(circle at 15% 80%, rgba(253,198,33,0.1), transparent 35%), radial-gradient(circle at 85% 20%, rgba(255,255,255,0.06), transparent 30%)',
+            'radial-gradient(ellipse 55% 50% at 50% 40%, rgba(253,198,33,0.28), transparent 58%), radial-gradient(circle at 12% 85%, rgba(143,115,67,0.18), transparent 32%)',
         }}
         aria-hidden
       />
 
-      <div className="site-shell relative z-10 grid items-center gap-12 md:grid-cols-[1.05fr_0.95fr] md:gap-16">
-        <div>
-          <motion.p
-            className="text-xs font-extrabold uppercase tracking-[0.28em] text-brand"
-            initial={{ y: 10 }}
-            whileInView={{ y: 0 }}
-            viewport={{ once: true }}
-          >
-            The Adwise way
-          </motion.p>
+      <div className="site-shell relative z-10">
+        <motion.p
+          className="text-center text-xs font-extrabold uppercase tracking-[0.28em] text-brand"
+          initial={{ y: 10 }}
+          whileInView={{ y: 0 }}
+          viewport={{ once: true }}
+        >
+          {copy.eyebrow}
+        </motion.p>
 
-          <h2 className="mt-6 font-display text-[clamp(2.8rem,6.5vw,5.2rem)] font-bold leading-[0.95] tracking-tight">
-            {taglineLines.map((line, i) => (
+        <div className="mx-auto mt-8 max-w-4xl px-1">
+          <h2 className="text-center font-display text-[clamp(1.85rem,8vw,6.2rem)] font-bold leading-[1.02] tracking-tight">
+            {copy.titleLines.map((line, i) => (
               <motion.span
-                key={line}
+                key={`${line}-${i}`}
                 className="block brand-shimmer"
-                initial={{ y: 16 }}
-                whileInView={{ y: 0 }}
+                initial={{ y: 36, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.45, delay: i * 0.06 }}
+                transition={{ duration: 0.7, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
               >
                 {line}
               </motion.span>
@@ -53,25 +53,31 @@ export default function Spotlight() {
         </div>
 
         <motion.div
-          className="rounded-[1.75rem] border border-brand/25 bg-white/5 p-8 backdrop-blur-sm md:p-10"
-          initial={{ y: 18 }}
+          className="mx-auto mt-10 h-1 w-28 rounded-full bg-brand md:mt-12 md:w-40"
+          initial={{ scaleX: 0 }}
+          whileInView={{ scaleX: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.25 }}
+          aria-hidden
+        />
+
+        <motion.div
+          className="mx-auto mt-8 max-w-2xl text-center md:mt-10"
+          initial={{ y: 16 }}
           whileInView={{ y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
         >
-          <p className="text-lg leading-relaxed text-white/75 md:text-xl">
-            Bold ideas. Sharp logos. Graphics that stop people mid-scroll — and bring customers your
-            way.
+          <p className="font-serif text-base leading-relaxed text-white/85 md:text-xl">
+            {copy.body}
           </p>
-          <p className="mt-4 text-sm font-semibold uppercase tracking-[0.18em] text-brand/90">
-            {siteConfig.name}
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="#contact" className="btn btn-on-dark">
-              Let’s build your brand
+          <p className="mt-4 font-serif text-lg italic text-brand md:text-2xl">{copy.accent}</p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3 md:mt-9 md:gap-4">
+            <Link href={copy.ctaPrimaryHref} className="btn btn-on-dark">
+              {copy.ctaPrimaryLabel}
             </Link>
-            <Link href="#work" className="btn btn-secondary-light">
-              See what’s coming
+            <Link href={copy.ctaSecondaryHref} className="btn btn-secondary-light">
+              {copy.ctaSecondaryLabel}
             </Link>
           </div>
         </motion.div>

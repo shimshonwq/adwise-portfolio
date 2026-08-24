@@ -42,3 +42,8 @@ bun-debug.log*
 
 # Cloudflare
 .wrangler/
+
+# Local admin logo store (runtime uploads)
+.data/
+public/uploads/logos/*
+!public/uploads/logos/.gitkeep

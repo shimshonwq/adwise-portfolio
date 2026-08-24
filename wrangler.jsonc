@@ -1,14 +1,21 @@
 {
-  // Cloudflare Workers (static assets) — required because Cloudflare runs
-  // `npx wrangler versions upload` after the build.
-  // Build with Next.js static export into ./out, then Wrangler uploads it.
+  // Cloudflare Workers (static assets) + CMS API on /api/*
   "name": "adwise-portfolio",
+  "main": "worker/index.js",
   "compatibility_date": "2026-07-15",
   "assets": {
     "directory": "./out",
-    // Serve our custom /404.html for unknown routes
+    "binding": "ASSETS",
     "not_found_handling": "404-page",
-    // Matches next.config.mjs trailingSlash: true
-    "html_handling": "auto-trailing-slash"
+    "html_handling": "auto-trailing-slash",
+    "run_worker_first": ["/api/*"]
   }
+  // Secrets (recommended — saves commit to GitHub, Cloudflare rebuilds):
+  //   npx wrangler secret put GITHUB_TOKEN
+  //   npx wrangler secret put GITHUB_REPO      # owner/repo
+  //   npx wrangler secret put GITHUB_BRANCH    # optional, default main
+  // Admin password hash: data/admin-auth.json in repo (npm run bootstrap:admin)
+  //
+  // Optional legacy fallback (instant saves without git):
+  //   kv_namespaces: [{ "binding": "LOGOS", "id": "...", "preview_id": "..." }]
 }
