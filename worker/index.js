@@ -5,20 +5,36 @@
  */
 import DEFAULT_CONTENT from './cms-default.json'
 import {
+  ADMIN_COOKIE,
+  SESSION_MAX_AGE_SEC,
+  makeSessionToken,
+  rotatePassword,
+  verifyPassword,
+  verifySessionToken,
+  validatePasswordStrength,
+  AUTH_REPO_PATH,
+} from './admin-auth.js'
+import {
   deleteFile,
   logoRepoPath,
   publishSiteContent,
+  readJsonFile,
   readSiteContent,
   writeBinaryFile,
+  writeJsonFile,
 } from './github-store.js'
 
-const ADMIN_COOKIE = 'adwise_admin'
-const SESSION_MAX_AGE_SEC = 60 * 60 * 24 * 14
-const CONTENT_KV_KEY = 'content:v1'
+const LOGIN_MAX_ATTEMPTS = 5
 const LEGACY_LOGOS_KEY = 'logos:v1'
 const MAX_BYTES = 2.5 * 1024 * 1024
+const LOGIN_MAX_ATTEMPTS = 5
+const LOGIN_WINDOW_MS = 15 * 60 * 1000
 const PUBLISH_MSG =
   'Saved to GitHub — Cloudflare will rebuild the site in about 1–3 minutes.'
+
+/** @type {{ record: object | null, at: number }} */
+let authCache = { record: null, at: 0 }
+const loginAttempts = new Map()
 
 function json(body, status = 200, headers = {}) {
   return new Response(JSON.stringify(body), {
@@ -26,6 +42,7 @@ function json(body, status = 200, headers = {}) {
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff',
       ...headers,
     },
   })
@@ -35,39 +52,59 @@ function hasGithub(env) {
   return Boolean(env.GITHUB_TOKEN || env.github_token)
 }
 
-function b64url(bytes) {
-  let str = ''
-  const bin = bytes instanceof ArrayBuffer ? new Uint8Array(bytes) : bytes
-  for (let i = 0; i < bin.length; i++) str += String.fromCharCode(bin[i])
-  return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
+async function getAuthRecord(env) {
+  if (!hasGithub(env)) {
+    throw new Error(
+      'Admin auth requires GITHUB_TOKEN + GITHUB_REPO secrets (credentials live in data/admin-auth.json).',
+    )
+  }
+  if (authCache.record && Date.now() - authCache.at < 60_000) {
+    return authCache.record
+  }
+  const row = await readJsonFile(env, AUTH_REPO_PATH)
+  if (!row?.data?.hash || !row.data.sessionKey) {
+    throw new Error(
+      'Missing data/admin-auth.json in GitHub. Run npm run bootstrap:admin locally and push.',
+    )
+  }
+  authCache = { record: row.data, at: Date.now() }
+  return row.data
 }
 
-async function hmac(secret, payload) {
-  const key = await crypto.subtle.importKey(
-    'raw',
-    new TextEncoder().encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign'],
+function invalidateAuthCache() {
+  authCache = { record: null, at: 0 }
+}
+
+function clientIp(request) {
+  return (
+    request.headers.get('CF-Connecting-IP') ||
+    request.headers.get('X-Forwarded-For')?.split(',')[0]?.trim() ||
+    'unknown'
   )
-  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(payload))
-  return b64url(sig)
 }
 
-async function makeSession(secret) {
-  const exp = Math.floor(Date.now() / 1000) + SESSION_MAX_AGE_SEC
-  const payload = `v1.${exp}`
-  return `${payload}.${await hmac(secret, payload)}`
+function loginRateLimited(ip) {
+  const now = Date.now()
+  let entry = loginAttempts.get(ip)
+  if (!entry || now > entry.resetAt) {
+    entry = { count: 0, resetAt: now + LOGIN_WINDOW_MS }
+    loginAttempts.set(ip, entry)
+  }
+  return entry.count >= LOGIN_MAX_ATTEMPTS
 }
 
-async function verifySession(secret, token) {
-  if (!token) return false
-  const parts = token.split('.')
-  if (parts.length !== 3) return false
-  const payload = `${parts[0]}.${parts[1]}`
-  if (parts[2] !== (await hmac(secret, payload))) return false
-  const exp = Number(parts[1])
-  return Number.isFinite(exp) && exp > Math.floor(Date.now() / 1000)
+function recordLoginFailure(ip) {
+  const now = Date.now()
+  let entry = loginAttempts.get(ip)
+  if (!entry || now > entry.resetAt) {
+    entry = { count: 0, resetAt: now + LOGIN_WINDOW_MS }
+  }
+  entry.count += 1
+  loginAttempts.set(ip, entry)
+}
+
+function clearLoginFailures(ip) {
+  loginAttempts.delete(ip)
 }
 
 function parseCookies(header) {
@@ -189,10 +226,15 @@ function dataUrlToBytes(dataUrl) {
   return { mime: match[1], bytes }
 }
 
+async function requireAuth(request, env) {
+  const record = await getAuthRecord(env)
+  const token = parseCookies(request.headers.get('Cookie') || '')[ADMIN_COOKIE]
+  return verifySessionToken(record.sessionKey, token)
+}
+
 async function handleApi(request, env) {
   const url = new URL(request.url)
   const pathname = url.pathname.replace(/\/+$/, '') || '/'
-  const password = env.ADMIN_PASSWORD
   const secure = url.protocol === 'https:'
 
   if (request.method === 'OPTIONS') {
@@ -208,27 +250,44 @@ async function handleApi(request, env) {
   }
 
   if (request.method === 'GET' && pathname === '/api/admin/status') {
-    return json({
-      storage: hasGithub(env) ? 'github' : env.LOGOS ? 'kv' : 'none',
-      repo: env.GITHUB_REPO || env.github_repo || 'shimshonwq/adwise-portfolio',
-      branch: env.GITHUB_BRANCH || env.github_branch || 'main',
-    })
+    try {
+      const record = await getAuthRecord(env)
+      return json({
+        storage: hasGithub(env) ? 'github' : env.LOGOS ? 'kv' : 'none',
+        repo: env.GITHUB_REPO || env.github_repo || 'shimshonwq/adwise-portfolio',
+        branch: env.GITHUB_BRANCH || env.github_branch || 'main',
+        authUpdatedAt: record.updatedAt || null,
+      })
+    } catch (err) {
+      return json({ error: err.message }, 503)
+    }
   }
 
-  if (!password && pathname.startsWith('/api/admin')) {
-    return json(
-      {
-        error:
-          'Set ADMIN_PASSWORD secret. For saves, also set GITHUB_TOKEN + GITHUB_REPO (recommended).',
-      },
-      503,
-    )
+  if (pathname.startsWith('/api/admin')) {
+    try {
+      await getAuthRecord(env)
+    } catch (err) {
+      return json({ error: err.message }, 503)
+    }
   }
 
   if (request.method === 'POST' && pathname === '/api/admin/login') {
+    const ip = clientIp(request)
+    if (loginRateLimited(ip)) {
+      return json(
+        { error: 'Too many login attempts. Wait about 15 minutes and try again.' },
+        429,
+      )
+    }
+
     const body = await request.json().catch(() => ({}))
-    if (!password || body.password !== password) return json({ error: 'Wrong password' }, 401)
-    const token = await makeSession(password)
+    const record = await getAuthRecord(env)
+    if (!(await verifyPassword(String(body.password || ''), record))) {
+      recordLoginFailure(ip)
+      return json({ error: 'Wrong password' }, 401)
+    }
+    clearLoginFailures(ip)
+    const token = await makeSessionToken(record.sessionKey)
     return json({ ok: true }, 200, { 'Set-Cookie': setCookie(token, secure) })
   }
 
@@ -236,8 +295,7 @@ async function handleApi(request, env) {
     return json({ ok: true }, 200, { 'Set-Cookie': clearCookie(secure) })
   }
 
-  const cookies = parseCookies(request.headers.get('Cookie') || '')
-  const authed = password ? await verifySession(password, cookies[ADMIN_COOKIE]) : false
+  const authed = await requireAuth(request, env)
 
   if (request.method === 'GET' && pathname === '/api/admin/session') {
     return json({ ok: authed })
@@ -247,13 +305,52 @@ async function handleApi(request, env) {
     return json({ error: 'Please log in' }, 401)
   }
 
-  if (!hasGithub(env) && !env.LOGOS && pathname.startsWith('/api/admin') && pathname !== '/api/admin/status') {
+  if (
+    !hasGithub(env) &&
+    !env.LOGOS &&
+    pathname.startsWith('/api/admin') &&
+    pathname !== '/api/admin/status'
+  ) {
     return json(
       {
         error:
           'Storage not configured. Set GITHUB_TOKEN + GITHUB_REPO secrets (recommended), or KV binding LOGOS.',
       },
       503,
+    )
+  }
+
+  if (request.method === 'POST' && pathname === '/api/admin/password') {
+    const body = await request.json().catch(() => ({}))
+    const current = String(body.currentPassword || '')
+    const next = String(body.newPassword || '')
+    const confirm = String(body.confirmPassword || '')
+
+    const record = await getAuthRecord(env)
+    if (!(await verifyPassword(current, record))) {
+      return json({ error: 'Current password is incorrect' }, 401)
+    }
+    if (next !== confirm) {
+      return json({ error: 'New passwords do not match' }, 400)
+    }
+    const strengthErr = validatePasswordStrength(next)
+    if (strengthErr) return json({ error: strengthErr }, 400)
+    if (await verifyPassword(next, record)) {
+      return json({ error: 'Choose a different password than your current one' }, 400)
+    }
+
+    const updated = await rotatePassword(record, next)
+    await writeJsonFile(env, AUTH_REPO_PATH, updated, 'CMS: change admin password')
+    invalidateAuthCache()
+    const token = await makeSessionToken(updated.sessionKey)
+    return json(
+      {
+        ok: true,
+        message: 'Password updated. All other sessions were signed out.',
+        authUpdatedAt: updated.updatedAt,
+      },
+      200,
+      { 'Set-Cookie': setCookie(token, secure) },
     )
   }
 

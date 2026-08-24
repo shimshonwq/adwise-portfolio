@@ -16,6 +16,7 @@ type Tab =
   | 'process'
   | 'about'
   | 'contact'
+  | 'security'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'logos', label: 'Logos' },
@@ -27,6 +28,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'process', label: 'Process' },
   { id: 'about', label: 'About' },
   { id: 'contact', label: 'Contact page' },
+  { id: 'security', label: 'Security' },
 ]
 
 async function readFileAsDataUrl(file: File): Promise<string> {
@@ -86,6 +88,9 @@ export default function AdminCms() {
   const [uploadName, setUploadName] = useState('')
   const [uploadFile, setUploadFile] = useState<File | null>(null)
   const [storageMode, setStorageMode] = useState<'github' | 'local' | 'kv' | 'unknown'>('unknown')
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
   const logos = useMemo(() => sortedLogos(content.logos || []), [content.logos])
@@ -175,6 +180,34 @@ export default function AdminCms() {
   const onLogout = async () => {
     await fetch('/api/admin/logout/', { method: 'POST', credentials: 'include' })
     setPhase('login')
+  }
+
+  const onChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setBusy(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/admin/password/', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+          confirmPassword,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Could not change password')
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+      flash(data.message || 'Password updated.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not change password')
+    } finally {
+      setBusy(false)
+    }
   }
 
   const saveContent = async (next: CmsContent) => {
@@ -350,7 +383,8 @@ export default function AdminCms() {
                 required
               />
               <span className="mt-1 block text-xs text-ink/45">
-                Same password you set on Cloudflare (local default: adwise-admin)
+                Use your admin password. First time? Run npm run bootstrap:admin locally for the
+                default, then change it under Security.
               </span>
             </label>
             {error && <p className="text-sm text-red-700">{error}</p>}
@@ -1034,6 +1068,62 @@ export default function AdminCms() {
                   }
                 />
               </SectionSave>
+            )}
+
+            {tab === 'security' && (
+              <form
+                onSubmit={onChangePassword}
+                className="soft-panel max-w-lg space-y-5 border border-ink/10 bg-white p-6 md:p-8"
+              >
+                <div>
+                  <h2 className="font-display text-xl font-bold">Change password</h2>
+                  <p className="mt-2 font-serif text-sm italic text-ink/60">
+                    After you change your password, every other browser session is signed out. Only
+                    the new password works.
+                  </p>
+                </div>
+                <label className="block text-sm">
+                  <span className="mb-1.5 block font-medium text-ink/70">Current password</span>
+                  <input
+                    type="password"
+                    autoComplete="current-password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="w-full rounded-lg border border-ink/15 bg-paper px-3 py-2.5 text-sm outline-none focus:border-brand"
+                    required
+                  />
+                </label>
+                <label className="block text-sm">
+                  <span className="mb-1.5 block font-medium text-ink/70">New password</span>
+                  <input
+                    type="password"
+                    autoComplete="new-password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full rounded-lg border border-ink/15 bg-paper px-3 py-2.5 text-sm outline-none focus:border-brand"
+                    required
+                    minLength={12}
+                  />
+                </label>
+                <label className="block text-sm">
+                  <span className="mb-1.5 block font-medium text-ink/70">Confirm new password</span>
+                  <input
+                    type="password"
+                    autoComplete="new-password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full rounded-lg border border-ink/15 bg-paper px-3 py-2.5 text-sm outline-none focus:border-brand"
+                    required
+                    minLength={12}
+                  />
+                </label>
+                <p className="text-xs text-ink/45">
+                  At least 12 characters with uppercase, lowercase, a number, and a symbol.
+                </p>
+                <button type="submit" disabled={busy} className="btn btn-primary">
+                  {busy ? 'Updating…' : 'Update password'}
+                </button>
+              </form>
             )}
           </>
         )}

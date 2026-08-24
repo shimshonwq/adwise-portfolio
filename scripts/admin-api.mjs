@@ -4,10 +4,23 @@
 import http from 'node:http'
 import fs from 'node:fs'
 import path from 'node:path'
-import crypto from 'node:crypto'
 import { fileURLToPath } from 'node:url'
 import {
-  CONTENT_REPO_PATH,
+  ADMIN_COOKIE,
+  SESSION_MAX_AGE_SEC,
+  makeSessionToken,
+  rotatePassword,
+  verifyPassword,
+  verifySessionToken,
+  validatePasswordStrength,
+} from './admin-auth.mjs'
+import {
+  ensureAuthRecord,
+  persistAuthRecord,
+  readAuthRecord,
+} from './admin-auth-store.mjs'
+import { ensureGithubEnv } from './github-env.mjs'
+import {
   githubConfigured,
   logoRepoPath,
   publishSiteContent,
@@ -19,45 +32,70 @@ import {
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
 
-function loadEnvFile(filePath) {
-  if (!fs.existsSync(filePath)) return
-  for (const line of fs.readFileSync(filePath, 'utf8').split(/\r?\n/)) {
-    const trimmed = line.trim()
-    if (!trimmed || trimmed.startsWith('#')) continue
-    const i = trimmed.indexOf('=')
-    if (i === -1) continue
-    const key = trimmed.slice(0, i).trim()
-    let val = trimmed.slice(i + 1).trim()
-    if (
-      (val.startsWith('"') && val.endsWith('"')) ||
-      (val.startsWith("'") && val.endsWith("'"))
-    ) {
-      val = val.slice(1, -1)
-    }
-    if (process.env[key] === undefined) process.env[key] = val
-  }
-}
-
-loadEnvFile(path.join(ROOT, '.env.local'))
-loadEnvFile(path.join(ROOT, '.env'))
+ensureGithubEnv(ROOT)
 
 const DATA_DIR = path.join(ROOT, '.data')
-const STORE_PATH = path.join(DATA_DIR, 'content.json')
 const DEFAULT_PATH = path.join(ROOT, 'data', 'cms-default.json')
 const PUBLIC_CONTENT = path.join(ROOT, 'public', 'data', 'content.json')
 const UPLOAD_DIR = path.join(ROOT, 'public', 'uploads', 'logos')
 const PORT = Number(process.env.ADMIN_API_PORT || 8787)
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'adwise-admin'
-const ADMIN_COOKIE = 'adwise_admin'
-const SESSION_MAX_AGE_SEC = 60 * 60 * 24 * 14
 const MAX_BYTES = 2.5 * 1024 * 1024
+const LOGIN_MAX_ATTEMPTS = 5
+const LOGIN_WINDOW_MS = 15 * 60 * 1000
 
 const PUBLISH_MSG =
   'Saved to GitHub — Cloudflare will rebuild the site in about 1–3 minutes.'
 
+/** @type {{ record: import('./admin-auth.mjs').hashPassword extends (...args: any) => infer R ? R : never } | null} */
+let authRecord = null
+const loginAttempts = new Map()
+
 function ensureDirs() {
   fs.mkdirSync(DATA_DIR, { recursive: true })
   fs.mkdirSync(UPLOAD_DIR, { recursive: true })
+}
+
+async function getAuthRecord() {
+  if (authRecord?.hash) return authRecord
+  authRecord = await readAuthRecord(ROOT)
+  if (!authRecord) {
+    const boot = await ensureAuthRecord(ROOT)
+    authRecord = boot.record
+    if (boot.created) {
+      console.log(`[cms-auth] Default password written to ${boot.hintPath}`)
+    }
+  }
+  return authRecord
+}
+
+function clientIp(req) {
+  const fwd = req.headers['x-forwarded-for']
+  if (typeof fwd === 'string' && fwd.trim()) return fwd.split(',')[0].trim()
+  return req.socket.remoteAddress || 'local'
+}
+
+function loginRateLimited(ip) {
+  const now = Date.now()
+  let entry = loginAttempts.get(ip)
+  if (!entry || now > entry.resetAt) {
+    entry = { count: 0, resetAt: now + LOGIN_WINDOW_MS }
+    loginAttempts.set(ip, entry)
+  }
+  return entry.count >= LOGIN_MAX_ATTEMPTS
+}
+
+function recordLoginFailure(ip) {
+  const now = Date.now()
+  let entry = loginAttempts.get(ip)
+  if (!entry || now > entry.resetAt) {
+    entry = { count: 0, resetAt: now + LOGIN_WINDOW_MS }
+  }
+  entry.count += 1
+  loginAttempts.set(ip, entry)
+}
+
+function clearLoginFailures(ip) {
+  loginAttempts.delete(ip)
 }
 
 function defaultContent() {
@@ -69,7 +107,7 @@ function writeLocalContent(content) {
   content.version = 1
   content.updatedAt = new Date().toISOString()
   const text = JSON.stringify(content, null, 2)
-  fs.writeFileSync(STORE_PATH, text)
+  fs.writeFileSync(path.join(DATA_DIR, 'content.json'), text)
   fs.writeFileSync(PUBLIC_CONTENT, text)
 }
 
@@ -86,9 +124,10 @@ async function readContent() {
     }
   }
   ensureDirs()
-  if (fs.existsSync(STORE_PATH)) {
+  const storePath = path.join(DATA_DIR, 'content.json')
+  if (fs.existsSync(storePath)) {
     try {
-      return JSON.parse(fs.readFileSync(STORE_PATH, 'utf8'))
+      return JSON.parse(fs.readFileSync(storePath, 'utf8'))
     } catch {
       /* fall through */
     }
@@ -124,34 +163,6 @@ function visibleLogos(content) {
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
 }
 
-function b64url(buf) {
-  return Buffer.from(buf)
-    .toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/g, '')
-}
-
-function sign(payload) {
-  return b64url(crypto.createHmac('sha256', ADMIN_PASSWORD).update(payload).digest())
-}
-
-function makeSession() {
-  const exp = Math.floor(Date.now() / 1000) + SESSION_MAX_AGE_SEC
-  const payload = `v1.${exp}`
-  return `${payload}.${sign(payload)}`
-}
-
-function verifySession(token) {
-  if (!token || typeof token !== 'string') return false
-  const parts = token.split('.')
-  if (parts.length !== 3) return false
-  const payload = `${parts[0]}.${parts[1]}`
-  if (parts[2] !== sign(payload)) return false
-  const exp = Number(parts[1])
-  return Number.isFinite(exp) && exp > Math.floor(Date.now() / 1000)
-}
-
 function parseCookies(header) {
   const out = {}
   if (!header) return out
@@ -167,6 +178,7 @@ function json(res, status, body, extraHeaders = {}) {
   res.writeHead(status, {
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-store',
+    'X-Content-Type-Options': 'nosniff',
     ...extraHeaders,
   })
   res.end(JSON.stringify(body))
@@ -209,8 +221,10 @@ async function readBody(req) {
   return Buffer.concat(chunks)
 }
 
-function requireAuth(req) {
-  return verifySession(parseCookies(req.headers.cookie)[ADMIN_COOKIE])
+async function requireAuth(req) {
+  const record = await getAuthRecord()
+  const token = parseCookies(req.headers.cookie)[ADMIN_COOKIE]
+  return verifySessionToken(record.sessionKey, token)
 }
 
 function reindexOrders(logos) {
@@ -243,19 +257,32 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (req.method === 'GET' && pathname === '/api/admin/status') {
+      const record = await getAuthRecord()
       return json(res, 200, {
         storage: githubConfigured() ? 'github' : 'local',
         repo: process.env.GITHUB_REPO || 'shimshonwq/adwise-portfolio',
         branch: process.env.GITHUB_BRANCH || 'main',
+        authUpdatedAt: record.updatedAt || null,
       })
     }
 
     if (req.method === 'POST' && pathname === '/api/admin/login') {
+      const ip = clientIp(req)
+      if (loginRateLimited(ip)) {
+        return json(res, 429, {
+          error: 'Too many login attempts. Wait about 15 minutes and try again.',
+        })
+      }
+
       const body = JSON.parse((await readBody(req)).toString('utf8') || '{}')
-      if (body.password !== ADMIN_PASSWORD) {
+      const record = await getAuthRecord()
+      if (!verifyPassword(String(body.password || ''), record)) {
+        recordLoginFailure(ip)
         return json(res, 401, { error: 'Wrong password' })
       }
-      return json(res, 200, { ok: true }, { 'Set-Cookie': setCookie(makeSession()) })
+      clearLoginFailures(ip)
+      const token = makeSessionToken(record.sessionKey)
+      return json(res, 200, { ok: true }, { 'Set-Cookie': setCookie(token) })
     }
 
     if (req.method === 'POST' && pathname === '/api/admin/logout') {
@@ -263,11 +290,45 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (req.method === 'GET' && pathname === '/api/admin/session') {
-      return json(res, 200, { ok: requireAuth(req) })
+      return json(res, 200, { ok: await requireAuth(req) })
     }
 
-    if (!requireAuth(req) && pathname.startsWith('/api/admin')) {
+    if (!(await requireAuth(req)) && pathname.startsWith('/api/admin')) {
       return json(res, 401, { error: 'Please log in' })
+    }
+
+    if (req.method === 'POST' && pathname === '/api/admin/password') {
+      const body = JSON.parse((await readBody(req)).toString('utf8') || '{}')
+      const current = String(body.currentPassword || '')
+      const next = String(body.newPassword || '')
+      const confirm = String(body.confirmPassword || '')
+
+      const record = await getAuthRecord()
+      if (!verifyPassword(current, record)) {
+        return json(res, 401, { error: 'Current password is incorrect' })
+      }
+      if (next !== confirm) {
+        return json(res, 400, { error: 'New passwords do not match' })
+      }
+      const strengthErr = validatePasswordStrength(next)
+      if (strengthErr) return json(res, 400, { error: strengthErr })
+      if (verifyPassword(next, record)) {
+        return json(res, 400, { error: 'Choose a different password than your current one' })
+      }
+
+      authRecord = rotatePassword(record, next)
+      await persistAuthRecord(ROOT, authRecord, 'CMS: change admin password')
+      const token = makeSessionToken(authRecord.sessionKey)
+      return json(
+        res,
+        200,
+        {
+          ok: true,
+          message: 'Password updated. All other sessions were signed out.',
+          authUpdatedAt: authRecord.updatedAt,
+        },
+        { 'Set-Cookie': setCookie(token) },
+      )
     }
 
     if (req.method === 'GET' && pathname === '/api/admin/content') {
@@ -374,7 +435,8 @@ const server = http.createServer(async (req, res) => {
 })
 
 ensureDirs()
-server.listen(PORT, '127.0.0.1', () => {
+server.listen(PORT, '127.0.0.1', async () => {
+  await getAuthRecord()
   const mode = githubConfigured() ? 'GitHub publish' : 'local only'
   console.log(`[cms-api] http://127.0.0.1:${PORT} (${mode})`)
 })

@@ -11,10 +11,10 @@
     "run_worker_first": ["/api/*"]
   }
   // Secrets (recommended — saves commit to GitHub, Cloudflare rebuilds):
-  //   npx wrangler secret put ADMIN_PASSWORD
   //   npx wrangler secret put GITHUB_TOKEN
   //   npx wrangler secret put GITHUB_REPO      # owner/repo
   //   npx wrangler secret put GITHUB_BRANCH    # optional, default main
+  // Admin password hash: data/admin-auth.json in repo (npm run bootstrap:admin)
   //
   // Optional legacy fallback (instant saves without git):
   //   kv_namespaces: [{ "binding": "LOGOS", "id": "...", "preview_id": "..." }]

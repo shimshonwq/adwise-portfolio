@@ -4,8 +4,10 @@
 import { spawn } from 'node:child_process'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { ensureGithubEnv } from './github-env.mjs'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+ensureGithubEnv(root)
 const env = { ...process.env }
 
 const api = spawn(process.execPath, [path.join(root, 'scripts', 'admin-api.mjs')], {
