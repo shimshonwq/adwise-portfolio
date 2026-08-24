@@ -1,28 +1,29 @@
 import { useEffect, useRef, useState } from 'react'
+import { DEFAULT_LOGOS, type LogoItem } from '../lib/logos'
 
-type Client = {
-  name: string
-  src: string
+async function loadLogos(): Promise<LogoItem[]> {
+  try {
+    const res = await fetch('/api/logos/', { cache: 'no-store' })
+    if (res.ok) {
+      const data = await res.json()
+      if (Array.isArray(data.logos)) return data.logos
+    }
+  } catch {
+    /* fall through */
+  }
+  try {
+    const res = await fetch('/data/logos.json', { cache: 'no-store' })
+    if (res.ok) {
+      const data = await res.json()
+      if (Array.isArray(data)) return data
+    }
+  } catch {
+    /* fall through */
+  }
+  return DEFAULT_LOGOS
 }
 
-/** Original-color client marks — same slot for every logo */
-export const clients: Client[] = [
-  { name: 'Kalmys', src: '/clients/kalmys.png' },
-  { name: 'Shloimy Friedlander', src: '/clients/shloimy.png' },
-  { name: 'Coffee Break', src: '/clients/coffee-break.png' },
-  { name: 'Flavor Max', src: '/clients/flavor-max.png' },
-  { name: 'Ride 24', src: '/clients/ride-24.png' },
-  { name: 'Planit Architecture', src: '/clients/planit.png' },
-  { name: 'iContact Studio', src: '/clients/icontact.png' },
-  { name: 'Garden Gourmet', src: '/clients/garden-gourmet.png' },
-  { name: 'HVN', src: '/clients/hvn.png' },
-  { name: 'Vish Vash', src: '/clients/vish-vash.png' },
-  { name: 'The Shvitz', src: '/clients/shvitz.png' },
-  { name: 'Green Power Electric', src: '/clients/greenpower.png' },
-  { name: 'Mendel Style Events', src: '/clients/mendel-style.png' },
-]
-
-/** White partnerships strip — auto-slides, draggable */
+/** White partnerships strip — auto-slides, draggable; logos from admin API */
 export default function Clients() {
   const trackRef = useRef<HTMLDivElement>(null)
   const offsetRef = useRef(0)
@@ -31,6 +32,17 @@ export default function Clients() {
   const loopWidthRef = useRef(0)
   const rafRef = useRef(0)
   const [dragging, setDragging] = useState(false)
+  const [clients, setClients] = useState<LogoItem[]>(DEFAULT_LOGOS)
+
+  useEffect(() => {
+    let cancelled = false
+    loadLogos().then((list) => {
+      if (!cancelled) setClients(list)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const loop = clients.length ? [...clients, ...clients] : []
 
@@ -70,7 +82,7 @@ export default function Clients() {
       window.removeEventListener('resize', measure)
       ro?.disconnect()
     }
-  }, [])
+  }, [clients])
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!clients.length) return
@@ -123,7 +135,7 @@ export default function Clients() {
           >
             {loop.map((client, i) => (
               <div
-                key={`${client.name}-${i}`}
+                key={`${client.id}-${i}`}
                 className="logo-box flex h-[5.25rem] w-[15rem] shrink-0 items-center justify-center md:h-[5.75rem] md:w-[16rem]"
                 title={client.name}
               >

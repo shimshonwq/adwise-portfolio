@@ -5,7 +5,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/dev.mjs",
+    "dev:next": "next dev",
+    "dev:api": "node scripts/admin-api.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

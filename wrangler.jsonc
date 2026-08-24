@@ -1,14 +1,23 @@
 {
-  // Cloudflare Workers (static assets) — required because Cloudflare runs
-  // `npx wrangler versions upload` after the build.
+  // Cloudflare Workers (static assets) + API worker for /api/* (admin + logos).
   // Build with Next.js static export into ./out, then Wrangler uploads it.
   "name": "adwise-portfolio",
+  "main": "worker/index.js",
   "compatibility_date": "2026-07-15",
   "assets": {
     "directory": "./out",
+    "binding": "ASSETS",
     // Serve our custom /404.html for unknown routes
     "not_found_handling": "404-page",
     // Matches next.config.mjs trailingSlash: true
-    "html_handling": "auto-trailing-slash"
+    "html_handling": "auto-trailing-slash",
+    // Admin + public logo list — handled by worker before static assets
+    "run_worker_first": ["/api/*"]
   }
+  // Optional (required for live admin uploads on production):
+  // 1) npx wrangler kv namespace create LOGOS
+  // 2) npx wrangler kv namespace create LOGOS --preview
+  // 3) Add under this object:
+  // "kv_namespaces": [{ "binding": "LOGOS", "id": "<id>", "preview_id": "<preview_id>" }]
+  // 4) npx wrangler secret put ADMIN_PASSWORD
 }
