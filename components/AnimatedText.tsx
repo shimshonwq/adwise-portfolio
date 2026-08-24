@@ -2,20 +2,23 @@ import { motion, type Variants } from 'framer-motion'
 
 /**
  * Animate with motion only — never hide text with opacity:0.
- * Optional shimmer applies a light readable gold shine.
+ * Optional shimmer: soft readable shine (dark on light, gold on dark).
+ * Words rise with light 3D depth.
  */
 const container: Variants = {
   hidden: {},
   show: {
-    transition: { staggerChildren: 0.055, delayChildren: 0.04 },
+    transition: { staggerChildren: 0.07, delayChildren: 0.04 },
   },
 }
 
 const wordVariant: Variants = {
-  hidden: { y: 18 },
+  hidden: { y: 26, rotateX: 28, z: -36 },
   show: {
     y: 0,
-    transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+    rotateX: 0,
+    z: 0,
+    transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
   },
 }
 
@@ -39,20 +42,22 @@ export default function AnimatedText({
 }: Props) {
   const words = text.split(' ')
   const shared = {
-    className,
+    className: `hero-perspective ${className}`,
     variants: container,
     initial: 'hidden' as const,
     ...(immediate ? { animate: 'show' as const } : { whileInView: 'show' as const }),
     viewport: immediate ? undefined : { once: true, amount: 0.35 },
     transition: { delayChildren: delay },
     'aria-label': text,
+    style: { transformStyle: 'preserve-3d' as const },
   }
 
   const children = words.map((w, i) => (
     <motion.span
       key={`${w}-${i}`}
       variants={wordVariant}
-      className={`mr-[0.28em] inline-block last:mr-0 ${shimmer ? 'brand-shimmer' : ''}`}
+      className={`letter-3d mr-[0.28em] inline-block last:mr-0 ${shimmer ? 'brand-shimmer' : ''}`}
+      style={{ transformStyle: 'preserve-3d' }}
     >
       {w}
     </motion.span>

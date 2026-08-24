@@ -5,7 +5,7 @@
 export const siteConfig = {
   name: 'Adwise Media',
   shortName: 'Adwise',
-  tagline: 'Thinkink Your Next Thing',
+  tagline: 'Thinking Your Next Thing',
   description:
     'Adwise Media designs logos, brand graphics, and visual systems for businesses — plus marketing and content that help brands stand out.',
   url: 'https://adwisemedia.co',

@@ -21,50 +21,53 @@ const steps = [
 
 export default function Process() {
   return (
-    <section className="section-aurora py-24 md:py-28">
-      <div className="site-shell">
-        <p className="eyebrow">How we work</p>
-        <AnimatedText
-          as="h2"
-          text="A simple process. Serious craft."
-          shimmer
-          className="mt-3 max-w-xl font-display text-4xl font-bold tracking-tight md:text-5xl"
-        />
+    <section className="relative overflow-hidden section-aurora grain py-24 md:py-32">
+      <div className="site-shell relative z-10">
+        <div className="max-w-2xl">
+          <p className="eyebrow">How we work</p>
+          <AnimatedText
+            as="h2"
+            text="A clear process. Serious craft."
+            shimmer
+            className="mt-3 font-display text-4xl font-bold tracking-tight md:text-5xl"
+          />
+          <p className="mt-5 max-w-lg text-lg text-ink/60">
+            Three focused phases — built for brands that want polish without the chaos.
+          </p>
+        </div>
 
-        <div className="mt-14 grid gap-5 md:grid-cols-3 md:gap-6">
-          {steps.map((step, index) => (
-            <motion.article
-              key={step.num}
-              initial={{ y: 16 }}
-              whileInView={{ y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.45, delay: index * 0.08 }}
-              whileHover={{ y: -6, transition: { duration: 0.25 } }}
-              className={`soft-panel border p-8 md:p-9 ${
-                index === 0
-                  ? 'border-line bg-white text-ink'
-                  : index === 1
-                    ? 'border-brand/40 bg-brand text-ink'
-                    : 'border-brand/30 bg-ink text-white'
-              }`}
-            >
-              <span
-                className={`inline-flex h-11 w-11 items-center justify-center rounded-full font-display text-sm font-bold ${
-                  index === 2 ? 'bg-brand text-ink' : 'bg-ink text-brand'
-                }`}
+        <div className="relative mt-16">
+          <div
+            className="process-line pointer-events-none absolute left-0 right-0 top-[2.1rem] hidden h-px md:block"
+            aria-hidden
+          />
+
+          <div className="tilt-3d-wrap grid gap-8 md:grid-cols-3 md:gap-10">
+            {steps.map((step, index) => (
+              <motion.article
+                key={step.num}
+                initial={{ y: 24, rotateX: 10 }}
+                whileInView={{ y: 0, rotateX: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.6, delay: index * 0.12 }}
+                className="tilt-3d panel-3d relative border border-ink/8 bg-white/90 p-7 md:p-8"
               >
-                {step.num}
-              </span>
-              <h3 className="mt-6 font-display text-2xl font-bold md:text-3xl">{step.title}</h3>
-              <p
-                className={`mt-4 leading-relaxed ${
-                  index === 2 ? 'text-white/70' : 'text-ink/60'
-                }`}
-              >
-                {step.body}
-              </p>
-            </motion.article>
-          ))}
+                <div className="relative z-10 mb-6 flex h-16 w-16 items-center justify-center rounded-full border-2 border-ink/10 bg-white shadow-[0_14px_34px_-14px_rgba(14,14,14,0.4)]">
+                  <span className="font-display text-lg font-bold text-ink">{step.num}</span>
+                  <span
+                    className="absolute inset-0 rounded-full ring-4 ring-brand/20"
+                    aria-hidden
+                  />
+                </div>
+                <h3 className="relative z-10 font-display text-2xl font-bold md:text-3xl">
+                  {step.title}
+                </h3>
+                <p className="relative z-10 mt-3 max-w-xs leading-relaxed text-ink/60">
+                  {step.body}
+                </p>
+              </motion.article>
+            ))}
+          </div>
         </div>
       </div>
     </section>

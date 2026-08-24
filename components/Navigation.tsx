@@ -23,9 +23,9 @@ export default function Navigation() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-[background,border-color] duration-300 ${
+      className={`fixed inset-x-0 top-0 z-50 transition-[background,border-color,box-shadow] duration-300 ${
         scrolled
-          ? 'border-b border-line bg-paper/90 backdrop-blur-md'
+          ? 'border-b border-line bg-paper/92 shadow-[0_10px_40px_-28px_rgba(14,14,14,0.35)] backdrop-blur-md'
           : 'border-b border-transparent bg-transparent'
       }`}
     >
@@ -34,19 +34,19 @@ export default function Navigation() {
 
         <div
           className={`hidden items-center gap-8 rounded-full px-5 py-3 md:flex ${
-            scrolled ? '' : 'border border-ink/8 bg-white/70 shadow-sm backdrop-blur-md'
+            scrolled ? '' : 'border border-ink/8 bg-white/75 shadow-sm backdrop-blur-md'
           }`}
         >
           {siteConfig.nav.map((item) => (
             <a
               key={item.href}
               href={`/${item.href}`}
-              className="text-sm font-medium tracking-wide text-ink/65 transition-colors hover:text-ink"
+              className="nav-link text-sm font-semibold tracking-wide text-ink/65 transition-colors hover:text-ink"
             >
               {item.label}
             </a>
           ))}
-          <a href="/#contact" className="btn btn-primary !py-2.5 !px-5">
+          <a href="/#contact" className="btn btn-primary !px-5 !py-2.5">
             Start a project
           </a>
         </div>
