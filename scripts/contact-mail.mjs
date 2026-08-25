@@ -99,6 +99,18 @@ async function sendWithFormSubmit({ to, payload, siteName }) {
   })
 
   const text = await res.text()
+  const lowerText = String(text || '').toLowerCase()
+  if (
+    lowerText.includes('just a moment') ||
+    lowerText.includes('cf-mitigated') ||
+    lowerText.includes('challenge-platform') ||
+    lowerText.includes('cf-browser-verification')
+  ) {
+    const err = new Error('FORMSUBMIT_CF_BLOCKED')
+    err.code = 'FORMSUBMIT_CF_BLOCKED'
+    throw err
+  }
+
   let data = {}
   try {
     data = text ? JSON.parse(text) : {}
@@ -108,12 +120,6 @@ async function sendWithFormSubmit({ to, payload, siteName }) {
 
   const msg = String(data.message || data.error || text || '')
   const lower = msg.toLowerCase()
-
-  if (lower.includes('just a moment') || lower.includes('cf-mitigated') || lower.includes('challenge-platform')) {
-    const err = new Error('FORMSUBMIT_CF_BLOCKED')
-    err.code = 'FORMSUBMIT_CF_BLOCKED'
-    throw err
-  }
 
   if (
     lower.includes('activate') ||
