@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-25T01:31:13.851Z",
+  "updatedAt": "2026-08-25T01:31:32.799Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -48,13 +48,18 @@
     "ctaPrimaryHref": "#work",
     "ctaSecondaryLabel": "Start a project",
     "ctaSecondaryHref": "#contact",
-    "orbitCaption": "Scroll - ideas in motion."
+    "orbitCaption": "Scroll - ideas in motion.",
+    "showOpening": true,
+    "showOrbit": true,
+    "background": "aurora"
   },
   "clients": {
     "eyebrow": "Some of our partnerships",
     "title": "Brands we work with",
     "subtitle": "Logos and campaigns for the brands we help grow.",
-    "emptyMessage": "Original brand marks, coming soon."
+    "emptyMessage": "Original brand marks, coming soon.",
+    "background": "white",
+    "marqueeSpeed": 0.42
   },
   "services": {
     "eyebrow": "How we move you forward",
@@ -97,7 +102,8 @@
         ],
         "tone": "gold"
       }
-    ]
+    ],
+    "background": "brand"
   },
   "spotlight": {
     "eyebrow": "Our manifesto",
@@ -112,7 +118,8 @@
     "ctaPrimaryLabel": "Begin the unexpected",
     "ctaPrimaryHref": "/#contact",
     "ctaSecondaryLabel": "See how we work",
-    "ctaSecondaryHref": "/#process"
+    "ctaSecondaryHref": "/#process",
+    "background": "ink"
   },
   "process": {
     "eyebrow": "This is how we do it",
@@ -140,7 +147,8 @@
         "body": "We ship, measure, and refine - so the work keeps earning attention after go-live.",
         "tone": "ink"
       }
-    ]
+    ],
+    "background": "aurora"
   },
   "about": {
     "eyebrow": "About {shortName}",
@@ -166,7 +174,8 @@
         "body": "Work that reads on a sign, a screen, a truck, and a business card.",
         "tone": "paper"
       }
-    ]
+    ],
+    "background": "inkGold"
   },
   "contact": {
     "eyebrow": "Contact",
@@ -185,7 +194,12 @@
     "namePlaceholder": "Your name",
     "emailPlaceholder": "you@company.com",
     "phonePlaceholder": "Optional",
-    "messagePlaceholder": "What are you building?"
+    "messagePlaceholder": "What are you building?",
+    "background": "brand",
+    "captchaLabel": "Verify you're human",
+    "captchaIdle": "I'm not a robot",
+    "captchaChecking": "Checking...",
+    "captchaVerified": "Verified"
   },
   "logos": [
     {
@@ -320,5 +334,74 @@
     "logoSrc": "/logo.png",
     "faviconSrc": "/uploads/brand/favicon-mt7x99rh.png",
     "ogImageSrc": "/logo.png"
-  }
+  },
+  "layout": {
+    "sections": [
+      {
+        "id": "hero",
+        "visible": true,
+        "order": 0,
+        "background": "aurora"
+      },
+      {
+        "id": "services",
+        "visible": true,
+        "order": 1,
+        "background": "brand"
+      },
+      {
+        "id": "clients",
+        "visible": true,
+        "order": 2,
+        "background": "white"
+      },
+      {
+        "id": "spotlight",
+        "visible": true,
+        "order": 3,
+        "background": "ink"
+      },
+      {
+        "id": "process",
+        "visible": true,
+        "order": 4,
+        "background": "aurora"
+      },
+      {
+        "id": "about",
+        "visible": true,
+        "order": 5,
+        "background": "inkGold"
+      },
+      {
+        "id": "contact",
+        "visible": true,
+        "order": 6,
+        "background": "brand"
+      }
+    ]
+  },
+  "channels": [
+    {
+      "id": "whatsapp",
+      "label": "WhatsApp",
+      "visible": true
+    },
+    {
+      "id": "email",
+      "label": "Email",
+      "visible": true
+    },
+    {
+      "id": "call",
+      "label": "Call",
+      "visible": true
+    },
+    {
+      "id": "sms",
+      "label": "SMS",
+      "visible": true
+    }
+  ],
+  "customPages": []
 }
