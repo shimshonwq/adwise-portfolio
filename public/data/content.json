@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-25T01:31:32.799Z",
+  "updatedAt": "2026-08-25T18:42:54.363Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -252,16 +252,16 @@
       "visible": true
     },
     {
-      "id": "garden-gourmet",
-      "name": "Garden Gourmet",
-      "src": "/clients/garden-gourmet.png",
+      "id": "hvn",
+      "name": "HVN",
+      "src": "/clients/hvn.png",
       "order": 7,
       "visible": true
     },
     {
-      "id": "hvn",
-      "name": "HVN",
-      "src": "/clients/hvn.png",
+      "id": "garden-gourmet",
+      "name": "Garden Gourmet",
+      "src": "/clients/garden-gourmet.png",
       "order": 8,
       "visible": true
     },
