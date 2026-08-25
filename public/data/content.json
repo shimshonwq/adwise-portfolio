@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": null,
+  "updatedAt": "2026-08-25T01:31:32.798Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -40,7 +40,7 @@
   },
   "hero": {
     "openName": "ADWISE MEDIA",
-    "eyebrow": "Made to be noticed",
+    "eyebrow": "Made to be noticed | CMS",
     "headline": "Turn heads. Grow brands.",
     "body": "Logo design, brand graphics, and marketing that make businesses look sharp - and get noticed.",
     "bodyAccent": "Creative that actually works.",
@@ -198,7 +198,7 @@
     "background": "brand",
     "captchaLabel": "Verify you're human",
     "captchaIdle": "I'm not a robot",
-    "captchaChecking": "Checking…",
+    "captchaChecking": "Checking...",
     "captchaVerified": "Verified"
   },
   "logos": [
@@ -311,9 +311,7 @@
     "fontSerifCustom": "",
     "fontDisplayUrl": "",
     "fontBodyUrl": "",
-    "fontSerifUrl": "",
-    "showColorRail": true,
-    "pageBackground": ""
+    "fontSerifUrl": ""
   },
   "projectsPage": {
     "eyebrow": "Portfolio",
@@ -325,9 +323,16 @@
     "body": "The link may be old, or the page may have moved. Head home and keep exploring.",
     "ctaLabel": "Back to home"
   },
+  "textStyles": {
+    "hero.eyebrow": {
+      "fontSize": "0.875rem",
+      "fontWeight": "800",
+      "color": "#8f7343"
+    }
+  },
   "brand": {
     "logoSrc": "/logo.png",
-    "faviconSrc": "/favicon.png",
+    "faviconSrc": "/uploads/brand/favicon-mt7x99rh.png",
     "ogImageSrc": "/logo.png"
   },
   "layout": {
@@ -376,7 +381,6 @@
       }
     ]
   },
-  "textStyles": {},
   "channels": [
     {
       "id": "whatsapp",

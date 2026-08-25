@@ -1534,7 +1534,40 @@ export default function AdminCms() {
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, spotlight: structuredClone(DEFAULT_CONTENT.spotlight) })} title="Spotlight">
                   <StyledField label="Eyebrow" path="spotlight.eyebrow" value={content.spotlight.eyebrow} onChange={(v) => setContent({ ...content, spotlight: { ...content.spotlight, eyebrow: v } })} style={content.textStyles?.['spotlight.eyebrow']} onStyleChange={setTextStyle} />
-                  <Field label="Title lines (one per line)" value={content.spotlight.titleLines.join('\n')} multiline onChange={(v) => setContent({ ...content, spotlight: { ...content.spotlight, titleLines: v.split('\n').map((s) => s.trim()).filter(Boolean) } })} hint="After save, open Text style on each line via clients rebuild — line styles use spotlight.titleLines.0 etc. Edit body/accent styles below." />
+                  <Field
+                    label="Title lines (one per line)"
+                    value={content.spotlight.titleLines.join('\n')}
+                    multiline
+                    onChange={(v) =>
+                      setContent({
+                        ...content,
+                        spotlight: {
+                          ...content.spotlight,
+                          titleLines: v.split('\n').map((s) => s.trim()).filter(Boolean),
+                        },
+                      })
+                    }
+                    hint="One line per row. Style each line below after you save, or use Body/Accent Text style."
+                  />
+                  {(content.spotlight.titleLines || []).map((line, i) => (
+                    <StyledField
+                      key={`title-line-${i}`}
+                      label={`Title line ${i + 1} style`}
+                      path={`spotlight.titleLines.${i}`}
+                      value={line}
+                      onChange={(v) => {
+                        const titleLines = content.spotlight.titleLines.map((x, j) =>
+                          j === i ? v : x,
+                        )
+                        setContent({
+                          ...content,
+                          spotlight: { ...content.spotlight, titleLines },
+                        })
+                      }}
+                      style={content.textStyles?.[`spotlight.titleLines.${i}`]}
+                      onStyleChange={setTextStyle}
+                    />
+                  ))}
                   <StyledField label="Body" path="spotlight.body" value={content.spotlight.body} multiline onChange={(v) => setContent({ ...content, spotlight: { ...content.spotlight, body: v } })} style={content.textStyles?.['spotlight.body']} onStyleChange={setTextStyle} />
                   <StyledField label="Accent line" path="spotlight.accent" value={content.spotlight.accent} onChange={(v) => setContent({ ...content, spotlight: { ...content.spotlight, accent: v } })} style={content.textStyles?.['spotlight.accent']} onStyleChange={setTextStyle} />
                   <StyledField label="Primary button text" path="spotlight.ctaPrimaryLabel" value={content.spotlight.ctaPrimaryLabel} onChange={(v) => setContent({ ...content, spotlight: { ...content.spotlight, ctaPrimaryLabel: v } })} style={content.textStyles?.['spotlight.ctaPrimaryLabel']} onStyleChange={setTextStyle} />
