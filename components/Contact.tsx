@@ -7,12 +7,19 @@ import AnimatedText from './AnimatedText'
 type Status = 'idle' | 'submitting' | 'success' | 'error' | 'captcha'
 type CaptchaPhase = 'idle' | 'checking' | 'verified'
 
+function isCloudflareChallenge(text: string): boolean {
+  const t = text.toLowerCase()
+  return t.includes('just a moment') || t.includes('cf-browser-verification') || t.includes('challenge-platform')
+}
+
 export default function Contact() {
   const { content, channels } = useSiteContent()
   const { site, contact: copy } = content
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' })
   const [status, setStatus] = useState<Status>('idle')
+  const [errorMessage, setErrorMessage] = useState('')
   const [captcha, setCaptcha] = useState<CaptchaPhase>('idle')
+  const [honeypot, setHoneypot] = useState('')
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -31,13 +38,113 @@ export default function Contact() {
     window.setTimeout(() => setCaptcha('verified'), 650)
   }
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (honeypot) return
     if (captcha !== 'verified') {
-      e.preventDefault()
       setStatus('captcha')
       return
     }
+
     setStatus('submitting')
+    setErrorMessage('')
+
+    const payload = {
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      phone: formData.phone.trim(),
+      message: formData.message.trim(),
+      _honey: honeypot,
+    }
+
+    try {
+      const res = await fetch('/api/contact/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean
+        error?: string
+        needsActivation?: boolean
+        fallback?: string
+      }
+
+      if (res.ok && data.ok) {
+        setStatus('success')
+        setFormData({ name: '', email: '', phone: '', message: '' })
+        setCaptcha('idle')
+        return
+      }
+
+      if (data.needsActivation) {
+        setStatus('error')
+        setErrorMessage(
+          data.error ||
+            'Check your Adwise inbox for a FormSubmit activation email, click Activate, then try again.'
+        )
+        return
+      }
+
+      // Worker / datacenter IPs are often blocked by FormSubmit Cloudflare.
+      // Fall back to browser-side FormSubmit AJAX (same destination email).
+      const browserRes = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(site.email)}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          name: payload.name,
+          email: payload.email,
+          phone: payload.phone || '(not provided)',
+          message: payload.message,
+          _subject: `New inquiry from ${payload.name} — ${site.name}`,
+          _template: 'table',
+          _captcha: 'false',
+          _honey: honeypot,
+        }),
+      })
+
+      const browserText = await browserRes.text()
+      if (!browserRes.ok || isCloudflareChallenge(browserText)) {
+        throw new Error(
+          data.error && data.error !== 'FORMSUBMIT_CF_BLOCKED'
+            ? data.error
+            : copy.errorMessage ||
+                'Email delivery is temporarily blocked. Please email us directly or try again later.'
+        )
+      }
+
+      let browserData: { success?: string | boolean; message?: string } = {}
+      try {
+        browserData = JSON.parse(browserText) as typeof browserData
+      } catch {
+        throw new Error(copy.errorMessage || 'Email service returned an unexpected response.')
+      }
+
+      const msg = String(browserData.message || '').toLowerCase()
+      if (msg.includes('activate') || msg.includes('confirm your email')) {
+        setStatus('error')
+        setErrorMessage(
+          'FormSubmit sent an activation email to your Adwise inbox. Open it, click Activate Form, then submit again.'
+        )
+        return
+      }
+
+      if (browserData.success === 'false' || browserData.success === false) {
+        throw new Error(browserData.message || copy.errorMessage || 'Could not send your message.')
+      }
+
+      setStatus('success')
+      setFormData({ name: '', email: '', phone: '', message: '' })
+      setCaptcha('idle')
+    } catch (err) {
+      setStatus('error')
+      setErrorMessage(
+        err instanceof Error ? err.message : copy.errorMessage || 'Something went wrong. Please try again.'
+      )
+    }
   }
 
   return (
@@ -86,8 +193,6 @@ export default function Contact() {
           whileInView={{ y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.45, delay: 0.06 }}
-          action={`https://formsubmit.co/${site.email}`}
-          method="POST"
           onSubmit={onSubmit}
           className="soft-panel space-y-5 border border-white/10 bg-ink p-7 text-white md:p-10"
         >
@@ -99,16 +204,10 @@ export default function Contact() {
           </div>
 
           <input
-            type="hidden"
-            name="_subject"
-            value={`New inquiry from ${formData.name || 'website'} — ${site.name}`}
-          />
-          <input type="hidden" name="_template" value="table" />
-          <input type="hidden" name="_captcha" value="true" />
-          <input type="hidden" name="_next" value={`${site.url}/?sent=1#contact`} />
-          <input
             type="text"
             name="_honey"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
             tabIndex={-1}
             autoComplete="off"
             className="absolute left-[-9999px] h-0 w-0 opacity-0"
@@ -229,7 +328,7 @@ export default function Contact() {
             <p className="text-sm text-brand">{copy.successMessage}</p>
           )}
           {status === 'error' && (
-            <p className="text-sm text-red-300">{copy.errorMessage}</p>
+            <p className="text-sm text-red-300">{errorMessage || copy.errorMessage}</p>
           )}
         </motion.form>
       </div>
