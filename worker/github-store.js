@@ -49,6 +49,11 @@ async function ghRequest(cfg, path, init = {}) {
     } catch {
       /* ignore */
     }
+    if (res.status === 401 || res.status === 403) {
+      throw new Error(
+        'Site storage token expired (GitHub). Login and saves need a fresh GITHUB_TOKEN Worker secret — this is not your CMS password.',
+      )
+    }
     throw new Error(`GitHub API ${res.status}: ${msg}`)
   }
   return body ? JSON.parse(body) : {}
