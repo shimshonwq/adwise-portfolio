@@ -20,7 +20,8 @@ export default function Clients() {
     const reduce =
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const speed = 0.42
+    const speed = Number(copy.marqueeSpeed) > 0 ? Number(copy.marqueeSpeed) : 0.42
+    let visible = true
 
     const measure = () => {
       const el = trackRef.current
@@ -35,7 +36,7 @@ export default function Clients() {
     const tick = () => {
       const el = trackRef.current
       const w = loopWidthRef.current
-      if (el && !draggingRef.current && !reduce && w > 0) {
+      if (el && !draggingRef.current && !reduce && w > 0 && visible) {
         offsetRef.current -= speed
       }
       if (w > 0) {
@@ -47,12 +48,25 @@ export default function Clients() {
     }
     rafRef.current = window.requestAnimationFrame(tick)
 
+    const section = trackRef.current?.closest('section')
+    const io =
+      section && typeof IntersectionObserver !== 'undefined'
+        ? new IntersectionObserver(
+            (entries) => {
+              visible = entries.some((entry) => entry.isIntersecting)
+            },
+            { rootMargin: '120px' },
+          )
+        : null
+    if (section && io) io.observe(section)
+
     return () => {
       window.cancelAnimationFrame(rafRef.current)
       window.removeEventListener('resize', measure)
       ro?.disconnect()
+      io?.disconnect()
     }
-  }, [clients])
+  }, [clients, copy.marqueeSpeed])
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!clients.length) return

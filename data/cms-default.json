@@ -22,6 +22,14 @@
         "label": "Services"
       },
       {
+        "href": "#process",
+        "label": "Process"
+      },
+      {
+        "href": "/projects/",
+        "label": "Work"
+      },
+      {
         "href": "#about",
         "label": "About"
       },
@@ -307,7 +315,7 @@
   "projectsPage": {
     "eyebrow": "Portfolio",
     "title": "Our work",
-    "body": "Case studies and project stories are coming soon. Meanwhile, explore the brands on our homepage."
+    "body": "Logo design, branding, signage, and print — selected projects from Adwise Media."
   },
   "notFoundPage": {
     "title": "This page took a wrong turn",

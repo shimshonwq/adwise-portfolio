@@ -23,6 +23,15 @@ export default function Navigation() {
     }
   }, [open])
 
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open])
+
   return (
     <>
       <header
@@ -59,9 +68,11 @@ export default function Navigation() {
 
           <button
             type="button"
+            id="mobile-menu-button"
             className="relative z-[70] flex h-10 w-10 flex-col items-center justify-center gap-1.5 rounded-lg border border-ink/15 bg-white md:hidden"
             aria-label={open ? 'Close menu' : 'Open menu'}
             aria-expanded={open}
+            aria-controls="mobile-menu-panel"
             onClick={() => setOpen((v) => !v)}
           >
             <span
@@ -78,6 +89,10 @@ export default function Navigation() {
       <AnimatePresence>
         {open && (
           <motion.div
+            id="mobile-menu-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mobile-menu-button"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

@@ -1,7 +1,13 @@
 import type { AppProps } from 'next/app'
 import { Bricolage_Grotesque, EB_Garamond, Sora } from 'next/font/google'
+import SkipLink from '../components/SkipLink'
 import { SiteContentProvider } from '../lib/SiteContentContext'
+import type { CmsContent } from '../lib/content'
 import '../styles/globals.css'
+
+type PageProps = {
+  initialContent?: CmsContent | null
+}
 
 /**
  * Bricolage Grotesque — distinctive display.
@@ -29,7 +35,7 @@ const serifFont = EB_Garamond({
   style: 'italic',
 })
 
-export default function App({ Component, pageProps }: AppProps) {
+export default function App({ Component, pageProps }: AppProps & { pageProps: PageProps }) {
   return (
     <div
       className={`${displayFont.variable} ${bodyFont.variable} ${serifFont.variable} ${bodyFont.className}`}
@@ -41,7 +47,8 @@ export default function App({ Component, pageProps }: AppProps) {
         } as React.CSSProperties
       }
     >
-      <SiteContentProvider>
+      <SkipLink />
+      <SiteContentProvider initialContent={pageProps.initialContent}>
         <Component {...pageProps} />
       </SiteContentProvider>
     </div>

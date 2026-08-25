@@ -4,6 +4,7 @@ import { useSiteContent } from '../lib/SiteContentContext'
 import ContactChannels from './ContactChannels'
 import AnimatedText from './AnimatedText'
 import TurnstileField, { type TurnstileHandle } from './TurnstileField'
+import { friendlyContactError } from '../lib/contact-errors'
 
 type Status = 'idle' | 'submitting' | 'success' | 'error' | 'captcha'
 
@@ -38,7 +39,7 @@ async function postContact(payload: Record<string, string>, signal: AbortSignal)
         lastError = 'Security check blocked the request. Retrying…'
         continue
       }
-      let data: { ok?: boolean; error?: string; provider?: string } = {}
+      let data: { ok?: boolean; error?: string; provider?: string; needsActivation?: boolean } = {}
       try {
         data = raw ? (JSON.parse(raw) as typeof data) : {}
       } catch {
@@ -67,6 +68,7 @@ export default function Contact() {
   const [captchaConfigLoaded, setCaptchaConfigLoaded] = useState(false)
   const turnstileRef = useRef<TurnstileHandle | null>(null)
   const feedbackRef = useRef<HTMLParagraphElement | null>(null)
+  const [honeypot, setHoneypot] = useState('')
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -141,7 +143,7 @@ export default function Contact() {
       phone: formData.phone.trim(),
       message: formData.message.trim(),
       turnstileToken: token,
-      _honey: '',
+      _honey: honeypot.trim(),
     }
 
     try {
@@ -153,16 +155,26 @@ export default function Contact() {
       if (res.ok && data.ok) {
         setStatus('success')
         setFormData({ name: '', email: '', phone: '', message: '' })
+        setHoneypot('')
         setTurnstileToken(null)
         turnstileRef.current?.reset()
         return
       }
 
+      if (data.needsActivation) {
+        setStatus('error')
+        setErrorMessage(
+          data.error ||
+            'Check your inbox for a FormSubmit activation email, then try again.',
+        )
+        return
+      }
+
       setStatus('error')
       setErrorMessage(
-        data.error ||
+        friendlyContactError(data.error || '') ||
           copy.errorMessage ||
-          `Something went wrong — email us at ${site.email}.`,
+          'Something went wrong. Please try again.',
       )
       // Keep Turnstile token usable for a quick retry unless server rejected captcha.
       if (/human verification|verify you/i.test(String(data.error || ''))) {
@@ -174,9 +186,9 @@ export default function Contact() {
       const aborted = err instanceof Error && err.name === 'AbortError'
       setErrorMessage(
         aborted
-          ? `Sending timed out — please email us at ${site.email}.`
+          ? 'Sending timed out. Please try again or email us directly.'
           : err instanceof Error
-            ? err.message
+            ? friendlyContactError(err.message)
             : copy.errorMessage || 'Something went wrong. Please try again.',
       )
     }
@@ -241,16 +253,13 @@ export default function Contact() {
           {/* Server-only honeypot name that password managers rarely autofill */}
           <input
             type="text"
-            name="ne_hp_field"
-            defaultValue=""
+            name="_honey"
+            value={honeypot}
             tabIndex={-1}
             autoComplete="off"
             className="absolute left-[-9999px] h-0 w-0 opacity-0"
             aria-hidden
-            onChange={(e) => {
-              // If something fills this, ignore client-side — server still filters _honey if sent.
-              void e
-            }}
+            onChange={(e) => setHoneypot(e.target.value)}
           />
 
           <div className="grid gap-5 sm:grid-cols-2">
@@ -352,9 +361,12 @@ export default function Contact() {
           {status === 'error' && (
             <p ref={feedbackRef} className="text-sm font-medium text-red-300" role="alert">
               {errorMessage || copy.errorMessage}{' '}
-              <a className="underline" href={`mailto:${site.email}`}>
-                {site.email}
-              </a>
+              <span className="text-white/70">
+                Or email us at{' '}
+                <a className="underline text-white" href={`mailto:${site.email}`}>
+                  {site.email}
+                </a>
+              </span>
             </p>
           )}
         </motion.form>

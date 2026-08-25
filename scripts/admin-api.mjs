@@ -34,6 +34,7 @@ import {
   deliverContactMessage,
   validateContactPayload,
   verifyTurnstileToken,
+  friendlyContactError,
 } from './contact-mail.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -275,8 +276,13 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'OPTIONS') return json(res, 204, {})
 
   try {
+    if (req.method === 'GET' && pathname === '/api/health') {
+      return json(res, 200, { ok: true, service: 'adwise-portfolio' })
+    }
+
     if (req.method === 'GET' && pathname === '/api/content') {
-      return json(res, 200, { content: await readContent() })
+      const content = await readContent()
+      return json(res, 200, { content: { ...content, logos: visibleLogos(content) } })
     }
 
     if (req.method === 'GET' && pathname === '/api/logos') {
@@ -336,21 +342,10 @@ const server = http.createServer(async (req, res) => {
         }
         return json(res, 200, { ok: true, provider: result.provider })
       } catch (err) {
-        const message = err?.message || 'Could not send message right now.'
         return json(res, 502, {
-          error: message,
+          error: friendlyContactError(err?.message || 'Could not send message right now.'),
         })
       }
-    }
-
-    if (req.method === 'GET' && pathname === '/api/admin/status') {
-      const record = await getAuthRecord()
-      return json(res, 200, {
-        storage: githubConfigured() ? 'github' : 'local',
-        repo: process.env.GITHUB_REPO || 'shimshonwq/adwise-portfolio',
-        branch: process.env.GITHUB_BRANCH || 'main',
-        authUpdatedAt: record.updatedAt || null,
-      })
     }
 
     if (req.method === 'POST' && pathname === '/api/admin/login') {
@@ -382,6 +377,14 @@ const server = http.createServer(async (req, res) => {
 
     if (!(await requireAuth(req)) && pathname.startsWith('/api/admin')) {
       return json(res, 401, { error: 'Please log in' })
+    }
+
+    if (req.method === 'GET' && pathname === '/api/admin/status') {
+      return json(res, 200, {
+        storage: githubConfigured() ? 'github' : 'local',
+        repo: process.env.GITHUB_REPO || 'shimshonwq/adwise-portfolio',
+        branch: process.env.GITHUB_BRANCH || 'main',
+      })
     }
 
     if (req.method === 'POST' && pathname === '/api/admin/password') {

@@ -67,12 +67,15 @@ export type CmsContent = {
     ctaSecondaryLabel: string
     ctaSecondaryHref: string
     orbitCaption: string
+    showOpening?: boolean
+    showOrbit?: boolean
   }
   clients: {
     eyebrow: string
     title: string
     subtitle: string
     emptyMessage: string
+    marqueeSpeed?: number
   }
   services: {
     eyebrow: string

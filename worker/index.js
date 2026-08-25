@@ -29,6 +29,7 @@ import {
   deliverContactMessage,
   validateContactPayload,
   verifyTurnstileToken,
+  friendlyContactError,
 } from './contact-mail.js'
 
 const CONTENT_KV_KEY = 'content:v1'
@@ -290,8 +291,13 @@ async function handleApi(request, env) {
     return new Response(null, { status: 204, headers: cors })
   }
 
+  if (request.method === 'GET' && pathname === '/api/health') {
+    return json({ ok: true, service: 'adwise-portfolio' }, 200, cors)
+  }
+
   if (request.method === 'GET' && pathname === '/api/content') {
-    return json({ content: await readContent(env) }, 200, cors)
+    const content = await readContent(env)
+    return json({ content: { ...content, logos: visibleLogos(content) } }, 200, cors)
   }
 
   if (request.method === 'GET' && pathname === '/api/logos') {
@@ -326,6 +332,14 @@ async function handleApi(request, env) {
     if (!checked.ok) return json({ error: checked.error }, checked.status, cors)
 
     const turnstileSecret = String(env.TURNSTILE_SECRET_KEY || env.turnstile_secret_key || '').trim()
+    const turnstileSiteKey = String(env.TURNSTILE_SITE_KEY || env.turnstile_site_key || '').trim()
+    if (turnstileSiteKey && !turnstileSecret) {
+      return json(
+        { error: 'Human verification is not configured on the server.' },
+        503,
+        cors,
+      )
+    }
     if (turnstileSecret) {
       const captcha = await verifyTurnstileToken({
         token: checked.data.turnstileToken,
@@ -361,22 +375,8 @@ async function handleApi(request, env) {
       }
       return json({ ok: true, provider: result.provider }, 200, cors)
     } catch (err) {
-      const message = err?.message || 'Could not send message right now.'
+      const message = friendlyContactError(err?.message || 'Could not send message right now.')
       return json({ error: message }, 502, cors)
-    }
-  }
-
-  if (request.method === 'GET' && pathname === '/api/admin/status') {
-    try {
-      const record = await getAuthRecord(env)
-      return json({
-        storage: hasGithub(env) ? 'github' : env.LOGOS ? 'kv' : 'none',
-        repo: env.GITHUB_REPO || env.github_repo || 'shimshonwq/adwise-portfolio',
-        branch: env.GITHUB_BRANCH || env.github_branch || 'main',
-        authUpdatedAt: record.updatedAt || null,
-      })
-    } catch (err) {
-      return json({ error: err.message }, 503)
     }
   }
 
@@ -420,6 +420,14 @@ async function handleApi(request, env) {
 
   if (!authed && pathname.startsWith('/api/admin')) {
     return json({ error: 'Please log in' }, 401)
+  }
+
+  if (request.method === 'GET' && pathname === '/api/admin/status') {
+    return json({
+      storage: hasGithub(env) ? 'github' : env.LOGOS ? 'kv' : 'none',
+      repo: env.GITHUB_REPO || env.github_repo || 'shimshonwq/adwise-portfolio',
+      branch: env.GITHUB_BRANCH || env.github_branch || 'main',
+    })
   }
 
   if (
@@ -477,6 +485,10 @@ async function handleApi(request, env) {
 
   if (request.method === 'PUT' && pathname === '/api/admin/content') {
     const body = await request.json().catch(() => ({}))
+    const raw = JSON.stringify(body?.content ?? body)
+    if (raw.length > 512_000) {
+      return json({ error: 'Content payload is too large.' }, 413)
+    }
     const next = body.content || body
     if (!next?.site || !Array.isArray(next.logos)) {
       return json({ error: 'Invalid content payload' }, 400)

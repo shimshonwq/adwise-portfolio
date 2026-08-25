@@ -17,6 +17,7 @@ import {
   type LogoItem,
 } from './content'
 import { googleFontsHref } from './fonts'
+import { safeStylesheetUrl } from './safe-stylesheet-url'
 
 type SiteContentValue = {
   content: CmsContent
@@ -88,8 +89,8 @@ function applyTheme(content: CmsContent) {
     ['adwise-font-serif-custom', theme.fontSerifUrl],
   ] as const) {
     let el = document.getElementById(key) as HTMLLinkElement | null
-    const u = String(url || '').trim()
-    if (u && u.startsWith('http')) {
+    const u = safeStylesheetUrl(String(url || ''))
+    if (u) {
       if (!el) {
         el = document.createElement('link')
         el.id = key
@@ -103,9 +104,16 @@ function applyTheme(content: CmsContent) {
   }
 }
 
-export function SiteContentProvider({ children }: { children: ReactNode }) {
-  const [content, setContent] = useState<CmsContent>(DEFAULT_CONTENT)
-  const [ready, setReady] = useState(false)
+export function SiteContentProvider({
+  children,
+  initialContent,
+}: {
+  children: ReactNode
+  initialContent?: CmsContent | null
+}) {
+  const seeded = initialContent ? normalizeContent(initialContent) : DEFAULT_CONTENT
+  const [content, setContent] = useState<CmsContent>(seeded)
+  const [ready, setReady] = useState(Boolean(initialContent))
 
   const refresh = useCallback(async () => {
     const next = await fetchContent()
