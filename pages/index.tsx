@@ -10,12 +10,24 @@ import Contact from '../components/Contact'
 import Footer from '../components/Footer'
 import JsonLd from '../components/JsonLd'
 import { useSiteContent } from '../lib/SiteContentContext'
-import { DEFAULT_CONTENT } from '../lib/content'
+import { DEFAULT_BRAND, DEFAULT_CONTENT, orderedSections } from '../lib/content'
+
+const SECTION_MAP = {
+  hero: Hero,
+  services: Services,
+  clients: Clients,
+  spotlight: Spotlight,
+  process: Process,
+  about: About,
+  contact: Contact,
+} as const
 
 export default function Home() {
   const { content } = useSiteContent()
   const site = content.site || DEFAULT_CONTENT.site
-  const title = `${site.name} — ${site.seoTitleSuffix || 'Logo Design & Marketing'}`
+  const brand = content.brand || DEFAULT_BRAND
+  const title = `${site.name} - ${site.seoTitleSuffix || 'Logo Design & Marketing'}`
+  const sections = orderedSections(content).filter((s) => s.visible !== false)
 
   return (
     <>
@@ -25,11 +37,12 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="keywords" content={site.seoKeywords} />
         <link rel="canonical" href={site.url} />
+        <link rel="icon" href={brand.faviconSrc || '/favicon.png'} type="image/png" />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={site.description} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={site.url} />
-        <meta property="og:image" content={`${site.url}/logo.png`} />
+        <meta property="og:image" content={`${site.url}${brand.ogImageSrc || '/logo.png'}`} />
         <meta property="og:site_name" content={site.name} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={title} />
@@ -39,13 +52,11 @@ export default function Home() {
       <JsonLd />
       <Navigation />
       <main>
-        <Hero />
-        <Services />
-        <Clients />
-        <Spotlight />
-        <Process />
-        <About />
-        <Contact />
+        {sections.map((sec) => {
+          const Comp = SECTION_MAP[sec.id]
+          if (!Comp) return null
+          return <Comp key={sec.id} />
+        })}
       </main>
       <Footer />
     </>

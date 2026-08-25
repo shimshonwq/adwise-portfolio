@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { siteConfig } from '../config/site.config'
+import { useSiteContent } from '../lib/SiteContentContext'
+import { DEFAULT_BRAND, DEFAULT_CONTENT } from '../lib/content'
 
 interface LogoProps {
   href?: string
@@ -15,12 +16,16 @@ const sizes = {
 }
 
 export default function Logo({ href = '/', className = '', size = 'md', bright = false }: LogoProps) {
+  const { content } = useSiteContent()
+  const name = content.site?.name || DEFAULT_CONTENT.site.name
+  const src = content.brand?.logoSrc || DEFAULT_BRAND.logoSrc
+
   return (
-    <Link href={href} className={`inline-flex items-center ${className}`} aria-label={siteConfig.name}>
+    <Link href={href} className={`inline-flex items-center ${className}`} aria-label={name}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/logo.png"
-        alt={siteConfig.name}
+        src={src}
+        alt={name}
         width={200}
         height={62}
         className={`w-auto ${sizes[size]} ${bright ? 'drop-shadow-[0_10px_30px_rgba(0,0,0,0.35)]' : ''}`}

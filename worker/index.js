@@ -367,6 +367,49 @@ async function handleApi(request, env) {
     return json(okPayload(result))
   }
 
+  if (request.method === 'POST' && pathname === '/api/admin/brand') {
+    const body = await request.json().catch(() => ({}))
+    const kind = String(body.kind || '').trim()
+    if (!['logo', 'favicon', 'og'].includes(kind)) {
+      return json({ error: 'kind must be logo, favicon, or og' }, 400)
+    }
+    const parsed = dataUrlToBytes(String(body.dataUrl || ''))
+    if (!parsed) return json({ error: 'Upload a PNG, JPG, or WebP' }, 400)
+    const width = body.width != null ? Number(body.width) : null
+    const height = body.height != null ? Number(body.height) : null
+    if (kind === 'logo') {
+      const bad = validateLogoUpload({
+        mime: parsed.mime,
+        size: parsed.bytes.length,
+        width: Number.isFinite(width) ? width : null,
+        height: Number.isFinite(height) ? height : null,
+      })
+      if (bad) return json({ error: bad }, 400)
+    } else if (!extForLogoMime(parsed.mime)) {
+      return json({ error: 'Upload a PNG, JPG, or WebP' }, 400)
+    } else if (parsed.bytes.length > LOGO_MAX_BYTES) {
+      return json({ error: `File too large (max ${Math.round(LOGO_MAX_BYTES / 1024 / 1024)}MB)` }, 400)
+    }
+    const ext = extForLogoMime(parsed.mime)
+    if (!ext) return json({ error: 'Upload a PNG, JPG, or WebP' }, 400)
+    const file = `${kind}-${Date.now().toString(36)}.${ext}`
+    const src = `/uploads/brand/${file}`
+    if (hasGithub(env)) {
+      await writeBinaryFile(env, `public${src}`, parsed.bytes, `CMS: update brand ${kind}`)
+    }
+    const content = await readContent(env)
+    content.brand = content.brand || {
+      logoSrc: '/logo.png',
+      faviconSrc: '/favicon.png',
+      ogImageSrc: '/logo.png',
+    }
+    if (kind === 'logo') content.brand.logoSrc = src
+    if (kind === 'favicon') content.brand.faviconSrc = src
+    if (kind === 'og') content.brand.ogImageSrc = src
+    const result = await persistContent(env, content, `CMS: update brand ${kind}`)
+    return json(okPayload(result))
+  }
+
   if (request.method === 'GET' && pathname === '/api/admin/logos') {
     const content = await readContent(env)
     return json({

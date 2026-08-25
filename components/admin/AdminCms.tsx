@@ -1,12 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
+  BG_PRESETS,
+  DEFAULT_BRAND,
+  DEFAULT_CHANNELS,
   DEFAULT_CONTENT,
+  DEFAULT_LAYOUT_SECTIONS,
   DEFAULT_THEME,
+  orderedSections,
   type CmsContent,
   type LogoItem,
+  type TextStyleOverride,
   type ThemeColors,
 } from '../../lib/content'
 import { BODY_FONTS, DISPLAY_FONTS, SERIF_FONTS } from '../../lib/fonts'
+import { StyledField } from './StyledField'
 import {
   LOGO_ACCEPT_ATTR,
   LOGO_BEST_HEIGHT,
@@ -25,7 +32,9 @@ import {
 type Phase = 'checking' | 'login' | 'app'
 type Tab =
   | 'start'
+  | 'brand'
   | 'logos'
+  | 'layout'
   | 'colors'
   | 'site'
   | 'hero'
@@ -35,23 +44,27 @@ type Tab =
   | 'process'
   | 'about'
   | 'contact'
+  | 'channels'
   | 'pages'
   | 'security'
 
 const TABS: { id: Tab; label: string; emoji: string }[] = [
   { id: 'start', label: 'How this works', emoji: '1' },
-  { id: 'logos', label: 'Logos', emoji: '2' },
-  { id: 'colors', label: 'Colors', emoji: '3' },
-  { id: 'site', label: 'Site & contact', emoji: '4' },
-  { id: 'hero', label: 'Hero', emoji: '5' },
-  { id: 'clients', label: 'Clients section', emoji: '6' },
-  { id: 'services', label: 'Services', emoji: '7' },
-  { id: 'spotlight', label: 'Spotlight', emoji: '8' },
-  { id: 'process', label: 'Process', emoji: '9' },
-  { id: 'about', label: 'About', emoji: '10' },
-  { id: 'contact', label: 'Contact form', emoji: '11' },
-  { id: 'pages', label: 'Other pages', emoji: '12' },
-  { id: 'security', label: 'Password', emoji: '13' },
+  { id: 'brand', label: 'My logo', emoji: '2' },
+  { id: 'logos', label: 'Client logos', emoji: '3' },
+  { id: 'layout', label: 'Page layout', emoji: '4' },
+  { id: 'colors', label: 'Colors & fonts', emoji: '5' },
+  { id: 'site', label: 'Site & menu', emoji: '6' },
+  { id: 'hero', label: 'Hero', emoji: '7' },
+  { id: 'clients', label: 'Clients section', emoji: '8' },
+  { id: 'services', label: 'Services', emoji: '9' },
+  { id: 'spotlight', label: 'Spotlight', emoji: '10' },
+  { id: 'process', label: 'Process', emoji: '11' },
+  { id: 'about', label: 'About', emoji: '12' },
+  { id: 'contact', label: 'Contact form', emoji: '13' },
+  { id: 'channels', label: 'Contact buttons', emoji: '14' },
+  { id: 'pages', label: 'Extra pages', emoji: '15' },
+  { id: 'security', label: 'Password', emoji: '16' },
 ]
 
 function Guide({
@@ -296,7 +309,17 @@ export default function AdminCms() {
       ...DEFAULT_CONTENT,
       ...next,
       site: { ...DEFAULT_CONTENT.site, ...next.site },
+      brand: { ...DEFAULT_BRAND, ...DEFAULT_CONTENT.brand, ...next.brand },
       theme: { ...DEFAULT_THEME, ...next.theme },
+      layout: {
+        sections:
+          next.layout?.sections?.length > 0
+            ? next.layout.sections
+            : DEFAULT_CONTENT.layout?.sections || DEFAULT_LAYOUT_SECTIONS,
+      },
+      textStyles: { ...(DEFAULT_CONTENT.textStyles || {}), ...(next.textStyles || {}) },
+      channels: next.channels?.length ? next.channels : DEFAULT_CONTENT.channels || DEFAULT_CHANNELS,
+      customPages: Array.isArray(next.customPages) ? next.customPages : [],
       contact: { ...DEFAULT_CONTENT.contact, ...next.contact },
       projectsPage: { ...DEFAULT_CONTENT.projectsPage, ...next.projectsPage },
       notFoundPage: { ...DEFAULT_CONTENT.notFoundPage, ...next.notFoundPage },
@@ -412,6 +435,41 @@ export default function AdminCms() {
 
   const setTheme = (patch: Partial<ThemeColors>) => {
     setContent({ ...content, theme: { ...theme, ...patch } })
+  }
+
+  const setTextStyle = (path: string, style: TextStyleOverride | undefined) => {
+    const textStyles = { ...(content.textStyles || {}) }
+    if (!style) delete textStyles[path]
+    else textStyles[path] = style
+    setContent({ ...content, textStyles })
+  }
+
+  const uploadBrandAsset = async (kind: 'logo' | 'favicon' | 'og', file: File) => {
+    setBusy(true)
+    setError(null)
+    try {
+      const dims = await measureImage(file).catch(() => ({ width: 400, height: 200 }))
+      if (kind === 'logo') {
+        const err = validateLogoFile(file, dims.width, dims.height)
+        if (err) throw new Error(err)
+      } else if (!logoMimeOk(file.type)) {
+        throw new Error(`Use ${LOGO_EXT_LABEL} only.`)
+      }
+      const dataUrl = await readFileAsDataUrl(file)
+      const res = await fetch('/api/admin/brand/', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kind, dataUrl, width: dims.width, height: dims.height }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Upload failed')
+      applyApiResult(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed')
+    } finally {
+      setBusy(false)
+    }
   }
 
   const moveLogo = async (id: string, dir: -1 | 1) => {
@@ -667,11 +725,193 @@ export default function AdminCms() {
                 <div className="rounded-xl border border-ink/10 bg-paper p-4 text-sm">
                   <p className="font-semibold">Easy path for most edits</p>
                   <p className="mt-2 text-ink/70">
-                    Logos → add client logos · Colors → paint the whole site · Site & contact → phone,
-                    email, menu · Hero → big headline on top · Contact form → form labels · Password →
-                    keep the editor safe.
+                    My logo → your brand mark · Client logos → partners bar · Page layout → show/hide/reorder
+                    sections · Colors & fonts → paint + type · Site & menu → add links · Extra pages → new
+                    pages · On any text field tap <strong>Text style</strong> for font/size/color.
                   </p>
                 </div>
+              </div>
+            )}
+
+            {tab === 'brand' && (
+              <div className="max-w-3xl space-y-6">
+                <Guide
+                  title="Your brand logo (header & footer)"
+                  what="The Adwise mark in the top menu and footer — not the client logos strip."
+                  how="Upload a PNG/JPG/WebP. Same size rules as client logos work best."
+                  happens="Saved to GitHub; site rebuilds in 1–3 minutes with your new mark everywhere."
+                />
+                <div className="soft-panel space-y-4 border border-ink/10 bg-white p-6">
+                  <h2 className="font-display text-xl font-bold">Current brand logo</h2>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={content.brand?.logoSrc || DEFAULT_BRAND.logoSrc}
+                    alt="Brand logo"
+                    className="h-16 w-auto bg-paper object-contain"
+                  />
+                  <label className="btn btn-primary inline-flex cursor-pointer text-sm">
+                    {busy ? 'Uploading…' : 'Replace brand logo'}
+                    <input
+                      type="file"
+                      accept={LOGO_ACCEPT_ATTR}
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0]
+                        if (f) uploadBrandAsset('logo', f)
+                        e.target.value = ''
+                      }}
+                    />
+                  </label>
+                  <label className="btn btn-secondary inline-flex cursor-pointer text-sm">
+                    Replace favicon
+                    <input
+                      type="file"
+                      accept={LOGO_ACCEPT_ATTR}
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0]
+                        if (f) uploadBrandAsset('favicon', f)
+                        e.target.value = ''
+                      }}
+                    />
+                  </label>
+                  <label className="btn btn-secondary inline-flex cursor-pointer text-sm">
+                    Replace social / OG image
+                    <input
+                      type="file"
+                      accept={LOGO_ACCEPT_ATTR}
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0]
+                        if (f) uploadBrandAsset('og', f)
+                        e.target.value = ''
+                      }}
+                    />
+                  </label>
+                  <p className="text-xs text-ink/50">
+                    Favicon: {content.brand?.faviconSrc || DEFAULT_BRAND.faviconSrc} · OG:{' '}
+                    {content.brand?.ogImageSrc || DEFAULT_BRAND.ogImageSrc}
+                  </p>
+                  <button
+                    type="button"
+                    className="btn btn-secondary text-sm"
+                    onClick={() =>
+                      setContent({
+                        ...content,
+                        brand: { ...DEFAULT_BRAND },
+                      })
+                    }
+                  >
+                    Reset brand assets to default paths
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {tab === 'layout' && (
+              <div className="max-w-3xl">
+                <Guide
+                  title="Homepage sections"
+                  what="Which blocks appear on the homepage, and in what order."
+                  how="Use Show/Hide and ↑ ↓. Pick a background preset per section if you want."
+                  happens="Save changes, wait for rebuild, refresh the site."
+                />
+                <SectionSave
+                  busy={busy}
+                  onSave={() => saveContent(content)}
+                  onReset={() =>
+                    setContent({
+                      ...content,
+                      layout: { sections: structuredClone(DEFAULT_LAYOUT_SECTIONS) },
+                    })
+                  }
+                  title="Page layout"
+                >
+                  {orderedSections(content).map((sec, i, arr) => (
+                    <div
+                      key={sec.id}
+                      className="flex flex-wrap items-center gap-3 rounded-xl border border-ink/10 p-3"
+                    >
+                      <span className="min-w-[7rem] font-medium capitalize">{sec.id}</span>
+                      <button
+                        type="button"
+                        className="btn btn-secondary !px-2 !py-1 text-xs"
+                        disabled={busy || i === 0}
+                        onClick={() => {
+                          const sections = orderedSections(content).map((s) => ({ ...s }))
+                          ;[sections[i - 1], sections[i]] = [sections[i], sections[i - 1]]
+                          setContent({
+                            ...content,
+                            layout: {
+                              sections: sections.map((s, order) => ({ ...s, order })),
+                            },
+                          })
+                        }}
+                      >
+                        ↑
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-secondary !px-2 !py-1 text-xs"
+                        disabled={busy || i === arr.length - 1}
+                        onClick={() => {
+                          const sections = orderedSections(content).map((s) => ({ ...s }))
+                          ;[sections[i + 1], sections[i]] = [sections[i], sections[i + 1]]
+                          setContent({
+                            ...content,
+                            layout: {
+                              sections: sections.map((s, order) => ({ ...s, order })),
+                            },
+                          })
+                        }}
+                      >
+                        ↓
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-secondary !px-2 !py-1 text-xs"
+                        onClick={() => {
+                          const sections = orderedSections(content).map((s) =>
+                            s.id === sec.id ? { ...s, visible: s.visible === false } : s,
+                          )
+                          setContent({ ...content, layout: { sections } })
+                        }}
+                      >
+                        {sec.visible === false ? 'Show' : 'Hide'}
+                      </button>
+                      <select
+                        className="rounded border border-ink/15 bg-paper px-2 py-1 text-xs"
+                        value={sec.background || 'default'}
+                        onChange={(e) => {
+                          const sections = orderedSections(content).map((s) =>
+                            s.id === sec.id ? { ...s, background: e.target.value } : s,
+                          )
+                          setContent({ ...content, layout: { sections } })
+                        }}
+                      >
+                        {BG_PRESETS.map((b) => (
+                          <option key={b.id} value={b.id}>
+                            {b.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  ))}
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={theme.showColorRail !== false}
+                      onChange={(e) => setTheme({ showColorRail: e.target.checked })}
+                    />
+                    Show gold color rail at the top
+                  </label>
+                  <Field
+                    label="Custom page background (optional CSS color)"
+                    value={theme.pageBackground || ''}
+                    onChange={(v) => setTheme({ pageBackground: v })}
+                    hint="Example: #e8dfd0 or leave blank for default paper"
+                  />
+                </SectionSave>
               </div>
             )}
 
@@ -990,23 +1230,23 @@ export default function AdminCms() {
                   happens="Saved to GitHub; the live site updates after rebuild."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, site: { ...DEFAULT_CONTENT.site } })} title="Site & contact">
-                  <Field label="Business name" value={content.site.name} onChange={(v) => setContent({ ...content, site: { ...content.site, name: v } })} />
-                  <Field label="Short name" value={content.site.shortName} onChange={(v) => setContent({ ...content, site: { ...content.site, shortName: v } })} hint="Used in About eyebrow like “About Adwise”" />
-                  <Field label="Tagline" value={content.site.tagline} onChange={(v) => setContent({ ...content, site: { ...content.site, tagline: v } })} />
+                  <StyledField label="Business name" path="site.name" value={content.site.name} onChange={(v) => setContent({ ...content, site: { ...content.site, name: v } })} style={content.textStyles?.['site.name']} onStyleChange={setTextStyle} />
+                  <StyledField label="Short name" path="site.shortName" value={content.site.shortName} onChange={(v) => setContent({ ...content, site: { ...content.site, shortName: v } })} hint="Used in About eyebrow like “About Adwise”" style={content.textStyles?.['site.shortName']} onStyleChange={setTextStyle} />
+                  <StyledField label="Tagline" path="site.tagline" value={content.site.tagline} onChange={(v) => setContent({ ...content, site: { ...content.site, tagline: v } })} style={content.textStyles?.['site.tagline']} onStyleChange={setTextStyle} />
                   <Field label="Website URL" value={content.site.url} onChange={(v) => setContent({ ...content, site: { ...content.site, url: v } })} hint="Example: https://adwisemedia.co" />
-                  <Field label="SEO description" value={content.site.description} onChange={(v) => setContent({ ...content, site: { ...content.site, description: v } })} multiline hint="Shown in Google search results" />
+                  <StyledField label="SEO description" path="site.description" value={content.site.description} onChange={(v) => setContent({ ...content, site: { ...content.site, description: v } })} multiline hint="Shown in Google search results" style={content.textStyles?.['site.description']} onStyleChange={setTextStyle} />
                   <Field label="SEO title ending" value={content.site.seoTitleSuffix || ''} onChange={(v) => setContent({ ...content, site: { ...content.site, seoTitleSuffix: v } })} hint="Browser tab: Name — this text" />
                   <Field label="SEO keywords" value={content.site.seoKeywords || ''} onChange={(v) => setContent({ ...content, site: { ...content.site, seoKeywords: v } })} hint="Comma-separated words" />
                   <Field label="Email" value={content.site.email} onChange={(v) => setContent({ ...content, site: { ...content.site, email: v } })} />
                   <Field label="Phone (digits for WhatsApp/call)" value={content.site.phone} onChange={(v) => setContent({ ...content, site: { ...content.site, phone: v } })} hint="Example: 8455515506" />
                   <Field label="Phone display" value={content.site.phoneDisplay} onChange={(v) => setContent({ ...content, site: { ...content.site, phoneDisplay: v } })} hint="Example: (845) 551-5506" />
-                  <Field label="Location line" value={content.site.location} onChange={(v) => setContent({ ...content, site: { ...content.site, location: v } })} />
-                  <Field label="Menu button text" value={content.site.navCta} onChange={(v) => setContent({ ...content, site: { ...content.site, navCta: v } })} />
+                  <StyledField label="Location line" path="site.location" value={content.site.location} onChange={(v) => setContent({ ...content, site: { ...content.site, location: v } })} style={content.textStyles?.['site.location']} onStyleChange={setTextStyle} />
+                  <StyledField label="Menu button text" path="site.navCta" value={content.site.navCta} onChange={(v) => setContent({ ...content, site: { ...content.site, navCta: v } })} style={content.textStyles?.['site.navCta']} onStyleChange={setTextStyle} />
                   <Field label="Menu button link" value={content.site.navCtaHref || '/#contact'} onChange={(v) => setContent({ ...content, site: { ...content.site, navCtaHref: v } })} />
-                  <Field label="Footer blurb" value={content.site.footerBlurb} onChange={(v) => setContent({ ...content, site: { ...content.site, footerBlurb: v } })} multiline />
-                  <Field label="Footer meta line" value={content.site.footerMeta} onChange={(v) => setContent({ ...content, site: { ...content.site, footerMeta: v } })} />
-                  <Field label="Footer “Explore” heading" value={content.site.footerExploreHeading || 'Explore'} onChange={(v) => setContent({ ...content, site: { ...content.site, footerExploreHeading: v } })} />
-                  <Field label="Footer “Contact” heading" value={content.site.footerContactHeading || 'Contact'} onChange={(v) => setContent({ ...content, site: { ...content.site, footerContactHeading: v } })} />
+                  <StyledField label="Footer blurb" path="site.footerBlurb" value={content.site.footerBlurb} onChange={(v) => setContent({ ...content, site: { ...content.site, footerBlurb: v } })} multiline style={content.textStyles?.['site.footerBlurb']} onStyleChange={setTextStyle} />
+                  <StyledField label="Footer meta line" path="site.footerMeta" value={content.site.footerMeta} onChange={(v) => setContent({ ...content, site: { ...content.site, footerMeta: v } })} style={content.textStyles?.['site.footerMeta']} onStyleChange={setTextStyle} />
+                  <StyledField label="Footer “Explore” heading" path="site.footerExploreHeading" value={content.site.footerExploreHeading || 'Explore'} onChange={(v) => setContent({ ...content, site: { ...content.site, footerExploreHeading: v } })} style={content.textStyles?.['site.footerExploreHeading']} onStyleChange={setTextStyle} />
+                  <StyledField label="Footer “Contact” heading" path="site.footerContactHeading" value={content.site.footerContactHeading || 'Contact'} onChange={(v) => setContent({ ...content, site: { ...content.site, footerContactHeading: v } })} style={content.textStyles?.['site.footerContactHeading']} onStyleChange={setTextStyle} />
                   {content.site.nav.map((item, i) => (
                     <div key={i} className="grid gap-3 rounded-xl border border-ink/10 p-3 sm:grid-cols-2">
                       <Field label={`Menu item ${i + 1} label`} value={item.label} onChange={(v) => {
@@ -1016,9 +1256,34 @@ export default function AdminCms() {
                       <Field label="Link" value={item.href} onChange={(v) => {
                         const nav = content.site.nav.map((n, j) => (j === i ? { ...n, href: v } : n))
                         setContent({ ...content, site: { ...content.site, nav } })
-                      }} hint="Example: #services" />
+                      }} hint="Example: #services or /p/my-page/" />
+                      <button
+                        type="button"
+                        className="btn btn-secondary text-xs sm:col-span-2"
+                        onClick={() => {
+                          const nav = content.site.nav.filter((_, j) => j !== i)
+                          setContent({ ...content, site: { ...content.site, nav } })
+                        }}
+                      >
+                        Remove menu item
+                      </button>
                     </div>
                   ))}
+                  <button
+                    type="button"
+                    className="btn btn-secondary text-sm"
+                    onClick={() =>
+                      setContent({
+                        ...content,
+                        site: {
+                          ...content.site,
+                          nav: [...content.site.nav, { label: 'New link', href: '#contact' }],
+                        },
+                      })
+                    }
+                  >
+                    + Add menu item
+                  </button>
                 </SectionSave>
               </div>
             )}
@@ -1027,21 +1292,114 @@ export default function AdminCms() {
               <div className="max-w-3xl">
                 <Guide
                   title="Top of the homepage (Hero)"
-                  what="The big first screen: badge, headline, paragraph, buttons, and opening animation name."
-                  how="Edit the boxes. Links can be #work or #contact."
+                  what="The big first screen: badge, headline, paragraph, buttons, and opening animation."
+                  how="Edit text. Tap Text style on any line for font/size/color. Toggle opening animation and orbit art."
                   happens="Homepage hero updates after the rebuild."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, hero: { ...DEFAULT_CONTENT.hero } })} title="Hero">
-                  <Field label="Opening name (big letters)" value={content.hero.openName} onChange={(v) => setContent({ ...content, hero: { ...content.hero, openName: v } })} />
-                  <Field label="Eyebrow / badge" value={content.hero.eyebrow} onChange={(v) => setContent({ ...content, hero: { ...content.hero, eyebrow: v } })} />
-                  <Field label="Headline" value={content.hero.headline} onChange={(v) => setContent({ ...content, hero: { ...content.hero, headline: v } })} />
-                  <Field label="Body" value={content.hero.body} onChange={(v) => setContent({ ...content, hero: { ...content.hero, body: v } })} multiline />
-                  <Field label="Body accent (italic gold line)" value={content.hero.bodyAccent} onChange={(v) => setContent({ ...content, hero: { ...content.hero, bodyAccent: v } })} />
-                  <Field label="Primary button text" value={content.hero.ctaPrimaryLabel} onChange={(v) => setContent({ ...content, hero: { ...content.hero, ctaPrimaryLabel: v } })} />
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={content.hero.showOpening !== false}
+                      onChange={(e) =>
+                        setContent({ ...content, hero: { ...content.hero, showOpening: e.target.checked } })
+                      }
+                    />
+                    Play opening name animation
+                  </label>
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={content.hero.showOrbit !== false}
+                      onChange={(e) =>
+                        setContent({ ...content, hero: { ...content.hero, showOrbit: e.target.checked } })
+                      }
+                    />
+                    Show lightbulb orbit art
+                  </label>
+                  <StyledField
+                    label="Opening name (big letters)"
+                    path="hero.openName"
+                    value={content.hero.openName}
+                    onChange={(v) => setContent({ ...content, hero: { ...content.hero, openName: v } })}
+                    style={content.textStyles?.['hero.openName']}
+                    onStyleChange={setTextStyle}
+                  />
+                  <StyledField
+                    label="Eyebrow / badge"
+                    path="hero.eyebrow"
+                    value={content.hero.eyebrow}
+                    onChange={(v) => setContent({ ...content, hero: { ...content.hero, eyebrow: v } })}
+                    style={content.textStyles?.['hero.eyebrow']}
+                    onStyleChange={setTextStyle}
+                  />
+                  <StyledField
+                    label="Headline"
+                    path="hero.headline"
+                    value={content.hero.headline}
+                    onChange={(v) => setContent({ ...content, hero: { ...content.hero, headline: v } })}
+                    style={content.textStyles?.['hero.headline']}
+                    onStyleChange={setTextStyle}
+                  />
+                  <StyledField
+                    label="Body"
+                    path="hero.body"
+                    value={content.hero.body}
+                    multiline
+                    onChange={(v) => setContent({ ...content, hero: { ...content.hero, body: v } })}
+                    style={content.textStyles?.['hero.body']}
+                    onStyleChange={setTextStyle}
+                  />
+                  <StyledField
+                    label="Body accent (italic gold line)"
+                    path="hero.bodyAccent"
+                    value={content.hero.bodyAccent}
+                    onChange={(v) => setContent({ ...content, hero: { ...content.hero, bodyAccent: v } })}
+                    style={content.textStyles?.['hero.bodyAccent']}
+                    onStyleChange={setTextStyle}
+                  />
+                  <StyledField
+                    label="Primary button text"
+                    path="hero.ctaPrimaryLabel"
+                    value={content.hero.ctaPrimaryLabel}
+                    onChange={(v) => setContent({ ...content, hero: { ...content.hero, ctaPrimaryLabel: v } })}
+                    style={content.textStyles?.['hero.ctaPrimaryLabel']}
+                    onStyleChange={setTextStyle}
+                  />
                   <Field label="Primary button link" value={content.hero.ctaPrimaryHref} onChange={(v) => setContent({ ...content, hero: { ...content.hero, ctaPrimaryHref: v } })} />
-                  <Field label="Secondary button text" value={content.hero.ctaSecondaryLabel} onChange={(v) => setContent({ ...content, hero: { ...content.hero, ctaSecondaryLabel: v } })} />
+                  <StyledField
+                    label="Secondary button text"
+                    path="hero.ctaSecondaryLabel"
+                    value={content.hero.ctaSecondaryLabel}
+                    onChange={(v) => setContent({ ...content, hero: { ...content.hero, ctaSecondaryLabel: v } })}
+                    style={content.textStyles?.['hero.ctaSecondaryLabel']}
+                    onStyleChange={setTextStyle}
+                  />
                   <Field label="Secondary button link" value={content.hero.ctaSecondaryHref} onChange={(v) => setContent({ ...content, hero: { ...content.hero, ctaSecondaryHref: v } })} />
-                  <Field label="Orbit caption" value={content.hero.orbitCaption} onChange={(v) => setContent({ ...content, hero: { ...content.hero, orbitCaption: v } })} />
+                  <StyledField
+                    label="Orbit caption"
+                    path="hero.orbitCaption"
+                    value={content.hero.orbitCaption}
+                    onChange={(v) => setContent({ ...content, hero: { ...content.hero, orbitCaption: v } })}
+                    style={content.textStyles?.['hero.orbitCaption']}
+                    onStyleChange={setTextStyle}
+                  />
+                  <label className="block text-sm">
+                    <span className="mb-1.5 block font-medium text-ink/70">Hero background</span>
+                    <select
+                      className="w-full rounded-lg border border-ink/15 bg-paper px-3 py-2.5 text-sm"
+                      value={content.hero.background || 'aurora'}
+                      onChange={(e) =>
+                        setContent({ ...content, hero: { ...content.hero, background: e.target.value } })
+                      }
+                    >
+                      {BG_PRESETS.map((b) => (
+                        <option key={b.id} value={b.id}>
+                          {b.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
                 </SectionSave>
               </div>
             )}
@@ -1055,10 +1413,21 @@ export default function AdminCms() {
                   happens="Section text updates after rebuild."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, clients: { ...DEFAULT_CONTENT.clients } })} title="Clients section">
-                  <Field label="Eyebrow" value={content.clients.eyebrow} onChange={(v) => setContent({ ...content, clients: { ...content.clients, eyebrow: v } })} />
-                  <Field label="Title" value={content.clients.title} onChange={(v) => setContent({ ...content, clients: { ...content.clients, title: v } })} />
-                  <Field label="Subtitle" value={content.clients.subtitle} onChange={(v) => setContent({ ...content, clients: { ...content.clients, subtitle: v } })} multiline />
-                  <Field label="Empty message (if no logos)" value={content.clients.emptyMessage} onChange={(v) => setContent({ ...content, clients: { ...content.clients, emptyMessage: v } })} />
+                  <StyledField label="Eyebrow" path="clients.eyebrow" value={content.clients.eyebrow} onChange={(v) => setContent({ ...content, clients: { ...content.clients, eyebrow: v } })} style={content.textStyles?.['clients.eyebrow']} onStyleChange={setTextStyle} />
+                  <StyledField label="Title" path="clients.title" value={content.clients.title} onChange={(v) => setContent({ ...content, clients: { ...content.clients, title: v } })} style={content.textStyles?.['clients.title']} onStyleChange={setTextStyle} />
+                  <StyledField label="Subtitle" path="clients.subtitle" value={content.clients.subtitle} onChange={(v) => setContent({ ...content, clients: { ...content.clients, subtitle: v } })} multiline style={content.textStyles?.['clients.subtitle']} onStyleChange={setTextStyle} />
+                  <StyledField label="Empty message (if no logos)" path="clients.emptyMessage" value={content.clients.emptyMessage} onChange={(v) => setContent({ ...content, clients: { ...content.clients, emptyMessage: v } })} style={content.textStyles?.['clients.emptyMessage']} onStyleChange={setTextStyle} />
+                  <Field
+                    label="Marquee speed (0.2 slow – 1.2 fast)"
+                    value={String(content.clients.marqueeSpeed ?? 0.42)}
+                    onChange={(v) =>
+                      setContent({
+                        ...content,
+                        clients: { ...content.clients, marqueeSpeed: Number(v) || 0.42 },
+                      })
+                    }
+                    hint="Numbers only. Default 0.42"
+                  />
                 </SectionSave>
               </div>
             )}
@@ -1073,24 +1442,24 @@ export default function AdminCms() {
                   tip="You can add or remove a card with the buttons under each card."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, services: structuredClone(DEFAULT_CONTENT.services) })} title="Services">
-                  <Field label="Eyebrow" value={content.services.eyebrow} onChange={(v) => setContent({ ...content, services: { ...content.services, eyebrow: v } })} />
-                  <Field label="Title" value={content.services.title} onChange={(v) => setContent({ ...content, services: { ...content.services, title: v } })} />
-                  <Field label="Subtitle" value={content.services.subtitle} onChange={(v) => setContent({ ...content, services: { ...content.services, subtitle: v } })} multiline />
+                  <StyledField label="Eyebrow" path="services.eyebrow" value={content.services.eyebrow} onChange={(v) => setContent({ ...content, services: { ...content.services, eyebrow: v } })} style={content.textStyles?.['services.eyebrow']} onStyleChange={setTextStyle} />
+                  <StyledField label="Title" path="services.title" value={content.services.title} onChange={(v) => setContent({ ...content, services: { ...content.services, title: v } })} style={content.textStyles?.['services.title']} onStyleChange={setTextStyle} />
+                  <StyledField label="Subtitle" path="services.subtitle" value={content.services.subtitle} onChange={(v) => setContent({ ...content, services: { ...content.services, subtitle: v } })} multiline style={content.textStyles?.['services.subtitle']} onStyleChange={setTextStyle} />
                   {content.services.items.map((item, i) => (
                     <div key={item.id} className="space-y-3 rounded-xl border border-ink/10 bg-paper/50 p-4">
                       <p className="text-xs font-bold uppercase tracking-wider text-brass">Card {i + 1}</p>
-                      <Field label="Number label" value={item.num} onChange={(v) => {
+                      <StyledField label="Number label" path={`services.items.${item.id}.num`} value={item.num} onChange={(v) => {
                         const items = content.services.items.map((x, j) => (j === i ? { ...x, num: v } : x))
                         setContent({ ...content, services: { ...content.services, items } })
-                      }} />
-                      <Field label="Title" value={item.title} onChange={(v) => {
+                      }} style={content.textStyles?.[`services.items.${item.id}.num`]} onStyleChange={setTextStyle} />
+                      <StyledField label="Title" path={`services.items.${item.id}.title`} value={item.title} onChange={(v) => {
                         const items = content.services.items.map((x, j) => (j === i ? { ...x, title: v } : x))
                         setContent({ ...content, services: { ...content.services, items } })
-                      }} />
-                      <Field label="Description" value={item.description} multiline onChange={(v) => {
+                      }} style={content.textStyles?.[`services.items.${item.id}.title`]} onStyleChange={setTextStyle} />
+                      <StyledField label="Description" path={`services.items.${item.id}.description`} value={item.description} multiline onChange={(v) => {
                         const items = content.services.items.map((x, j) => (j === i ? { ...x, description: v } : x))
                         setContent({ ...content, services: { ...content.services, items } })
-                      }} />
+                      }} style={content.textStyles?.[`services.items.${item.id}.description`]} onStyleChange={setTextStyle} />
                       <Field label="Bullet points (one per line)" value={item.points.join('\n')} multiline onChange={(v) => {
                         const items = content.services.items.map((x, j) =>
                           j === i ? { ...x, points: v.split('\n').map((s) => s.trim()).filter(Boolean) } : x,
@@ -1164,13 +1533,13 @@ export default function AdminCms() {
                   happens="Spotlight section updates after rebuild."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, spotlight: structuredClone(DEFAULT_CONTENT.spotlight) })} title="Spotlight">
-                  <Field label="Eyebrow" value={content.spotlight.eyebrow} onChange={(v) => setContent({ ...content, spotlight: { ...content.spotlight, eyebrow: v } })} />
-                  <Field label="Title lines (one per line)" value={content.spotlight.titleLines.join('\n')} multiline onChange={(v) => setContent({ ...content, spotlight: { ...content.spotlight, titleLines: v.split('\n').map((s) => s.trim()).filter(Boolean) } })} />
-                  <Field label="Body" value={content.spotlight.body} multiline onChange={(v) => setContent({ ...content, spotlight: { ...content.spotlight, body: v } })} />
-                  <Field label="Accent line" value={content.spotlight.accent} onChange={(v) => setContent({ ...content, spotlight: { ...content.spotlight, accent: v } })} />
-                  <Field label="Primary button text" value={content.spotlight.ctaPrimaryLabel} onChange={(v) => setContent({ ...content, spotlight: { ...content.spotlight, ctaPrimaryLabel: v } })} />
+                  <StyledField label="Eyebrow" path="spotlight.eyebrow" value={content.spotlight.eyebrow} onChange={(v) => setContent({ ...content, spotlight: { ...content.spotlight, eyebrow: v } })} style={content.textStyles?.['spotlight.eyebrow']} onStyleChange={setTextStyle} />
+                  <Field label="Title lines (one per line)" value={content.spotlight.titleLines.join('\n')} multiline onChange={(v) => setContent({ ...content, spotlight: { ...content.spotlight, titleLines: v.split('\n').map((s) => s.trim()).filter(Boolean) } })} hint="After save, open Text style on each line via clients rebuild — line styles use spotlight.titleLines.0 etc. Edit body/accent styles below." />
+                  <StyledField label="Body" path="spotlight.body" value={content.spotlight.body} multiline onChange={(v) => setContent({ ...content, spotlight: { ...content.spotlight, body: v } })} style={content.textStyles?.['spotlight.body']} onStyleChange={setTextStyle} />
+                  <StyledField label="Accent line" path="spotlight.accent" value={content.spotlight.accent} onChange={(v) => setContent({ ...content, spotlight: { ...content.spotlight, accent: v } })} style={content.textStyles?.['spotlight.accent']} onStyleChange={setTextStyle} />
+                  <StyledField label="Primary button text" path="spotlight.ctaPrimaryLabel" value={content.spotlight.ctaPrimaryLabel} onChange={(v) => setContent({ ...content, spotlight: { ...content.spotlight, ctaPrimaryLabel: v } })} style={content.textStyles?.['spotlight.ctaPrimaryLabel']} onStyleChange={setTextStyle} />
                   <Field label="Primary button link" value={content.spotlight.ctaPrimaryHref} onChange={(v) => setContent({ ...content, spotlight: { ...content.spotlight, ctaPrimaryHref: v } })} />
-                  <Field label="Secondary button text" value={content.spotlight.ctaSecondaryLabel} onChange={(v) => setContent({ ...content, spotlight: { ...content.spotlight, ctaSecondaryLabel: v } })} />
+                  <StyledField label="Secondary button text" path="spotlight.ctaSecondaryLabel" value={content.spotlight.ctaSecondaryLabel} onChange={(v) => setContent({ ...content, spotlight: { ...content.spotlight, ctaSecondaryLabel: v } })} style={content.textStyles?.['spotlight.ctaSecondaryLabel']} onStyleChange={setTextStyle} />
                   <Field label="Secondary button link" value={content.spotlight.ctaSecondaryHref} onChange={(v) => setContent({ ...content, spotlight: { ...content.spotlight, ctaSecondaryHref: v } })} />
                 </SectionSave>
               </div>
@@ -1185,24 +1554,24 @@ export default function AdminCms() {
                   happens="Process section updates after rebuild."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, process: structuredClone(DEFAULT_CONTENT.process) })} title="Process">
-                  <Field label="Eyebrow" value={content.process.eyebrow} onChange={(v) => setContent({ ...content, process: { ...content.process, eyebrow: v } })} />
-                  <Field label="Title" value={content.process.title} onChange={(v) => setContent({ ...content, process: { ...content.process, title: v } })} />
-                  <Field label="Subtitle" value={content.process.subtitle} multiline onChange={(v) => setContent({ ...content, process: { ...content.process, subtitle: v } })} />
+                  <StyledField label="Eyebrow" path="process.eyebrow" value={content.process.eyebrow} onChange={(v) => setContent({ ...content, process: { ...content.process, eyebrow: v } })} style={content.textStyles?.['process.eyebrow']} onStyleChange={setTextStyle} />
+                  <StyledField label="Title" path="process.title" value={content.process.title} onChange={(v) => setContent({ ...content, process: { ...content.process, title: v } })} style={content.textStyles?.['process.title']} onStyleChange={setTextStyle} />
+                  <StyledField label="Subtitle" path="process.subtitle" value={content.process.subtitle} multiline onChange={(v) => setContent({ ...content, process: { ...content.process, subtitle: v } })} style={content.textStyles?.['process.subtitle']} onStyleChange={setTextStyle} />
                   {content.process.steps.map((step, i) => (
                     <div key={step.id} className="space-y-3 rounded-xl border border-ink/10 p-4">
                       <p className="text-xs font-bold uppercase tracking-wider text-brass">Step {i + 1}</p>
-                      <Field label="Number" value={step.num} onChange={(v) => {
+                      <StyledField label="Number" path={`process.steps.${step.id}.num`} value={step.num} onChange={(v) => {
                         const steps = content.process.steps.map((x, j) => (j === i ? { ...x, num: v } : x))
                         setContent({ ...content, process: { ...content.process, steps } })
-                      }} />
-                      <Field label="Title" value={step.title} onChange={(v) => {
+                      }} style={content.textStyles?.[`process.steps.${step.id}.num`]} onStyleChange={setTextStyle} />
+                      <StyledField label="Title" path={`process.steps.${step.id}.title`} value={step.title} onChange={(v) => {
                         const steps = content.process.steps.map((x, j) => (j === i ? { ...x, title: v } : x))
                         setContent({ ...content, process: { ...content.process, steps } })
-                      }} />
-                      <Field label="Body" value={step.body} multiline onChange={(v) => {
+                      }} style={content.textStyles?.[`process.steps.${step.id}.title`]} onStyleChange={setTextStyle} />
+                      <StyledField label="Body" path={`process.steps.${step.id}.body`} value={step.body} multiline onChange={(v) => {
                         const steps = content.process.steps.map((x, j) => (j === i ? { ...x, body: v } : x))
                         setContent({ ...content, process: { ...content.process, steps } })
-                      }} />
+                      }} style={content.textStyles?.[`process.steps.${step.id}.body`]} onStyleChange={setTextStyle} />
                       <label className="block text-sm">
                         <span className="mb-1.5 block font-medium text-ink/70">Tone</span>
                         <select
@@ -1269,21 +1638,40 @@ export default function AdminCms() {
                   happens="About section updates after rebuild."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, about: structuredClone(DEFAULT_CONTENT.about) })} title="About">
-                  <Field label="Eyebrow" value={content.about.eyebrow} onChange={(v) => setContent({ ...content, about: { ...content.about, eyebrow: v } })} hint="Tip: write About {shortName}" />
-                  <Field label="Title" value={content.about.title} onChange={(v) => setContent({ ...content, about: { ...content.about, title: v } })} />
-                  <Field label="Body" value={content.about.body} multiline onChange={(v) => setContent({ ...content, about: { ...content.about, body: v } })} />
-                  <Field label="Accent" value={content.about.accent} onChange={(v) => setContent({ ...content, about: { ...content.about, accent: v } })} />
+                  <StyledField label="Eyebrow" path="about.eyebrow" value={content.about.eyebrow} onChange={(v) => setContent({ ...content, about: { ...content.about, eyebrow: v } })} hint="Tip: write About {shortName}" style={content.textStyles?.['about.eyebrow']} onStyleChange={setTextStyle} />
+                  <StyledField label="Title" path="about.title" value={content.about.title} onChange={(v) => setContent({ ...content, about: { ...content.about, title: v } })} style={content.textStyles?.['about.title']} onStyleChange={setTextStyle} />
+                  <StyledField label="Body" path="about.body" value={content.about.body} multiline onChange={(v) => setContent({ ...content, about: { ...content.about, body: v } })} style={content.textStyles?.['about.body']} onStyleChange={setTextStyle} />
+                  <StyledField label="Accent" path="about.accent" value={content.about.accent} onChange={(v) => setContent({ ...content, about: { ...content.about, accent: v } })} style={content.textStyles?.['about.accent']} onStyleChange={setTextStyle} />
                   {content.about.principles.map((p, i) => (
                     <div key={p.id} className="space-y-3 rounded-xl border border-ink/10 p-4">
                       <p className="text-xs font-bold uppercase tracking-wider text-brass">Principle {i + 1}</p>
-                      <Field label="Title" value={p.title} onChange={(v) => {
-                        const principles = content.about.principles.map((x, j) => (j === i ? { ...x, title: v } : x))
-                        setContent({ ...content, about: { ...content.about, principles } })
-                      }} />
-                      <Field label="Body" value={p.body} multiline onChange={(v) => {
-                        const principles = content.about.principles.map((x, j) => (j === i ? { ...x, body: v } : x))
-                        setContent({ ...content, about: { ...content.about, principles } })
-                      }} />
+                      <StyledField
+                        label="Title"
+                        path={`about.principles.${p.id}.title`}
+                        value={p.title}
+                        onChange={(v) => {
+                          const principles = content.about.principles.map((x, j) =>
+                            j === i ? { ...x, title: v } : x,
+                          )
+                          setContent({ ...content, about: { ...content.about, principles } })
+                        }}
+                        style={content.textStyles?.[`about.principles.${p.id}.title`]}
+                        onStyleChange={setTextStyle}
+                      />
+                      <StyledField
+                        label="Body"
+                        path={`about.principles.${p.id}.body`}
+                        value={p.body}
+                        multiline
+                        onChange={(v) => {
+                          const principles = content.about.principles.map((x, j) =>
+                            j === i ? { ...x, body: v } : x,
+                          )
+                          setContent({ ...content, about: { ...content.about, principles } })
+                        }}
+                        style={content.textStyles?.[`about.principles.${p.id}.body`]}
+                        onStyleChange={setTextStyle}
+                      />
                       <label className="block text-sm">
                         <span className="mb-1.5 block font-medium text-ink/70">Tone</span>
                         <select
@@ -1348,45 +1736,208 @@ export default function AdminCms() {
                   happens="Contact section updates after rebuild. Form still emails your site email via FormSubmit."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, contact: { ...DEFAULT_CONTENT.contact } })} title="Contact">
-                  <Field label="Eyebrow" value={content.contact.eyebrow} onChange={(v) => setContent({ ...content, contact: { ...content.contact, eyebrow: v } })} />
-                  <Field label="Title" value={content.contact.title} onChange={(v) => setContent({ ...content, contact: { ...content.contact, title: v } })} />
-                  <Field label="Intro" value={content.contact.intro} multiline onChange={(v) => setContent({ ...content, contact: { ...content.contact, intro: v } })} />
-                  <Field label="Form eyebrow" value={content.contact.formEyebrow} onChange={(v) => setContent({ ...content, contact: { ...content.contact, formEyebrow: v } })} />
-                  <Field label="Form note" value={content.contact.formNote} onChange={(v) => setContent({ ...content, contact: { ...content.contact, formNote: v } })} />
-                  <Field label="Success message" value={content.contact.successMessage} onChange={(v) => setContent({ ...content, contact: { ...content.contact, successMessage: v } })} />
-                  <Field label="Error message" value={content.contact.errorMessage} onChange={(v) => setContent({ ...content, contact: { ...content.contact, errorMessage: v } })} />
-                  <Field label="Name label" value={content.contact.nameLabel || 'Name'} onChange={(v) => setContent({ ...content, contact: { ...content.contact, nameLabel: v } })} />
+                  <StyledField label="Eyebrow" path="contact.eyebrow" value={content.contact.eyebrow} onChange={(v) => setContent({ ...content, contact: { ...content.contact, eyebrow: v } })} style={content.textStyles?.['contact.eyebrow']} onStyleChange={setTextStyle} />
+                  <StyledField label="Title" path="contact.title" value={content.contact.title} onChange={(v) => setContent({ ...content, contact: { ...content.contact, title: v } })} style={content.textStyles?.['contact.title']} onStyleChange={setTextStyle} />
+                  <StyledField label="Intro" path="contact.intro" value={content.contact.intro} multiline onChange={(v) => setContent({ ...content, contact: { ...content.contact, intro: v } })} style={content.textStyles?.['contact.intro']} onStyleChange={setTextStyle} />
+                  <StyledField label="Form eyebrow" path="contact.formEyebrow" value={content.contact.formEyebrow} onChange={(v) => setContent({ ...content, contact: { ...content.contact, formEyebrow: v } })} style={content.textStyles?.['contact.formEyebrow']} onStyleChange={setTextStyle} />
+                  <StyledField label="Form note" path="contact.formNote" value={content.contact.formNote} onChange={(v) => setContent({ ...content, contact: { ...content.contact, formNote: v } })} style={content.textStyles?.['contact.formNote']} onStyleChange={setTextStyle} />
+                  <StyledField label="Success message" path="contact.successMessage" value={content.contact.successMessage} onChange={(v) => setContent({ ...content, contact: { ...content.contact, successMessage: v } })} style={content.textStyles?.['contact.successMessage']} onStyleChange={setTextStyle} />
+                  <StyledField label="Error message" path="contact.errorMessage" value={content.contact.errorMessage} onChange={(v) => setContent({ ...content, contact: { ...content.contact, errorMessage: v } })} style={content.textStyles?.['contact.errorMessage']} onStyleChange={setTextStyle} />
+                  <StyledField label="Name label" path="contact.nameLabel" value={content.contact.nameLabel || 'Name'} onChange={(v) => setContent({ ...content, contact: { ...content.contact, nameLabel: v } })} style={content.textStyles?.['contact.nameLabel']} onStyleChange={setTextStyle} />
                   <Field label="Name placeholder" value={content.contact.namePlaceholder || ''} onChange={(v) => setContent({ ...content, contact: { ...content.contact, namePlaceholder: v } })} />
-                  <Field label="Email label" value={content.contact.emailLabel || 'Email'} onChange={(v) => setContent({ ...content, contact: { ...content.contact, emailLabel: v } })} />
+                  <StyledField label="Email label" path="contact.emailLabel" value={content.contact.emailLabel || 'Email'} onChange={(v) => setContent({ ...content, contact: { ...content.contact, emailLabel: v } })} style={content.textStyles?.['contact.emailLabel']} onStyleChange={setTextStyle} />
                   <Field label="Email placeholder" value={content.contact.emailPlaceholder || ''} onChange={(v) => setContent({ ...content, contact: { ...content.contact, emailPlaceholder: v } })} />
-                  <Field label="Phone label" value={content.contact.phoneLabel || 'Phone'} onChange={(v) => setContent({ ...content, contact: { ...content.contact, phoneLabel: v } })} />
+                  <StyledField label="Phone label" path="contact.phoneLabel" value={content.contact.phoneLabel || 'Phone'} onChange={(v) => setContent({ ...content, contact: { ...content.contact, phoneLabel: v } })} style={content.textStyles?.['contact.phoneLabel']} onStyleChange={setTextStyle} />
                   <Field label="Phone placeholder" value={content.contact.phonePlaceholder || ''} onChange={(v) => setContent({ ...content, contact: { ...content.contact, phonePlaceholder: v } })} />
-                  <Field label="Message label" value={content.contact.messageLabel || 'Message'} onChange={(v) => setContent({ ...content, contact: { ...content.contact, messageLabel: v } })} />
+                  <StyledField label="Message label" path="contact.messageLabel" value={content.contact.messageLabel || 'Message'} onChange={(v) => setContent({ ...content, contact: { ...content.contact, messageLabel: v } })} style={content.textStyles?.['contact.messageLabel']} onStyleChange={setTextStyle} />
                   <Field label="Message placeholder" value={content.contact.messagePlaceholder || ''} onChange={(v) => setContent({ ...content, contact: { ...content.contact, messagePlaceholder: v } })} />
-                  <Field label="Submit button" value={content.contact.submitLabel || 'Send message'} onChange={(v) => setContent({ ...content, contact: { ...content.contact, submitLabel: v } })} />
+                  <StyledField label="Submit button" path="contact.submitLabel" value={content.contact.submitLabel || 'Send message'} onChange={(v) => setContent({ ...content, contact: { ...content.contact, submitLabel: v } })} style={content.textStyles?.['contact.submitLabel']} onStyleChange={setTextStyle} />
                   <Field label="Sending button" value={content.contact.sendingLabel || 'Sending…'} onChange={(v) => setContent({ ...content, contact: { ...content.contact, sendingLabel: v } })} />
+                  <StyledField label="Captcha section label" path="contact.captchaLabel" value={content.contact.captchaLabel || ''} onChange={(v) => setContent({ ...content, contact: { ...content.contact, captchaLabel: v } })} style={content.textStyles?.['contact.captchaLabel']} onStyleChange={setTextStyle} />
+                  <Field label="Captcha idle text" value={content.contact.captchaIdle || ''} onChange={(v) => setContent({ ...content, contact: { ...content.contact, captchaIdle: v } })} />
+                  <Field label="Captcha checking text" value={content.contact.captchaChecking || ''} onChange={(v) => setContent({ ...content, contact: { ...content.contact, captchaChecking: v } })} />
+                  <Field label="Captcha verified text" value={content.contact.captchaVerified || ''} onChange={(v) => setContent({ ...content, contact: { ...content.contact, captchaVerified: v } })} />
+                </SectionSave>
+              </div>
+            )}
+
+
+            {tab === 'channels' && (
+              <div className="max-w-3xl">
+                <Guide
+                  title="WhatsApp / Email / Call / SMS buttons"
+                  what="The round contact icons near the form and elsewhere."
+                  how="Rename any button and turn it on or off. Phone/email come from Site & menu."
+                  happens="Contact buttons update after rebuild."
+                />
+                <SectionSave
+                  busy={busy}
+                  onSave={() => saveContent(content)}
+                  onReset={() =>
+                    setContent({
+                      ...content,
+                      channels: structuredClone(DEFAULT_CHANNELS),
+                    })
+                  }
+                  title="Contact buttons"
+                >
+                  {(content.channels?.length ? content.channels : DEFAULT_CHANNELS).map((ch, i) => (
+                    <div key={ch.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-ink/10 p-3">
+                      <span className="min-w-[5rem] text-sm font-semibold capitalize">{ch.id}</span>
+                      <input
+                        type="text"
+                        className="min-w-[10rem] flex-1 rounded-lg border border-ink/15 bg-paper px-3 py-2 text-sm"
+                        value={ch.label}
+                        onChange={(e) => {
+                          const channels = (content.channels?.length
+                            ? content.channels
+                            : DEFAULT_CHANNELS
+                          ).map((c, j) => (j === i ? { ...c, label: e.target.value } : c))
+                          setContent({ ...content, channels })
+                        }}
+                      />
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={ch.visible !== false}
+                          onChange={(e) => {
+                            const channels = (content.channels?.length
+                              ? content.channels
+                              : DEFAULT_CHANNELS
+                            ).map((c, j) => (j === i ? { ...c, visible: e.target.checked } : c))
+                            setContent({ ...content, channels })
+                          }}
+                        />
+                        Show
+                      </label>
+                    </div>
+                  ))}
                 </SectionSave>
               </div>
             )}
 
             {tab === 'pages' && (
-              <div className="max-w-3xl">
+              <div className="max-w-3xl space-y-6">
                 <Guide
-                  title="Other pages"
-                  what="The /projects “coming soon” page and the 404 “page not found” page."
-                  how="Edit the titles and paragraphs, then save."
-                  happens="Those pages update after rebuild."
+                  title="Extra pages"
+                  what="Built-in Projects/404 copy, plus brand-new pages you create (live at /p/your-slug/ after rebuild)."
+                  how="Edit projects/404 below, or add a custom page with a simple URL slug (letters, numbers, dashes)."
+                  happens="Custom pages appear after Cloudflare rebuilds. Turn on “Show in top menu” or add a link under Site & menu."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, projectsPage: { ...DEFAULT_CONTENT.projectsPage } })} title="Projects page">
-                  <Field label="Eyebrow" value={content.projectsPage?.eyebrow || ''} onChange={(v) => setContent({ ...content, projectsPage: { ...content.projectsPage, eyebrow: v } })} />
-                  <Field label="Title" value={content.projectsPage?.title || ''} onChange={(v) => setContent({ ...content, projectsPage: { ...content.projectsPage, title: v } })} />
-                  <Field label="Body" value={content.projectsPage?.body || ''} multiline onChange={(v) => setContent({ ...content, projectsPage: { ...content.projectsPage, body: v } })} />
+                  <StyledField label="Eyebrow" path="projectsPage.eyebrow" value={content.projectsPage?.eyebrow || ''} onChange={(v) => setContent({ ...content, projectsPage: { ...content.projectsPage, eyebrow: v } })} style={content.textStyles?.['projectsPage.eyebrow']} onStyleChange={setTextStyle} />
+                  <StyledField label="Title" path="projectsPage.title" value={content.projectsPage?.title || ''} onChange={(v) => setContent({ ...content, projectsPage: { ...content.projectsPage, title: v } })} style={content.textStyles?.['projectsPage.title']} onStyleChange={setTextStyle} />
+                  <StyledField label="Body" path="projectsPage.body" value={content.projectsPage?.body || ''} multiline onChange={(v) => setContent({ ...content, projectsPage: { ...content.projectsPage, body: v } })} style={content.textStyles?.['projectsPage.body']} onStyleChange={setTextStyle} />
                 </SectionSave>
-                <div className="h-4" />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, notFoundPage: { ...DEFAULT_CONTENT.notFoundPage } })} title="404 page">
-                  <Field label="Title" value={content.notFoundPage?.title || ''} onChange={(v) => setContent({ ...content, notFoundPage: { ...content.notFoundPage, title: v } })} />
-                  <Field label="Body" value={content.notFoundPage?.body || ''} multiline onChange={(v) => setContent({ ...content, notFoundPage: { ...content.notFoundPage, body: v } })} />
-                  <Field label="Button text" value={content.notFoundPage?.ctaLabel || ''} onChange={(v) => setContent({ ...content, notFoundPage: { ...content.notFoundPage, ctaLabel: v } })} />
+                  <StyledField label="Title" path="notFoundPage.title" value={content.notFoundPage?.title || ''} onChange={(v) => setContent({ ...content, notFoundPage: { ...content.notFoundPage, title: v } })} style={content.textStyles?.['notFoundPage.title']} onStyleChange={setTextStyle} />
+                  <StyledField label="Body" path="notFoundPage.body" value={content.notFoundPage?.body || ''} multiline onChange={(v) => setContent({ ...content, notFoundPage: { ...content.notFoundPage, body: v } })} style={content.textStyles?.['notFoundPage.body']} onStyleChange={setTextStyle} />
+                  <StyledField label="Button text" path="notFoundPage.ctaLabel" value={content.notFoundPage?.ctaLabel || ''} onChange={(v) => setContent({ ...content, notFoundPage: { ...content.notFoundPage, ctaLabel: v } })} style={content.textStyles?.['notFoundPage.ctaLabel']} onStyleChange={setTextStyle} />
+                </SectionSave>
+                <SectionSave
+                  busy={busy}
+                  onSave={() => saveContent(content)}
+                  title="Custom pages you create"
+                  note="Published pages build at /p/slug/"
+                >
+                  {(content.customPages || []).map((page, i) => (
+                    <div key={page.id} className="space-y-3 rounded-xl border border-ink/10 p-4">
+                      <Field
+                        label="Title"
+                        value={page.title}
+                        onChange={(v) => {
+                          const customPages = content.customPages.map((p, j) =>
+                            j === i ? { ...p, title: v } : p,
+                          )
+                          setContent({ ...content, customPages })
+                        }}
+                      />
+                      <Field
+                        label="URL slug"
+                        value={page.slug}
+                        onChange={(v) => {
+                          const slug = v
+                            .toLowerCase()
+                            .replace(/[^a-z0-9-]+/g, '-')
+                            .replace(/^-|-$/g, '')
+                          const customPages = content.customPages.map((p, j) =>
+                            j === i ? { ...p, slug } : p,
+                          )
+                          setContent({ ...content, customPages })
+                        }}
+                        hint={`Will be /p/${page.slug || 'your-slug'}/`}
+                      />
+                      <Field
+                        label="Body"
+                        value={page.body}
+                        multiline
+                        onChange={(v) => {
+                          const customPages = content.customPages.map((p, j) =>
+                            j === i ? { ...p, body: v } : p,
+                          )
+                          setContent({ ...content, customPages })
+                        }}
+                      />
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={page.published !== false}
+                          onChange={(e) => {
+                            const customPages = content.customPages.map((p, j) =>
+                              j === i ? { ...p, published: e.target.checked } : p,
+                            )
+                            setContent({ ...content, customPages })
+                          }}
+                        />
+                        Published
+                      </label>
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={page.showInNav === true}
+                          onChange={(e) => {
+                            const customPages = content.customPages.map((p, j) =>
+                              j === i ? { ...p, showInNav: e.target.checked } : p,
+                            )
+                            setContent({ ...content, customPages })
+                          }}
+                        />
+                        Show in top menu
+                      </label>
+                      <button
+                        type="button"
+                        className="btn btn-secondary text-xs"
+                        onClick={() => {
+                          const customPages = content.customPages.filter((_, j) => j !== i)
+                          setContent({ ...content, customPages })
+                        }}
+                      >
+                        Remove page
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    className="btn btn-secondary text-sm"
+                    onClick={() =>
+                      setContent({
+                        ...content,
+                        customPages: [
+                          ...(content.customPages || []),
+                          {
+                            id: `page-${Date.now().toString(36)}`,
+                            slug: `new-page-${(content.customPages || []).length + 1}`,
+                            title: 'New page',
+                            body: 'Write your page content here.',
+                            published: true,
+                            showInNav: false,
+                          },
+                        ],
+                      })
+                    }
+                  >
+                    + Add a new page
+                  </button>
                 </SectionSave>
               </div>
             )}

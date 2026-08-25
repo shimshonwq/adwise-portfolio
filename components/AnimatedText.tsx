@@ -1,4 +1,5 @@
 import { motion, type Variants } from 'framer-motion'
+import type { CSSProperties } from 'react'
 
 /**
  * Animate with motion only — never hide text with opacity:0.
@@ -27,6 +28,7 @@ type Props = {
   immediate?: boolean
   /** Yellow ↔ black animated headline style */
   shimmer?: boolean
+  style?: CSSProperties
 }
 
 export default function AnimatedText({
@@ -36,10 +38,12 @@ export default function AnimatedText({
   delay = 0,
   immediate = false,
   shimmer = false,
+  style,
 }: Props) {
   const words = text.split(' ')
   const shared = {
     className,
+    style,
     variants: container,
     initial: 'hidden' as const,
     ...(immediate ? { animate: 'show' as const } : { whileInView: 'show' as const }),

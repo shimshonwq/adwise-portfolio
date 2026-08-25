@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import Navigation from '../../components/Navigation'
 import Footer from '../../components/Footer'
+import { CmsText } from '../../lib/CmsText'
 import { useSiteContent } from '../../lib/SiteContentContext'
 import { DEFAULT_CONTENT } from '../../lib/content'
 
@@ -29,9 +30,23 @@ export default function ProjectsComingSoon() {
             transition={{ duration: 0.5 }}
             className="coming-soon-panel max-w-2xl"
           >
-            <p className="text-sm font-bold uppercase tracking-[0.22em] text-brand">{page.eyebrow}</p>
-            <h1 className="mt-4 font-display text-4xl font-bold md:text-5xl">{page.title}</h1>
-            <p className="mt-6 text-lg text-white/65">{page.body}</p>
+            <CmsText
+              path="projectsPage.eyebrow"
+              as="p"
+              className="text-sm font-bold uppercase tracking-[0.22em] text-brand"
+            >
+              {page.eyebrow}
+            </CmsText>
+            <CmsText
+              path="projectsPage.title"
+              as="h1"
+              className="mt-4 font-display text-4xl font-bold md:text-5xl"
+            >
+              {page.title}
+            </CmsText>
+            <CmsText path="projectsPage.body" as="p" className="mt-6 text-lg text-white/65">
+              {page.body}
+            </CmsText>
             <Link href="/#work" className="btn btn-on-dark mt-9">
               Back to homepage
             </Link>

@@ -1,26 +1,37 @@
 import { motion } from 'framer-motion'
+import { CmsText } from '../lib/CmsText'
+import { sectionBackground, textStyleToCss } from '../lib/content'
 import { useSiteContent } from '../lib/SiteContentContext'
 import AnimatedText from './AnimatedText'
 
 export default function Services() {
   const { content } = useSiteContent()
   const copy = content.services
+  const bg = sectionBackground(content, 'services', 'brand-field')
+  const styles = content.textStyles || {}
 
   return (
-    <section id="services" className="scroll-mt-24 brand-field py-20 md:py-32">
+    <section id="services" className={`scroll-mt-24 ${bg} py-20 md:py-32`}>
       <div className="site-shell">
         <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between md:gap-6">
           <div className="max-w-2xl">
-            <p className="eyebrow !text-ink/60">{copy.eyebrow}</p>
+            <CmsText path="services.eyebrow" as="p" className="eyebrow !text-ink/60">
+              {copy.eyebrow}
+            </CmsText>
             <AnimatedText
               as="h2"
               text={copy.title}
               className="mt-3 font-display text-[clamp(1.65rem,6vw,3.25rem)] font-bold tracking-tight text-ink"
+              style={textStyleToCss(styles['services.title'])}
             />
           </div>
-          <p className="max-w-sm font-serif text-lg italic leading-relaxed text-ink/80 md:text-right md:text-xl">
+          <CmsText
+            path="services.subtitle"
+            as="p"
+            className="max-w-sm font-serif text-lg italic leading-relaxed text-ink/80 md:text-right md:text-xl"
+          >
             {copy.subtitle}
-          </p>
+          </CmsText>
         </div>
 
         <div className="mt-12 grid gap-5 md:mt-14 md:grid-cols-3 md:gap-6">
@@ -43,23 +54,33 @@ export default function Services() {
                       : 'border-ink/10 bg-white text-ink'
                 }`}
               >
-                <span
+                <CmsText
+                  path={`services.items.${service.id}.num`}
+                  as="span"
                   className={`inline-flex h-11 w-11 items-center justify-center rounded-lg font-display text-sm font-bold ${
                     ink ? 'bg-brand text-ink' : gold ? 'bg-ink text-brand' : 'bg-brand text-ink'
                   }`}
                 >
                   {service.num}
-                </span>
-                <h3 className="mt-5 font-display text-[clamp(1.6rem,4vw,1.9rem)] font-bold tracking-tight">
+                </CmsText>
+                <CmsText
+                  path={`services.items.${service.id}.title`}
+                  as="h3"
+                  className="mt-5 font-display text-[clamp(1.6rem,4vw,1.9rem)] font-bold tracking-tight"
+                >
                   {service.title}
-                </h3>
-                <p className={`mt-4 font-serif leading-relaxed ${ink ? 'text-white/80' : 'text-ink/75'}`}>
+                </CmsText>
+                <CmsText
+                  path={`services.items.${service.id}.description`}
+                  as="p"
+                  className={`mt-4 font-serif leading-relaxed ${ink ? 'text-white/80' : 'text-ink/75'}`}
+                >
                   {service.description}
-                </p>
+                </CmsText>
                 <ul className="mt-8 space-y-2.5">
-                  {service.points.map((point) => (
+                  {service.points.map((point, pi) => (
                     <li
-                      key={point}
+                      key={`${service.id}-${pi}`}
                       className={`flex items-center gap-3 text-sm font-medium ${
                         ink ? 'text-white/80' : 'text-ink/75'
                       }`}
@@ -68,7 +89,9 @@ export default function Services() {
                         className={`h-1.5 w-1.5 rounded-full ${ink ? 'bg-brand' : 'bg-ink'}`}
                         aria-hidden
                       />
-                      {point}
+                      <CmsText path={`services.items.${service.id}.points.${pi}`} as="span">
+                        {point}
+                      </CmsText>
                     </li>
                   ))}
                 </ul>

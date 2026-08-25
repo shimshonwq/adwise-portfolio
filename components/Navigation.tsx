@@ -1,13 +1,29 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import Logo from './Logo'
 import { useSiteContent } from '../lib/SiteContentContext'
+
+function navHref(href: string) {
+  if (!href) return '/'
+  if (href.startsWith('http') || href.startsWith('mailto:') || href.startsWith('tel:')) return href
+  if (href.startsWith('/')) return href
+  if (href.startsWith('#')) return `/${href}`
+  if (href.startsWith('p/')) return `/${href}`
+  return `/${href}`
+}
 
 export default function Navigation() {
   const { content } = useSiteContent()
   const { nav, navCta, navCtaHref } = content.site
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+
+  const menu = useMemo(() => {
+    const custom = (content.customPages || [])
+      .filter((p) => p.published !== false && p.showInNav && p.slug)
+      .map((p) => ({ href: `/p/${p.slug}/`, label: p.title }))
+    return [...(nav || []), ...custom]
+  }, [nav, content.customPages])
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
@@ -43,16 +59,16 @@ export default function Navigation() {
               scrolled ? '' : 'border border-ink/10 bg-white/80 shadow-sm backdrop-blur-md'
             }`}
           >
-            {nav.map((item) => (
+            {menu.map((item) => (
               <a
-                key={item.href}
-                href={`/${item.href}`}
+                key={`${item.href}-${item.label}`}
+                href={navHref(item.href)}
                 className="text-sm font-medium tracking-wide text-ink/70 transition-colors hover:text-ink"
               >
                 {item.label}
               </a>
             ))}
-            <a href={navCtaHref || '/#contact'} className="btn btn-primary !py-2.5 !px-5">
+            <a href={navHref(navCtaHref || '/#contact')} className="btn btn-primary !py-2.5 !px-5">
               {navCta}
             </a>
           </div>
@@ -86,10 +102,10 @@ export default function Navigation() {
           >
             <div className="color-rail" aria-hidden />
             <div className="site-shell flex h-full flex-col justify-center gap-3 pt-20 pb-10">
-              {nav.map((item, i) => (
+              {menu.map((item, i) => (
                 <motion.a
-                  key={item.href}
-                  href={`/${item.href}`}
+                  key={`${item.href}-${item.label}`}
+                  href={navHref(item.href)}
                   onClick={() => setOpen(false)}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -100,7 +116,7 @@ export default function Navigation() {
                 </motion.a>
               ))}
               <a
-                href={navCtaHref || '/#contact'}
+                href={navHref(navCtaHref || '/#contact')}
                 onClick={() => setOpen(false)}
                 className="btn btn-brand mt-8 w-fit"
               >

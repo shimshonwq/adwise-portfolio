@@ -232,7 +232,8 @@ footer.bg-ink .brand-shimmer,
 
 .color-rail {
   height: 4px;
-  background: #fdc621;
+  background: var(--color-brand, #fdc621);
+  opacity: var(--color-rail-opacity, 1);
 }
 
 .btn-secondary-light {
