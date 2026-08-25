@@ -36,7 +36,7 @@ export default function Navigation() {
       >
         <div className="color-rail" aria-hidden />
         <nav className="site-shell flex h-16 items-center justify-between md:h-20">
-          <Logo href="/#top" size="sm" />
+          <Logo href="/#top" size="sm" tone={scrolled || open ? 'ink' : 'brand'} />
 
           <div
             className={`hidden items-center gap-8 rounded-xl px-5 py-3 md:flex ${

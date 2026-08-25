@@ -139,6 +139,11 @@ export type CmsContent = {
     emailPlaceholder: string
     phonePlaceholder: string
     messagePlaceholder: string
+    captchaLabel?: string
+    captchaIdle?: string
+    captchaChecking?: string
+    captchaVerified?: string
+    background?: string
   }
   projectsPage: {
     eyebrow: string

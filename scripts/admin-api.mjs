@@ -30,7 +30,11 @@ import {
 } from './github-store.mjs'
 import { validateLogoUpload, extForLogoMime, LOGO_MAX_BYTES } from './logo-rules.mjs'
 import { sanitizeDeep } from './text-sanitize.mjs'
-import { deliverContactMessage, validateContactPayload } from './contact-mail.mjs'
+import {
+  deliverContactMessage,
+  validateContactPayload,
+  verifyTurnstileToken,
+} from './contact-mail.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -279,6 +283,14 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, { logos: visibleLogos(await readContent()) })
     }
 
+    if (req.method === 'GET' && pathname === '/api/captcha-config') {
+      const siteKey = String(process.env.TURNSTILE_SITE_KEY || '').trim()
+      return json(res, 200, {
+        provider: siteKey ? 'turnstile' : null,
+        siteKey: siteKey || null,
+      })
+    }
+
     if (req.method === 'POST' && pathname === '/api/contact') {
       const ip = clientIp(req)
       if (contactRateLimited(ip)) {
@@ -292,6 +304,16 @@ const server = http.createServer(async (req, res) => {
       if (checked.spam) return json(res, 200, { ok: true })
       if (!checked.ok) return json(res, checked.status, { error: checked.error })
 
+      const turnstileSecret = String(process.env.TURNSTILE_SECRET_KEY || '').trim()
+      if (turnstileSecret) {
+        const captcha = await verifyTurnstileToken({
+          token: checked.data.turnstileToken,
+          secret: turnstileSecret,
+          ip,
+        })
+        if (!captcha.ok) return json(res, 400, { error: captcha.error })
+      }
+
       try {
         const content = await readContent()
         const to = String(content?.site?.email || '').trim()
@@ -301,6 +323,9 @@ const server = http.createServer(async (req, res) => {
           siteName: content?.site?.name || 'Adwise Media',
           resendApiKey: process.env.RESEND_API_KEY || '',
           resendFrom: process.env.RESEND_FROM || '',
+          githubToken: process.env.GITHUB_TOKEN || '',
+          githubRepo: process.env.GITHUB_REPO || 'shimshonwq/adwise-portfolio',
+          githubBranch: process.env.GITHUB_BRANCH || 'main',
         })
         if (result.needsActivation) {
           return json(res, 200, {
@@ -312,13 +337,6 @@ const server = http.createServer(async (req, res) => {
         return json(res, 200, { ok: true, provider: result.provider })
       } catch (err) {
         const message = err?.message || 'Could not send message right now.'
-        if (String(message).includes('FORMSUBMIT_CF_BLOCKED') || String(message).includes('Just a moment')) {
-          return json(res, 502, {
-            ok: false,
-            error: 'FORMSUBMIT_CF_BLOCKED',
-            fallback: 'client',
-          })
-        }
         return json(res, 502, {
           error: message,
         })

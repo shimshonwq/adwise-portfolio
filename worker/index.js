@@ -25,7 +25,11 @@ import {
 } from './github-store.js'
 import { validateLogoUpload, extForLogoMime, LOGO_MAX_BYTES } from './logo-rules.js'
 import { sanitizeDeep } from './text-sanitize.js'
-import { deliverContactMessage, validateContactPayload } from './contact-mail.js'
+import {
+  deliverContactMessage,
+  validateContactPayload,
+  verifyTurnstileToken,
+} from './contact-mail.js'
 
 const CONTENT_KV_KEY = 'content:v1'
 const LEGACY_LOGOS_KEY = 'logos:v1'
@@ -272,6 +276,14 @@ async function handleApi(request, env) {
     return json({ logos: visibleLogos(await readContent(env)) })
   }
 
+  if (request.method === 'GET' && pathname === '/api/captcha-config') {
+    const siteKey = String(env.TURNSTILE_SITE_KEY || env.turnstile_site_key || '').trim()
+    return json({
+      provider: siteKey ? 'turnstile' : null,
+      siteKey: siteKey || null,
+    })
+  }
+
   if (request.method === 'POST' && pathname === '/api/contact') {
     const ip = clientIp(request)
     if (contactRateLimited(ip)) {
@@ -286,6 +298,16 @@ async function handleApi(request, env) {
     if (checked.spam) return json({ ok: true })
     if (!checked.ok) return json({ error: checked.error }, checked.status)
 
+    const turnstileSecret = String(env.TURNSTILE_SECRET_KEY || env.turnstile_secret_key || '').trim()
+    if (turnstileSecret) {
+      const captcha = await verifyTurnstileToken({
+        token: checked.data.turnstileToken,
+        secret: turnstileSecret,
+        ip,
+      })
+      if (!captcha.ok) return json({ error: captcha.error }, 400)
+    }
+
     const content = await readContent(env)
     const to = String(content?.site?.email || '').trim()
     try {
@@ -295,6 +317,9 @@ async function handleApi(request, env) {
         siteName: content?.site?.name || 'Adwise Media',
         resendApiKey: env.RESEND_API_KEY || env.resend_api_key || '',
         resendFrom: env.RESEND_FROM || env.resend_from || '',
+        githubToken: env.GITHUB_TOKEN || env.github_token || '',
+        githubRepo: env.GITHUB_REPO || env.github_repo || 'shimshonwq/adwise-portfolio',
+        githubBranch: env.GITHUB_BRANCH || env.github_branch || 'main',
       })
       if (result.needsActivation) {
         return json({
@@ -306,10 +331,6 @@ async function handleApi(request, env) {
       return json({ ok: true, provider: result.provider })
     } catch (err) {
       const message = err?.message || 'Could not send message right now.'
-      // Tell the browser form to fall back to client-side FormSubmit when CF blocks us.
-      if (String(message).includes('FORMSUBMIT_CF_BLOCKED') || String(message).includes('Just a moment')) {
-        return json({ ok: false, error: 'FORMSUBMIT_CF_BLOCKED', fallback: 'client' }, 502)
-      }
       return json({ error: message }, 502)
     }
   }

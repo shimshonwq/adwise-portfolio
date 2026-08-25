@@ -15,7 +15,7 @@ export default function Process() {
           text={copy.title}
           className="mt-3 max-w-2xl font-display text-[clamp(1.65rem,6vw,3.25rem)] font-bold tracking-tight text-ink"
         />
-        <p className="mt-5 max-w-lg font-serif text-lg italic text-brass md:text-xl">
+        <p className="mt-5 max-w-lg font-serif text-lg italic text-ink/75 md:text-xl">
           {copy.subtitle}
         </p>
 

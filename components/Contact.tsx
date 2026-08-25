@@ -3,14 +3,9 @@ import { motion } from 'framer-motion'
 import { useSiteContent } from '../lib/SiteContentContext'
 import ContactChannels from './ContactChannels'
 import AnimatedText from './AnimatedText'
+import TurnstileField from './TurnstileField'
 
 type Status = 'idle' | 'submitting' | 'success' | 'error' | 'captcha'
-type CaptchaPhase = 'idle' | 'checking' | 'verified'
-
-function isCloudflareChallenge(text: string): boolean {
-  const t = text.toLowerCase()
-  return t.includes('just a moment') || t.includes('cf-browser-verification') || t.includes('challenge-platform')
-}
 
 export default function Contact() {
   const { content, channels } = useSiteContent()
@@ -18,8 +13,12 @@ export default function Contact() {
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' })
   const [status, setStatus] = useState<Status>('idle')
   const [errorMessage, setErrorMessage] = useState('')
-  const [captcha, setCaptcha] = useState<CaptchaPhase>('idle')
   const [honeypot, setHoneypot] = useState('')
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
+  const [turnstileSiteKey, setTurnstileSiteKey] = useState<string | null>(null)
+  const [turnstileRequired, setTurnstileRequired] = useState(false)
+  const [captchaConfigLoaded, setCaptchaConfigLoaded] = useState(false)
+  const [turnstileMountKey, setTurnstileMountKey] = useState(0)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -27,22 +26,51 @@ export default function Contact() {
     if (params.get('sent') === '1') setStatus('success')
   }, [])
 
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch('/api/captcha-config/')
+        const data = (await res.json().catch(() => ({}))) as { siteKey?: string | null }
+        if (cancelled) return
+        const key = String(data.siteKey || '').trim()
+        if (key) {
+          setTurnstileSiteKey(key)
+          setTurnstileRequired(true)
+        } else {
+          setTurnstileSiteKey(null)
+          setTurnstileRequired(false)
+        }
+      } catch {
+        if (!cancelled) {
+          setTurnstileSiteKey(null)
+          setTurnstileRequired(false)
+        }
+      } finally {
+        if (!cancelled) setCaptchaConfigLoaded(true)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   const onChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const onCaptchaPress = () => {
-    if (captcha === 'checking' || captcha === 'verified') return
-    setCaptcha('checking')
-    setStatus((s) => (s === 'captcha' ? 'idle' : s))
-    window.setTimeout(() => setCaptcha('verified'), 650)
+  const resetTurnstile = () => {
+    setTurnstileToken(null)
+    setTurnstileMountKey((k) => k + 1)
   }
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (honeypot) return
-    if (captcha !== 'verified') {
+
+    if (turnstileRequired && !turnstileToken) {
       setStatus('captcha')
+      setErrorMessage('Please complete the “Verify you are human” check.')
       return
     }
 
@@ -54,123 +82,53 @@ export default function Contact() {
       email: formData.email.trim(),
       phone: formData.phone.trim(),
       message: formData.message.trim(),
+      turnstileToken: turnstileToken || '',
       _honey: honeypot,
     }
 
     try {
+      const controller = new AbortController()
+      const timer = window.setTimeout(() => controller.abort(), 25000)
       const res = await fetch('/api/contact/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify(payload),
+        signal: controller.signal,
       })
+      window.clearTimeout(timer)
+
       const data = (await res.json().catch(() => ({}))) as {
         ok?: boolean
         error?: string
         needsActivation?: boolean
-        fallback?: string
+        provider?: string
       }
 
       if (res.ok && data.ok) {
         setStatus('success')
         setFormData({ name: '', email: '', phone: '', message: '' })
-        setCaptcha('idle')
+        resetTurnstile()
         return
       }
 
-      if (data.needsActivation) {
-        setStatus('error')
-        setErrorMessage(
-          data.error ||
-            'Check your Adwise inbox for a FormSubmit activation email, click Activate, then try again.'
-        )
-        return
-      }
-
-      // Worker / datacenter IPs are often blocked by FormSubmit Cloudflare.
-      // Prefer browser FormSubmit AJAX; if CORS/CF blocks it, fall back to a
-      // top-level HTML POST (no CORS) with captcha disabled.
-      try {
-        const browserRes = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(site.email)}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify({
-            name: payload.name,
-            email: payload.email,
-            phone: payload.phone || '(not provided)',
-            message: payload.message,
-            _subject: `New inquiry from ${payload.name} — ${site.name}`,
-            _template: 'table',
-            _captcha: 'false',
-            _honey: honeypot,
-          }),
-        })
-
-        const browserText = await browserRes.text()
-        if (browserRes.ok && !isCloudflareChallenge(browserText)) {
-          let browserData: { success?: string | boolean; message?: string } = {}
-          try {
-            browserData = JSON.parse(browserText) as typeof browserData
-          } catch {
-            browserData = {}
-          }
-
-          const msg = String(browserData.message || '').toLowerCase()
-          if (msg.includes('activate') || msg.includes('confirm your email')) {
-            setStatus('error')
-            setErrorMessage(
-              'FormSubmit sent an activation email to your Adwise inbox. Open it, click Activate Form, then submit again.'
-            )
-            return
-          }
-
-          if (browserData.success !== 'false' && browserData.success !== false) {
-            setStatus('success')
-            setFormData({ name: '', email: '', phone: '', message: '' })
-            setCaptcha('idle')
-            return
-          }
-        }
-      } catch {
-        // CORS / network — continue to HTML POST fallback below.
-      }
-
-      const nextUrl =
-        typeof window !== 'undefined'
-          ? `${window.location.origin}/?sent=1#contact`
-          : `${site.url}/?sent=1#contact`
-      const fallback = document.createElement('form')
-      fallback.method = 'POST'
-      fallback.action = `https://formsubmit.co/${site.email}`
-      fallback.style.display = 'none'
-      const fields: Record<string, string> = {
-        name: payload.name,
-        email: payload.email,
-        phone: payload.phone || '(not provided)',
-        message: payload.message,
-        _subject: `New inquiry from ${payload.name} — ${site.name}`,
-        _template: 'table',
-        _captcha: 'false',
-        _next: nextUrl,
-        _honey: honeypot,
-      }
-      for (const [key, value] of Object.entries(fields)) {
-        const input = document.createElement('input')
-        input.type = 'hidden'
-        input.name = key
-        input.value = value
-        fallback.appendChild(input)
-      }
-      document.body.appendChild(fallback)
-      fallback.submit()
-      return
-    } catch (err) {
       setStatus('error')
       setErrorMessage(
-        err instanceof Error ? err.message : copy.errorMessage || 'Something went wrong. Please try again.'
+        data.error ||
+          copy.errorMessage ||
+          `Something went wrong — email us at ${site.email}.`
       )
+      resetTurnstile()
+    } catch (err) {
+      setStatus('error')
+      const aborted = err instanceof Error && err.name === 'AbortError'
+      setErrorMessage(
+        aborted
+          ? `Sending timed out — please email us at ${site.email}.`
+          : err instanceof Error
+            ? err.message
+            : copy.errorMessage || 'Something went wrong. Please try again.'
+      )
+      resetTurnstile()
     }
   }
 
@@ -192,13 +150,13 @@ export default function Contact() {
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.45 }}
         >
-          <p className="eyebrow !text-ink/55">{copy.eyebrow}</p>
+          <p className="eyebrow !text-ink/80">{copy.eyebrow}</p>
           <AnimatedText
             as="h2"
             text={copy.title}
             className="mt-3 font-display text-[clamp(1.65rem,6vw,3.25rem)] font-bold tracking-tight text-ink"
           />
-          <p className="mt-5 max-w-md font-serif text-base italic text-ink/75 md:text-lg">
+          <p className="mt-5 max-w-md font-serif text-base italic text-ink/80 md:text-lg">
             {copy.intro}
           </p>
 
@@ -209,7 +167,7 @@ export default function Contact() {
             <a href={channels.call} className="block font-semibold hover:underline">
               {site.phoneDisplay}
             </a>
-            <p className="text-ink/55">{site.location}</p>
+            <p className="text-ink/70">{site.location}</p>
           </div>
 
           <ContactChannels variant="light" className="mt-8" />
@@ -232,7 +190,7 @@ export default function Contact() {
 
           <input
             type="text"
-            name="_honey"
+            name="website_url"
             value={honeypot}
             onChange={(e) => setHoneypot(e.target.value)}
             tabIndex={-1}
@@ -243,42 +201,45 @@ export default function Contact() {
 
           <div className="grid gap-5 sm:grid-cols-2">
             <label className="block text-sm">
-              <span className="mb-2 block text-white/55">{copy.nameLabel}</span>
+              <span className="mb-2 block text-white/70">{copy.nameLabel}</span>
               <input
                 name="name"
                 required
                 value={formData.name}
                 onChange={onChange}
+                autoComplete="name"
                 className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
                 placeholder={copy.namePlaceholder}
               />
             </label>
             <label className="block text-sm">
-              <span className="mb-2 block text-white/55">{copy.emailLabel}</span>
+              <span className="mb-2 block text-white/70">{copy.emailLabel}</span>
               <input
                 type="email"
                 name="email"
                 required
                 value={formData.email}
                 onChange={onChange}
+                autoComplete="email"
                 className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
                 placeholder={copy.emailPlaceholder}
               />
             </label>
           </div>
           <label className="block text-sm">
-            <span className="mb-2 block text-white/55">{copy.phoneLabel}</span>
+            <span className="mb-2 block text-white/70">{copy.phoneLabel}</span>
             <input
               type="tel"
               name="phone"
               value={formData.phone}
               onChange={onChange}
+              autoComplete="tel"
               className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
               placeholder={copy.phonePlaceholder}
             />
           </label>
           <label className="block text-sm">
-            <span className="mb-2 block text-white/55">{copy.messageLabel}</span>
+            <span className="mb-2 block text-white/70">{copy.messageLabel}</span>
             <textarea
               name="message"
               required
@@ -290,72 +251,57 @@ export default function Contact() {
             />
           </label>
 
-          <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/40">
-              Verify you’re human
-            </p>
-            <button
-              type="button"
-              onClick={onCaptchaPress}
-              aria-pressed={captcha === 'verified'}
-              className={`flex w-full max-w-sm items-center gap-3 rounded-lg border px-3 py-3 text-left transition ${
-                status === 'captcha'
-                  ? 'border-brand bg-brand/10'
-                  : 'border-white bg-white hover:bg-white'
-              }`}
-            >
-              <span
-                className={`flex h-7 w-7 shrink-0 items-center justify-center border-2 ${
-                  captcha === 'verified'
-                    ? 'border-emerald-600 bg-emerald-500 text-white'
-                    : 'border-black/35 bg-white'
-                }`}
-                aria-hidden
-              >
-                {captcha === 'checking' && (
-                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-ink/25 border-t-ink" />
-                )}
-                {captcha === 'verified' && (
-                  <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden>
-                    <path
-                      d="M5 10.5 8.2 13.5 15 6.5"
-                      stroke="currentColor"
-                      strokeWidth="2.4"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                )}
-              </span>
-              <span className="flex-1 text-sm font-medium text-ink">
-                {captcha === 'checking'
-                  ? 'Checking…'
-                  : captcha === 'verified'
-                    ? 'Verified'
-                    : 'I’m not a robot'}
-              </span>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-ink/40">
-                reCAPTCHA
-              </span>
-            </button>
-            {status === 'captcha' && (
-              <p className="text-sm text-brand">Please press “I’m not a robot” before sending.</p>
-            )}
-          </div>
+          {(!captchaConfigLoaded || turnstileSiteKey) && (
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
+                {copy.captchaLabel || 'Verify you’re human'}
+              </p>
+              {!captchaConfigLoaded ? (
+                <p className="text-sm text-white/55">Loading security check…</p>
+              ) : turnstileSiteKey ? (
+                <div className="max-w-sm rounded-lg bg-white p-3">
+                  <TurnstileField
+                    key={turnstileMountKey}
+                    siteKey={turnstileSiteKey}
+                    theme="light"
+                    onToken={(token) => {
+                      setTurnstileToken(token)
+                      if (token) {
+                        setStatus((s) => (s === 'captcha' ? 'idle' : s))
+                        setErrorMessage('')
+                      }
+                    }}
+                  />
+                </div>
+              ) : null}
+              {status === 'captcha' && (
+                <p className="text-sm text-brand" role="alert">
+                  {errorMessage || 'Please complete the “Verify you are human” check.'}
+                </p>
+              )}
+            </div>
+          )}
 
           <button
             type="submit"
-            disabled={status === 'submitting' || captcha === 'checking'}
+            disabled={status === 'submitting'}
             className="btn btn-on-dark mt-2"
           >
             {status === 'submitting' ? copy.sendingLabel : copy.submitLabel}
           </button>
 
           {status === 'success' && (
-            <p className="text-sm text-brand">{copy.successMessage}</p>
+            <p className="text-sm text-brand" role="status">
+              {copy.successMessage}
+            </p>
           )}
           {status === 'error' && (
-            <p className="text-sm text-red-300">{errorMessage || copy.errorMessage}</p>
+            <p className="text-sm text-red-300" role="alert">
+              {errorMessage || copy.errorMessage}{' '}
+              <a className="underline" href={`mailto:${site.email}`}>
+                {site.email}
+              </a>
+            </p>
           )}
         </motion.form>
       </div>
