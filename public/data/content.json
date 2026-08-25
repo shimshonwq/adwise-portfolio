@@ -22,6 +22,14 @@
         "label": "Services"
       },
       {
+        "href": "#process",
+        "label": "Process"
+      },
+      {
+        "href": "/projects/",
+        "label": "Work"
+      },
+      {
         "href": "#about",
         "label": "About"
       },
@@ -40,7 +48,7 @@
   },
   "hero": {
     "openName": "ADWISE MEDIA",
-    "eyebrow": "Made to be noticed | CMS",
+    "eyebrow": "Made to be noticed",
     "headline": "Turn heads. Grow brands.",
     "body": "Logo design, brand graphics, and marketing that make businesses look sharp - and get noticed.",
     "bodyAccent": "Creative that actually works.",
@@ -316,7 +324,7 @@
   "projectsPage": {
     "eyebrow": "Portfolio",
     "title": "Our work",
-    "body": "Case studies and project stories are coming soon. Meanwhile, explore the brands on our homepage."
+    "body": "Logo design, branding, signage, and print — selected projects from Adwise Media."
   },
   "notFoundPage": {
     "title": "This page took a wrong turn",
