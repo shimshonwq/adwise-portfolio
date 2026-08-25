@@ -1,5 +1,16 @@
+import { useMemo } from 'react'
 import Logo from './Logo'
+import { CmsText } from '../lib/CmsText'
+import { DEFAULT_CHANNELS } from '../lib/content'
 import { useSiteContent } from '../lib/SiteContentContext'
+
+function navHref(href: string) {
+  if (!href) return '/'
+  if (href.startsWith('http') || href.startsWith('mailto:') || href.startsWith('tel:')) return href
+  if (href.startsWith('/')) return href
+  if (href.startsWith('#')) return `/${href}`
+  return `/${href}`
+}
 
 export default function Footer() {
   const { content, channels } = useSiteContent()
@@ -13,27 +24,43 @@ export default function Footer() {
     }
   })()
   const year = new Date().getFullYear()
+  const explore = useMemo(() => {
+    const custom = (content.customPages || [])
+      .filter((p) => p.published !== false && p.showInNav && p.slug)
+      .map((p) => ({ href: `/p/${p.slug}/`, label: p.title }))
+    return [...(nav || []), ...custom]
+  }, [nav, content.customPages])
+  const waLabel =
+    (content.channels || DEFAULT_CHANNELS).find((c) => c.id === 'whatsapp')?.label || 'WhatsApp'
 
   return (
     <footer className="border-t border-white/10 bg-ink py-14 text-white">
       <div className="site-shell flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
         <div>
           <Logo href="/#top" size="sm" bright />
-          <p className="mt-4 max-w-xs font-serif text-sm italic leading-relaxed text-white/70">
+          <CmsText
+            path="site.footerBlurb"
+            as="p"
+            className="mt-4 max-w-xs font-serif text-sm italic leading-relaxed text-white/70"
+          >
             {footerBlurb}
-          </p>
+          </CmsText>
           <p className="mt-3 max-w-xs text-sm">
-            <span className="font-serif text-lg italic text-brand">{tagline}</span>
+            <CmsText path="site.tagline" as="span" className="font-serif text-lg italic text-brand">
+              {tagline}
+            </CmsText>
           </p>
         </div>
 
         <div className="flex flex-wrap gap-12 text-sm">
           <div>
-            <p className="font-semibold text-brand">{footerExploreHeading}</p>
+            <CmsText path="site.footerExploreHeading" as="p" className="font-semibold text-brand">
+              {footerExploreHeading}
+            </CmsText>
             <ul className="mt-3 space-y-2 text-white/55">
-              {nav.map((item) => (
-                <li key={item.href}>
-                  <a href={`/${item.href}`} className="hover:text-white">
+              {explore.map((item) => (
+                <li key={`${item.href}-${item.label}`}>
+                  <a href={navHref(item.href)} className="hover:text-white">
                     {item.label}
                   </a>
                 </li>
@@ -41,7 +68,9 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <p className="font-semibold text-brand">{footerContactHeading}</p>
+            <CmsText path="site.footerContactHeading" as="p" className="font-semibold text-brand">
+              {footerContactHeading}
+            </CmsText>
             <ul className="mt-3 space-y-2 text-white/55">
               <li>
                 <a href={channels.email} className="hover:text-white">
@@ -60,7 +89,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  WhatsApp
+                  {waLabel}
                 </a>
               </li>
               <li>
@@ -77,7 +106,9 @@ export default function Footer() {
         <p>
           © {year} {name}
         </p>
-        <p>{footerMeta}</p>
+        <CmsText path="site.footerMeta" as="p">
+          {footerMeta}
+        </CmsText>
       </div>
     </footer>
   )

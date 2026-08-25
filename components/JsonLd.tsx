@@ -1,10 +1,11 @@
 import { useSiteContent } from '../lib/SiteContentContext'
-import { DEFAULT_CONTENT, contactChannelsFromSite } from '../lib/content'
+import { DEFAULT_BRAND, DEFAULT_CONTENT, contactChannelsFromSite } from '../lib/content'
 
 /** Structured data so Google can understand Adwise Media as a business entity. */
 export default function JsonLd() {
   const { content } = useSiteContent()
   const site = content.site || DEFAULT_CONTENT.site
+  const brand = content.brand || DEFAULT_BRAND
   const channels = contactChannelsFromSite(site)
   const phone = String(site.phone || '').replace(/\D/g, '')
   const telephone =
@@ -17,7 +18,7 @@ export default function JsonLd() {
     '@type': 'ProfessionalService',
     name: site.name,
     url: site.url,
-    image: `${site.url}/logo.png`,
+    image: `${site.url}${brand.logoSrc || '/logo.png'}`,
     description: site.description,
     email: site.email,
     telephone,

@@ -40,6 +40,7 @@ const DATA_DIR = path.join(ROOT, '.data')
 const DEFAULT_PATH = path.join(ROOT, 'data', 'cms-default.json')
 const PUBLIC_CONTENT = path.join(ROOT, 'public', 'data', 'content.json')
 const UPLOAD_DIR = path.join(ROOT, 'public', 'uploads', 'logos')
+const BRAND_UPLOAD_DIR = path.join(ROOT, 'public', 'uploads', 'brand')
 const PORT = Number(process.env.ADMIN_API_PORT || 8787)
 const MAX_BYTES = LOGO_MAX_BYTES
 const LOGIN_MAX_ATTEMPTS = 5
@@ -55,6 +56,7 @@ const loginAttempts = new Map()
 function ensureDirs() {
   fs.mkdirSync(DATA_DIR, { recursive: true })
   fs.mkdirSync(UPLOAD_DIR, { recursive: true })
+  fs.mkdirSync(BRAND_UPLOAD_DIR, { recursive: true })
 }
 
 async function getAuthRecord() {
@@ -341,6 +343,57 @@ const server = http.createServer(async (req, res) => {
         return json(res, 400, { error: 'Invalid content payload' })
       }
       const result = await persistContent(next, 'CMS: update site content')
+      return json(res, 200, okPayload(result))
+    }
+
+    if (req.method === 'POST' && pathname === '/api/admin/brand') {
+      const body = JSON.parse((await readBody(req)).toString('utf8') || '{}')
+      const kind = String(body.kind || '').trim()
+      if (!['logo', 'favicon', 'og'].includes(kind)) {
+        return json(res, 400, { error: 'kind must be logo, favicon, or og' })
+      }
+      const dataUrl = String(body.dataUrl || '')
+      const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/)
+      if (!match) return json(res, 400, { error: 'Upload a PNG, JPG, or WebP' })
+      const mime = match[1]
+      const buf = Buffer.from(match[2], 'base64')
+      const width = body.width != null ? Number(body.width) : null
+      const height = body.height != null ? Number(body.height) : null
+      if (kind === 'logo') {
+        const bad = validateLogoUpload({
+          mime,
+          size: buf.length,
+          width: Number.isFinite(width) ? width : null,
+          height: Number.isFinite(height) ? height : null,
+        })
+        if (bad) return json(res, 400, { error: bad })
+      } else {
+        if (!extForLogoMime(mime)) {
+          return json(res, 400, { error: 'Upload a PNG, JPG, or WebP' })
+        }
+        if (buf.length > MAX_BYTES) {
+          return json(res, 400, { error: `File too large (max ${Math.round(MAX_BYTES / 1024 / 1024)}MB)` })
+        }
+      }
+      const ext = extForLogoMime(mime)
+      if (!ext) return json(res, 400, { error: 'Upload a PNG, JPG, or WebP' })
+      const file = `${kind}-${Date.now().toString(36)}.${ext}`
+      const src = `/uploads/brand/${file}`
+      ensureDirs()
+      fs.writeFileSync(path.join(BRAND_UPLOAD_DIR, file), buf)
+      if (githubConfigured()) {
+        await writeBinaryFile(`public${src}`, buf, `CMS: update brand ${kind}`)
+      }
+      const content = await readContent()
+      content.brand = content.brand || {
+        logoSrc: '/logo.png',
+        faviconSrc: '/favicon.png',
+        ogImageSrc: '/logo.png',
+      }
+      if (kind === 'logo') content.brand.logoSrc = src
+      if (kind === 'favicon') content.brand.faviconSrc = src
+      if (kind === 'og') content.brand.ogImageSrc = src
+      const result = await persistContent(content, `CMS: update brand ${kind}`)
       return json(res, 200, okPayload(result))
     }
 

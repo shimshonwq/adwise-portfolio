@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
+import { CmsText } from '../lib/CmsText'
+import { sectionBackground, textStyleToCss } from '../lib/content'
 import { useSiteContent } from '../lib/SiteContentContext'
 import ContactChannels from './ContactChannels'
 import AnimatedText from './AnimatedText'
@@ -13,6 +15,8 @@ export default function Contact() {
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' })
   const [status, setStatus] = useState<Status>('idle')
   const [captcha, setCaptcha] = useState<CaptchaPhase>('idle')
+  const bg = sectionBackground(content, 'contact', 'brand-field')
+  const styles = content.textStyles || {}
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -41,7 +45,7 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact" className="scroll-mt-24 relative overflow-hidden brand-field py-24 md:py-32">
+    <section id="contact" className={`scroll-mt-24 relative overflow-hidden ${bg} py-24 md:py-32`}>
       <div
         className="pointer-events-none absolute inset-0"
         style={{
@@ -58,15 +62,22 @@ export default function Contact() {
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.45 }}
         >
-          <p className="eyebrow !text-ink/55">{copy.eyebrow}</p>
+          <CmsText path="contact.eyebrow" as="p" className="eyebrow !text-ink/55">
+            {copy.eyebrow}
+          </CmsText>
           <AnimatedText
             as="h2"
             text={copy.title}
             className="mt-3 font-display text-[clamp(1.65rem,6vw,3.25rem)] font-bold tracking-tight text-ink"
+            style={textStyleToCss(styles['contact.title'])}
           />
-          <p className="mt-5 max-w-md font-serif text-base italic text-ink/75 md:text-lg">
+          <CmsText
+            path="contact.intro"
+            as="p"
+            className="mt-5 max-w-md font-serif text-base italic text-ink/75 md:text-lg"
+          >
             {copy.intro}
-          </p>
+          </CmsText>
 
           <div className="mt-8 space-y-2 text-ink">
             <a href={channels.email} className="block font-semibold hover:underline">
@@ -92,10 +103,20 @@ export default function Contact() {
           className="soft-panel space-y-5 border border-white/10 bg-ink p-7 text-white md:p-10"
         >
           <div className="mb-2">
-            <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-brand">
+            <CmsText
+              path="contact.formEyebrow"
+              as="p"
+              className="text-xs font-extrabold uppercase tracking-[0.22em] text-brand"
+            >
               {copy.formEyebrow}
-            </p>
-            <p className="mt-2 font-serif text-sm italic text-white/70">{copy.formNote}</p>
+            </CmsText>
+            <CmsText
+              path="contact.formNote"
+              as="p"
+              className="mt-2 font-serif text-sm italic text-white/70"
+            >
+              {copy.formNote}
+            </CmsText>
           </div>
 
           <input
@@ -117,7 +138,9 @@ export default function Contact() {
 
           <div className="grid gap-5 sm:grid-cols-2">
             <label className="block text-sm">
-              <span className="mb-2 block text-white/55">{copy.nameLabel}</span>
+              <CmsText path="contact.nameLabel" as="span" className="mb-2 block text-white/55">
+                {copy.nameLabel}
+              </CmsText>
               <input
                 name="name"
                 required
@@ -128,7 +151,9 @@ export default function Contact() {
               />
             </label>
             <label className="block text-sm">
-              <span className="mb-2 block text-white/55">{copy.emailLabel}</span>
+              <CmsText path="contact.emailLabel" as="span" className="mb-2 block text-white/55">
+                {copy.emailLabel}
+              </CmsText>
               <input
                 type="email"
                 name="email"
@@ -141,7 +166,9 @@ export default function Contact() {
             </label>
           </div>
           <label className="block text-sm">
-            <span className="mb-2 block text-white/55">{copy.phoneLabel}</span>
+            <CmsText path="contact.phoneLabel" as="span" className="mb-2 block text-white/55">
+              {copy.phoneLabel}
+            </CmsText>
             <input
               type="tel"
               name="phone"
@@ -152,7 +179,9 @@ export default function Contact() {
             />
           </label>
           <label className="block text-sm">
-            <span className="mb-2 block text-white/55">{copy.messageLabel}</span>
+            <CmsText path="contact.messageLabel" as="span" className="mb-2 block text-white/55">
+              {copy.messageLabel}
+            </CmsText>
             <textarea
               name="message"
               required
@@ -165,9 +194,13 @@ export default function Contact() {
           </label>
 
           <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/40">
-              Verify you’re human
-            </p>
+            <CmsText
+              path="contact.captchaLabel"
+              as="p"
+              className="text-xs font-semibold uppercase tracking-[0.18em] text-white/40"
+            >
+              {copy.captchaLabel || 'Verify you’re human'}
+            </CmsText>
             <button
               type="button"
               onClick={onCaptchaPress}
@@ -203,17 +236,17 @@ export default function Contact() {
               </span>
               <span className="flex-1 text-sm font-medium text-ink">
                 {captcha === 'checking'
-                  ? 'Checking…'
+                  ? copy.captchaChecking || 'Checking…'
                   : captcha === 'verified'
-                    ? 'Verified'
-                    : 'I’m not a robot'}
+                    ? copy.captchaVerified || 'Verified'
+                    : copy.captchaIdle || 'I’m not a robot'}
               </span>
               <span className="text-[10px] font-bold uppercase tracking-wider text-ink/40">
                 reCAPTCHA
               </span>
             </button>
             {status === 'captcha' && (
-              <p className="text-sm text-brand">Please press “I’m not a robot” before sending.</p>
+              <p className="text-sm text-brand">Please press the verification box before sending.</p>
             )}
           </div>
 
@@ -221,15 +254,20 @@ export default function Contact() {
             type="submit"
             disabled={status === 'submitting' || captcha === 'checking'}
             className="btn btn-on-dark mt-2"
+            style={textStyleToCss(styles['contact.submitLabel'])}
           >
             {status === 'submitting' ? copy.sendingLabel : copy.submitLabel}
           </button>
 
           {status === 'success' && (
-            <p className="text-sm text-brand">{copy.successMessage}</p>
+            <CmsText path="contact.successMessage" as="p" className="text-sm text-brand">
+              {copy.successMessage}
+            </CmsText>
           )}
           {status === 'error' && (
-            <p className="text-sm text-red-300">{copy.errorMessage}</p>
+            <CmsText path="contact.errorMessage" as="p" className="text-sm text-red-300">
+              {copy.errorMessage}
+            </CmsText>
           )}
         </motion.form>
       </div>

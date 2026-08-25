@@ -6,12 +6,11 @@ Standard install/run commands are in `README.md`.
 
 ## Cursor Cloud specific instructions
 
-- Refresh deps with `npm install` from the repo root. Dev server: `npm run dev` (port 3000). There is no automated test suite (`package.json` has no `test` script). `npm run lint` may prompt to create an ESLint config — skip that prompt; do not run it unattended.
-- Homepage order is Hero → Services (“What we do”) → Clients logo strip → Spotlight → Process → About → Contact. There is no “Now trending” section.
-- **CMS**: Public pages load from `GET /api/content/` (GitHub when configured), fallback `public/data/content.json`. Admin at `/login` edits logos, **theme colors**, all section copy, contact form labels, projects/404 pages, and password. Logo uploads: PNG/JPG/WebP only, 200–2400×40–1200px, max 2MB (see `lib/logo-rules.ts`). Saves commit to GitHub — Cloudflare rebuilds. Production Worker secrets: `GITHUB_TOKEN`, `GITHUB_REPO`. PBKDF2 uses 100k iterations. Deploy: `npm run deploy` then `npx wrangler versions deploy <version-id>`.
-- Editorial accent type is **EB Garamond italic** (`.font-serif`).
-- The hero lightbulb (`HeroOrbit` in `components/Hero.tsx`) is scroll-driven. To verify it, load `/`, wait for the short opening (~1.2s), then scroll — the bulb and rings should tilt/shift.
-- Mobile hamburger overlay is a sibling of `<header>` (`z-[60]`), not inside a `backdrop-filter` header. Open it mid-page to confirm links are visible. Header uses a solid paper background when scrolled or open.
-- Opening animation respects `prefers-reduced-motion` and skips the veil.
-- Palette is gold, black, white, and brass on a warm ivory paper (`#e8dfd0`). Do not reintroduce cyan/pink “kids” accents.
+- Refresh deps with `npm install` from the repo root. Dev server: `npm run dev` (port 3000 + local CMS API on 8787). There is no automated test suite (`package.json` has no `test` script). `npm run lint` may prompt to create an ESLint config — skip that prompt; do not run it unattended. Prefer `npx next build --no-lint` for builds.
+- Homepage order/visibility/backgrounds are CMS-driven via `layout.sections` (admin **Page layout** tab). Default order: Hero → Services → Clients → Spotlight → Process → About → Contact.
+- **CMS (`/login`)**: Full site builder — brand logo/favicon/OG (`POST /api/admin/brand`), client logos, theme colors + fonts, per-field text styles (`textStyles` + `CmsText` on the public site), section backgrounds, nav, contact buttons, custom pages (`/p/[slug]/` after rebuild; `showInNav` merges into header/footer), and password. Logo uploads: PNG/JPG/WebP only, size rules in `lib/logo-rules.ts`. Saves commit to GitHub — Cloudflare rebuilds (~1–3 min). Production Worker secrets: `GITHUB_TOKEN`, `GITHUB_REPO` (`shimshonwq/adwise-portfolio`), `GITHUB_BRANCH`=`main`. PBKDF2 uses 100k iterations. Deploy: `npx next build --no-lint` then `npx wrangler versions upload` / `deploy`. Do **not** reset `data/admin-auth.json` unless the user asks.
+- Editorial accent type is **EB Garamond italic** (`.font-serif`). Per-line overrides use the admin “Text style” control on each field.
+- The hero lightbulb (`HeroOrbit` in `components/Hero.tsx`) is scroll-driven. Opening animation respects `prefers-reduced-motion`.
+- Mobile hamburger overlay is a sibling of `<header>` (`z-[60]`). Header uses a solid paper background when scrolled or open.
+- Palette is gold, black, white, and brass on warm ivory paper. Do not reintroduce cyan/pink accents.
 - Headlines on gold sections (`brand-field`) stay ink for contrast. Gold type is for dark sections only.

@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion, useScroll, useSpring, useTransform } from 'framer-motion'
+import { CmsText } from '../lib/CmsText'
+import { sectionBackground, textStyleToCss } from '../lib/content'
 import { useSiteContent } from '../lib/SiteContentContext'
 
 type Phase = 'void' | 'burst' | 'assemble' | 'lock' | 'exit' | 'done'
@@ -83,11 +85,15 @@ export default function Hero() {
   const openName = hero.openName
   const headline = hero.headline
   const letters = useMemo(() => openName.split(''), [openName])
+  const showOpening = hero.showOpening !== false
+  const showOrbit = hero.showOrbit !== false
+  const bg = sectionBackground(content, 'hero', 'section-aurora')
+  const styles = content.textStyles || {}
 
-  const [phase, setPhase] = useState<Phase>('void')
-  const [ready, setReady] = useState(false)
-  const [typed, setTyped] = useState('')
-  const [typingDone, setTypingDone] = useState(false)
+  const [phase, setPhase] = useState<Phase>(showOpening ? 'void' : 'done')
+  const [ready, setReady] = useState(!showOpening)
+  const [typed, setTyped] = useState(showOpening ? '' : headline)
+  const [typingDone, setTypingDone] = useState(!showOpening)
 
   const scatters = useMemo(
     () =>
@@ -101,6 +107,13 @@ export default function Hero() {
   )
 
   useEffect(() => {
+    if (!showOpening) {
+      setPhase('done')
+      setReady(true)
+      setTyped(headline)
+      setTypingDone(true)
+      return
+    }
     const reduce =
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -128,7 +141,7 @@ export default function Hero() {
       window.clearTimeout(t4)
       window.clearTimeout(t5)
     }
-  }, [])
+  }, [showOpening, headline])
 
   useEffect(() => {
     if (!ready || typingDone) return
@@ -145,10 +158,10 @@ export default function Hero() {
     return () => window.clearInterval(id)
   }, [ready, typingDone, headline])
 
-  const showVeil = phase !== 'done'
+  const showVeil = showOpening && phase !== 'done'
 
   return (
-    <section id="top" className="relative min-h-[100svh] overflow-hidden section-aurora text-ink">
+    <section id="top" className={`relative min-h-[100svh] overflow-hidden ${bg} text-ink`}>
       {showVeil && (
         <div className={`hero-shock ${phase === 'exit' ? 'hero-shock-exit' : ''}`} aria-hidden>
           <div className="hero-shock-void" />
@@ -157,7 +170,11 @@ export default function Hero() {
           )}
 
           <div className="hero-shock-copy">
-            <p className="hero-shock-letters" aria-label={content.site.name}>
+            <p
+              className="hero-shock-letters"
+              aria-label={content.site.name}
+              style={textStyleToCss(styles['hero.openName'])}
+            >
               {letters.map((ch, i) => {
                 const s = scatters[i]
                 const assembled = phase === 'assemble' || phase === 'lock' || phase === 'exit'
@@ -200,12 +217,19 @@ export default function Hero() {
       <div className="site-shell relative z-10 grid min-h-[100svh] items-center gap-8 pb-14 pt-24 md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] md:gap-8 md:pb-20 md:pt-32 lg:gap-12">
         <div className={`${ready ? 'hero-content-ready' : 'hero-content-wait'}`}>
           <p className="mb-5 text-xs font-extrabold uppercase tracking-[0.22em] text-ink sm:tracking-[0.28em]">
-            <span className="inline-block rounded-md bg-brand px-2.5 py-1">{hero.eyebrow}</span>
+            <CmsText
+              path="hero.eyebrow"
+              as="span"
+              className="inline-block rounded-md bg-brand px-2.5 py-1"
+            >
+              {hero.eyebrow}
+            </CmsText>
           </p>
 
           <h1
             className="font-display text-[clamp(1.9rem,8.4vw,5.2rem)] font-bold leading-[1.08] tracking-tight text-ink"
             aria-label={headline}
+            style={textStyleToCss(styles['hero.headline'])}
           >
             {typed}
             {!typingDone && ready && <span className="hero-type-caret" aria-hidden />}
@@ -216,9 +240,12 @@ export default function Hero() {
             initial={{ y: 14, opacity: 0 }}
             animate={{ y: ready ? 0 : 14, opacity: ready ? 1 : 0 }}
             transition={{ delay: ready ? 0.35 : 0, duration: 0.55 }}
+            style={textStyleToCss(styles['hero.body'])}
           >
             {hero.body}{' '}
-            <span className="font-serif italic text-brass">{hero.bodyAccent}</span>
+            <CmsText path="hero.bodyAccent" as="span" className="font-serif italic text-brass">
+              {hero.bodyAccent}
+            </CmsText>
           </motion.p>
 
           <motion.div
@@ -227,18 +254,34 @@ export default function Hero() {
             animate={{ y: ready ? 0 : 14, opacity: ready ? 1 : 0 }}
             transition={{ delay: ready ? 0.45 : 0, duration: 0.55 }}
           >
-            <a href={hero.ctaPrimaryHref} className="btn btn-primary">
+            <a
+              href={hero.ctaPrimaryHref}
+              className="btn btn-primary"
+              style={textStyleToCss(styles['hero.ctaPrimaryLabel'])}
+            >
               {hero.ctaPrimaryLabel}
             </a>
-            <a href={hero.ctaSecondaryHref} className="btn btn-brand">
+            <a
+              href={hero.ctaSecondaryHref}
+              className="btn btn-brand"
+              style={textStyleToCss(styles['hero.ctaSecondaryLabel'])}
+            >
               {hero.ctaSecondaryLabel}
             </a>
           </motion.div>
         </div>
 
         <div className="relative mx-auto flex w-full max-w-[34rem] flex-col items-center justify-center md:max-w-none md:items-end md:justify-end">
-          <HeroOrbit active={ready} />
-          <p className="mt-3 font-serif italic text-brass md:mr-8">{hero.orbitCaption}</p>
+          {showOrbit && <HeroOrbit active={ready} />}
+          {showOrbit && (
+            <CmsText
+              path="hero.orbitCaption"
+              as="p"
+              className="mt-3 font-serif italic text-brass md:mr-8"
+            >
+              {hero.orbitCaption}
+            </CmsText>
+          )}
         </div>
       </div>
 

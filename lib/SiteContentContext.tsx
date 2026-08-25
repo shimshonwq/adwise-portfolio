@@ -82,6 +82,13 @@ function applyTheme(content: CmsContent) {
     link.remove()
   }
 
+  if (theme.pageBackground) {
+    document.body.style.background = theme.pageBackground
+  } else {
+    document.body.style.background = ''
+  }
+  root.style.setProperty('--color-rail-opacity', theme.showColorRail === false ? '0' : '1')
+
   for (const [key, url] of [
     ['adwise-font-display-custom', theme.fontDisplayUrl],
     ['adwise-font-body-custom', theme.fontBodyUrl],

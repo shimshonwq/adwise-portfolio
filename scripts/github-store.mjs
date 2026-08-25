@@ -115,7 +115,7 @@ export const CONTENT_REPO_PATH = 'public/data/content.json'
 
 export function logoRepoPath(src) {
   if (!src || typeof src !== 'string') return null
-  if (src.startsWith('/uploads/logos/')) return `public${src}`
+  if (src.startsWith('/uploads/logos/') || src.startsWith('/uploads/brand/')) return `public${src}`
   return null
 }
 
