@@ -134,6 +134,12 @@ async function sendWithFormSubmit({ to, payload, siteName }) {
     }
   }
 
+  if (lower.includes('rate limit')) {
+    const err = new Error('FORMSUBMIT_CF_BLOCKED')
+    err.code = 'FORMSUBMIT_CF_BLOCKED'
+    throw err
+  }
+
   if (!res.ok) {
     throw new Error(msg || `FormSubmit error ${res.status}`)
   }
