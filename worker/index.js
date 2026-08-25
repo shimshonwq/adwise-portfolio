@@ -40,11 +40,32 @@ const CONTACT_MAX_ATTEMPTS = 8
 const CONTACT_WINDOW_MS = 15 * 60 * 1000
 const PUBLISH_MSG =
   'Saved to GitHub — Cloudflare will rebuild the site in about 1–3 minutes.'
+const CORS_ORIGINS = new Set([
+  'https://adwisemedia.co',
+  'https://www.adwisemedia.co',
+  'https://adwise-portfolio.adwisecreativity.workers.dev',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:3001',
+  'http://127.0.0.1:3001',
+])
 
 /** @type {{ record: object | null, at: number }} */
 let authCache = { record: null, at: 0 }
 const loginAttempts = new Map()
 const contactAttempts = new Map()
+
+function corsHeaders(request) {
+  const origin = request.headers.get('Origin') || ''
+  if (!origin || !CORS_ORIGINS.has(origin)) return {}
+  return {
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Accept',
+    'Access-Control-Max-Age': '86400',
+    Vary: 'Origin',
+  }
+}
 
 function json(body, status = 200, headers = {}) {
   return new Response(JSON.stringify(body), {
@@ -263,25 +284,30 @@ async function handleApi(request, env) {
   const url = new URL(request.url)
   const pathname = url.pathname.replace(/\/+$/, '') || '/'
   const secure = url.protocol === 'https:'
+  const cors = corsHeaders(request)
 
   if (request.method === 'OPTIONS') {
-    return new Response(null, { status: 204 })
+    return new Response(null, { status: 204, headers: cors })
   }
 
   if (request.method === 'GET' && pathname === '/api/content') {
-    return json({ content: await readContent(env) })
+    return json({ content: await readContent(env) }, 200, cors)
   }
 
   if (request.method === 'GET' && pathname === '/api/logos') {
-    return json({ logos: visibleLogos(await readContent(env)) })
+    return json({ logos: visibleLogos(await readContent(env)) }, 200, cors)
   }
 
   if (request.method === 'GET' && pathname === '/api/captcha-config') {
     const siteKey = String(env.TURNSTILE_SITE_KEY || env.turnstile_site_key || '').trim()
-    return json({
-      provider: siteKey ? 'turnstile' : null,
-      siteKey: siteKey || null,
-    })
+    return json(
+      {
+        provider: siteKey ? 'turnstile' : null,
+        siteKey: siteKey || null,
+      },
+      200,
+      cors,
+    )
   }
 
   if (request.method === 'POST' && pathname === '/api/contact') {
@@ -290,13 +316,14 @@ async function handleApi(request, env) {
       return json(
         { error: 'Too many messages from this connection. Please wait a bit and try again.' },
         429,
+        cors,
       )
     }
     recordContactAttempt(ip)
     const body = await request.json().catch(() => ({}))
     const checked = validateContactPayload(body)
-    if (checked.spam) return json({ ok: true })
-    if (!checked.ok) return json({ error: checked.error }, checked.status)
+    if (checked.spam) return json({ ok: true }, 200, cors)
+    if (!checked.ok) return json({ error: checked.error }, checked.status, cors)
 
     const turnstileSecret = String(env.TURNSTILE_SECRET_KEY || env.turnstile_secret_key || '').trim()
     if (turnstileSecret) {
@@ -305,7 +332,7 @@ async function handleApi(request, env) {
         secret: turnstileSecret,
         ip,
       })
-      if (!captcha.ok) return json({ error: captcha.error }, 400)
+      if (!captcha.ok) return json({ error: captcha.error }, 400, cors)
     }
 
     const content = await readContent(env)
@@ -322,16 +349,20 @@ async function handleApi(request, env) {
         githubBranch: env.GITHUB_BRANCH || env.github_branch || 'main',
       })
       if (result.needsActivation) {
-        return json({
-          ok: false,
-          needsActivation: true,
-          error: result.message,
-        })
+        return json(
+          {
+            ok: false,
+            needsActivation: true,
+            error: result.message,
+          },
+          200,
+          cors,
+        )
       }
-      return json({ ok: true, provider: result.provider })
+      return json({ ok: true, provider: result.provider }, 200, cors)
     } catch (err) {
       const message = err?.message || 'Could not send message right now.'
-      return json({ error: message }, 502)
+      return json({ error: message }, 502, cors)
     }
   }
 

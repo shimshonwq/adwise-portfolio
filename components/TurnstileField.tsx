@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
 
 declare global {
   interface Window {
@@ -17,9 +17,15 @@ declare global {
       ) => string
       reset: (widgetId?: string) => void
       remove: (widgetId?: string) => void
+      getResponse?: (widgetId?: string) => string
     }
     onTurnstileApiLoad?: () => void
   }
+}
+
+export type TurnstileHandle = {
+  getToken: () => string | null
+  reset: () => void
 }
 
 type Props = {
@@ -39,13 +45,18 @@ function loadTurnstileScript() {
   turnstileScriptPromise = new Promise((resolve, reject) => {
     const existing = document.querySelector<HTMLScriptElement>('script[data-turnstile]')
     if (existing) {
+      if (window.turnstile) {
+        resolve()
+        return
+      }
       existing.addEventListener('load', () => resolve())
       existing.addEventListener('error', () => reject(new Error('Failed to load Turnstile')))
       return
     }
     window.onTurnstileApiLoad = () => resolve()
     const script = document.createElement('script')
-    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileApiLoad'
+    script.src =
+      'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileApiLoad'
     script.async = true
     script.defer = true
     script.dataset.turnstile = '1'
@@ -57,11 +68,43 @@ function loadTurnstileScript() {
 }
 
 /** Real Cloudflare Turnstile checkbox — the only human verification on the form. */
-export default function TurnstileField({ siteKey, onToken, theme = 'light', className = '' }: Props) {
+const TurnstileField = forwardRef<TurnstileHandle, Props>(function TurnstileField(
+  { siteKey, onToken, theme = 'light', className = '' },
+  ref,
+) {
   const hostRef = useRef<HTMLDivElement>(null)
   const widgetIdRef = useRef<string | null>(null)
+  const tokenRef = useRef<string | null>(null)
   const onTokenRef = useRef(onToken)
   onTokenRef.current = onToken
+
+  useImperativeHandle(ref, () => ({
+    getToken: () => {
+      if (tokenRef.current) return tokenRef.current
+      const id = widgetIdRef.current || undefined
+      try {
+        const fromWidget = window.turnstile?.getResponse?.(id)
+        if (fromWidget) {
+          tokenRef.current = fromWidget
+          return fromWidget
+        }
+      } catch {
+        /* ignore */
+      }
+      return null
+    },
+    reset: () => {
+      tokenRef.current = null
+      onTokenRef.current(null)
+      if (widgetIdRef.current && window.turnstile) {
+        try {
+          window.turnstile.reset(widgetIdRef.current)
+        } catch {
+          /* ignore */
+        }
+      }
+    },
+  }))
 
   useEffect(() => {
     let cancelled = false
@@ -83,9 +126,18 @@ export default function TurnstileField({ siteKey, onToken, theme = 'light', clas
         widgetIdRef.current = window.turnstile.render(hostRef.current, {
           sitekey: siteKey,
           theme,
-          callback: (token) => onTokenRef.current(token),
-          'expired-callback': () => onTokenRef.current(null),
-          'error-callback': () => onTokenRef.current(null),
+          callback: (token) => {
+            tokenRef.current = token
+            onTokenRef.current(token)
+          },
+          'expired-callback': () => {
+            tokenRef.current = null
+            onTokenRef.current(null)
+          },
+          'error-callback': () => {
+            tokenRef.current = null
+            onTokenRef.current(null)
+          },
         })
       } catch {
         onTokenRef.current(null)
@@ -108,14 +160,6 @@ export default function TurnstileField({ siteKey, onToken, theme = 'light', clas
   }, [siteKey, theme])
 
   return <div ref={hostRef} className={className} />
-}
+})
 
-export function resetTurnstile(host?: HTMLElement | null) {
-  if (typeof window === 'undefined' || !window.turnstile) return
-  try {
-    window.turnstile.reset()
-  } catch {
-    /* ignore */
-  }
-  void host
-}
+export default TurnstileField
