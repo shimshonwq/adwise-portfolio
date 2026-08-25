@@ -87,58 +87,85 @@ export default function Contact() {
       }
 
       // Worker / datacenter IPs are often blocked by FormSubmit Cloudflare.
-      // Fall back to browser-side FormSubmit AJAX (same destination email).
-      const browserRes = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(site.email)}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify({
-          name: payload.name,
-          email: payload.email,
-          phone: payload.phone || '(not provided)',
-          message: payload.message,
-          _subject: `New inquiry from ${payload.name} — ${site.name}`,
-          _template: 'table',
-          _captcha: 'false',
-          _honey: honeypot,
-        }),
-      })
-
-      const browserText = await browserRes.text()
-      if (!browserRes.ok || isCloudflareChallenge(browserText)) {
-        throw new Error(
-          data.error && data.error !== 'FORMSUBMIT_CF_BLOCKED'
-            ? data.error
-            : copy.errorMessage ||
-                'Email delivery is temporarily blocked. Please email us directly or try again later.'
-        )
-      }
-
-      let browserData: { success?: string | boolean; message?: string } = {}
+      // Prefer browser FormSubmit AJAX; if CORS/CF blocks it, fall back to a
+      // top-level HTML POST (no CORS) with captcha disabled.
       try {
-        browserData = JSON.parse(browserText) as typeof browserData
+        const browserRes = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(site.email)}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
+            name: payload.name,
+            email: payload.email,
+            phone: payload.phone || '(not provided)',
+            message: payload.message,
+            _subject: `New inquiry from ${payload.name} — ${site.name}`,
+            _template: 'table',
+            _captcha: 'false',
+            _honey: honeypot,
+          }),
+        })
+
+        const browserText = await browserRes.text()
+        if (browserRes.ok && !isCloudflareChallenge(browserText)) {
+          let browserData: { success?: string | boolean; message?: string } = {}
+          try {
+            browserData = JSON.parse(browserText) as typeof browserData
+          } catch {
+            browserData = {}
+          }
+
+          const msg = String(browserData.message || '').toLowerCase()
+          if (msg.includes('activate') || msg.includes('confirm your email')) {
+            setStatus('error')
+            setErrorMessage(
+              'FormSubmit sent an activation email to your Adwise inbox. Open it, click Activate Form, then submit again.'
+            )
+            return
+          }
+
+          if (browserData.success !== 'false' && browserData.success !== false) {
+            setStatus('success')
+            setFormData({ name: '', email: '', phone: '', message: '' })
+            setCaptcha('idle')
+            return
+          }
+        }
       } catch {
-        throw new Error(copy.errorMessage || 'Email service returned an unexpected response.')
+        // CORS / network — continue to HTML POST fallback below.
       }
 
-      const msg = String(browserData.message || '').toLowerCase()
-      if (msg.includes('activate') || msg.includes('confirm your email')) {
-        setStatus('error')
-        setErrorMessage(
-          'FormSubmit sent an activation email to your Adwise inbox. Open it, click Activate Form, then submit again.'
-        )
-        return
+      const nextUrl =
+        typeof window !== 'undefined'
+          ? `${window.location.origin}/?sent=1#contact`
+          : `${site.url}/?sent=1#contact`
+      const fallback = document.createElement('form')
+      fallback.method = 'POST'
+      fallback.action = `https://formsubmit.co/${site.email}`
+      fallback.style.display = 'none'
+      const fields: Record<string, string> = {
+        name: payload.name,
+        email: payload.email,
+        phone: payload.phone || '(not provided)',
+        message: payload.message,
+        _subject: `New inquiry from ${payload.name} — ${site.name}`,
+        _template: 'table',
+        _captcha: 'false',
+        _next: nextUrl,
+        _honey: honeypot,
       }
-
-      if (browserData.success === 'false' || browserData.success === false) {
-        throw new Error(browserData.message || copy.errorMessage || 'Could not send your message.')
+      for (const [key, value] of Object.entries(fields)) {
+        const input = document.createElement('input')
+        input.type = 'hidden'
+        input.name = key
+        input.value = value
+        fallback.appendChild(input)
       }
-
-      setStatus('success')
-      setFormData({ name: '', email: '', phone: '', message: '' })
-      setCaptcha('idle')
+      document.body.appendChild(fallback)
+      fallback.submit()
+      return
     } catch (err) {
       setStatus('error')
       setErrorMessage(
