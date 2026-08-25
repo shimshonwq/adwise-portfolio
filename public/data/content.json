@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-25T00:23:40.047Z",
+  "updatedAt": "2026-08-25T00:23:42.027Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -315,5 +315,10 @@
       "fontWeight": "800",
       "color": "#8f7343"
     }
+  },
+  "brand": {
+    "logoSrc": "/logo.png",
+    "faviconSrc": "/uploads/brand/favicon-mt7x99rh.png",
+    "ogImageSrc": "/logo.png"
   }
 }
