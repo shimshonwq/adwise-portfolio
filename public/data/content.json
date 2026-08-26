@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-26T20:58:42.724Z",
+  "updatedAt": "2026-08-26T20:58:53.386Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -49,7 +49,7 @@
   "hero": {
     "openName": "LIVE-BROWSER-TEST",
     "eyebrow": "Made to be noticed",
-    "headline": "LIVE-BROWSER-TEST",
+    "headline": "Made to be noticed",
     "body": "Logo design, brand graphics, and marketing that make businesses look sharp - and get noticed.",
     "bodyAccent": "Creative that actually works.",
     "ctaPrimaryLabel": "Our clients",
