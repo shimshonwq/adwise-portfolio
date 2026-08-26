@@ -282,7 +282,7 @@ export default function AdminCms() {
     flash(
       data.publishMessage ||
         (storageMode === 'github'
-          ? 'Saved to GitHub — Cloudflare will rebuild in about 1–3 minutes.'
+          ? 'Saved. Live site updates for everyone within a few seconds.'
           : 'Saved.'),
     )
   }
@@ -570,7 +570,7 @@ export default function AdminCms() {
             </h1>
             <p className="mt-2 max-w-2xl font-serif text-base italic text-ink/70">
               Change logos, colors, words, buttons, and contact info. Saves go to GitHub — Cloudflare
-              rebuilds in about 1–3 minutes. This page is private (only at /login).
+              updates live for every visitor within a few seconds. This page is private (only at /login).
             </p>
           </div>
           {phase === 'app' && (
@@ -825,7 +825,7 @@ export default function AdminCms() {
                   title="Change colors and fonts"
                   what="Site-wide colors plus headline, body, and accent fonts."
                   how="Pick colors, choose fonts from the lists, or choose Custom and paste a font name + optional Google Fonts CSS link."
-                  happens="The whole site restyles after Cloudflare rebuilds (about 1–3 minutes). Preview colors/fonts update when you save."
+                  happens="Colors and fonts update live for every visitor within a few seconds after you save."
                   tip="Reset to default restores the original Adwise look."
                 />
                 <SectionSave
@@ -987,7 +987,7 @@ export default function AdminCms() {
                   title="Business name, contact, and menu"
                   what="Your company name, phone, email, website address, menu links, and footer text."
                   how="Edit any box. Menu links use #work style anchors for homepage sections."
-                  happens="Saved to GitHub; the live site updates after rebuild."
+                  happens="Saved to GitHub; every visitor sees the update within a few seconds."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, site: { ...DEFAULT_CONTENT.site } })} title="Site & contact">
                   <Field label="Business name" value={content.site.name} onChange={(v) => setContent({ ...content, site: { ...content.site, name: v } })} />
@@ -1029,7 +1029,7 @@ export default function AdminCms() {
                   title="Top of the homepage (Hero)"
                   what="The big first screen: badge, headline, paragraph, buttons, and opening animation name."
                   how="Edit the boxes. Links can be #work or #contact."
-                  happens="Homepage hero updates after the rebuild."
+                  happens="Homepage hero updates live for every visitor within a few seconds."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, hero: { ...DEFAULT_CONTENT.hero } })} title="Hero">
                   <Field label="Opening name (big letters)" value={content.hero.openName} onChange={(v) => setContent({ ...content, hero: { ...content.hero, openName: v } })} />
@@ -1052,7 +1052,7 @@ export default function AdminCms() {
                   title="Clients section words"
                   what="The titles above the sliding logo bar (not the logos themselves — those are under Logos)."
                   how="Edit eyebrow, title, subtitle, and the empty message."
-                  happens="Section text updates after rebuild."
+                  happens="Section text updates live for every visitor within a few seconds."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, clients: { ...DEFAULT_CONTENT.clients } })} title="Clients section">
                   <Field label="Eyebrow" value={content.clients.eyebrow} onChange={(v) => setContent({ ...content, clients: { ...content.clients, eyebrow: v } })} />
@@ -1069,7 +1069,7 @@ export default function AdminCms() {
                   title="Services cards"
                   what="The “What we do” section: titles, descriptions, bullet points, and card colors."
                   how="Edit each card. Points = one idea per line. Tone = white, ink, or gold background."
-                  happens="Service cards update after rebuild."
+                  happens="Service cards update live for every visitor within a few seconds."
                   tip="You can add or remove a card with the buttons under each card."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, services: structuredClone(DEFAULT_CONTENT.services) })} title="Services">
@@ -1161,7 +1161,7 @@ export default function AdminCms() {
                   title="Spotlight / manifesto block"
                   what="The bold dark section with stacked title lines and two buttons."
                   how="Title lines = one word/line per row in the box."
-                  happens="Spotlight section updates after rebuild."
+                  happens="Spotlight section updates live for every visitor within a few seconds."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, spotlight: structuredClone(DEFAULT_CONTENT.spotlight) })} title="Spotlight">
                   <Field label="Eyebrow" value={content.spotlight.eyebrow} onChange={(v) => setContent({ ...content, spotlight: { ...content.spotlight, eyebrow: v } })} />
@@ -1182,7 +1182,7 @@ export default function AdminCms() {
                   title="Process steps"
                   what="Research → Create → Launch style steps."
                   how="Edit each step’s number, title, body, and color tone. Add or remove steps as needed."
-                  happens="Process section updates after rebuild."
+                  happens="Process section updates live for every visitor within a few seconds."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, process: structuredClone(DEFAULT_CONTENT.process) })} title="Process">
                   <Field label="Eyebrow" value={content.process.eyebrow} onChange={(v) => setContent({ ...content, process: { ...content.process, eyebrow: v } })} />
@@ -1266,7 +1266,7 @@ export default function AdminCms() {
                   title="About section"
                   what="About headline, story, accent line, and principle cards."
                   how="Use {shortName} in the eyebrow to insert your short business name automatically."
-                  happens="About section updates after rebuild."
+                  happens="About section updates live for every visitor within a few seconds."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, about: structuredClone(DEFAULT_CONTENT.about) })} title="About">
                   <Field label="Eyebrow" value={content.about.eyebrow} onChange={(v) => setContent({ ...content, about: { ...content.about, eyebrow: v } })} hint="Tip: write About {shortName}" />
@@ -1345,7 +1345,7 @@ export default function AdminCms() {
                   title="Contact page & form"
                   what="Headings, intro, and every form label / placeholder / button / success message."
                   how="Change the words visitors see when they fill out the form."
-                  happens="Contact section updates after rebuild. Form still emails your site email via FormSubmit."
+                  happens="Contact section updates live for every visitor. Form delivery uses Resend/FormSubmit/GitHub."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, contact: { ...DEFAULT_CONTENT.contact } })} title="Contact">
                   <Field label="Eyebrow" value={content.contact.eyebrow} onChange={(v) => setContent({ ...content, contact: { ...content.contact, eyebrow: v } })} />
@@ -1375,7 +1375,7 @@ export default function AdminCms() {
                   title="Other pages"
                   what="The /projects “coming soon” page and the 404 “page not found” page."
                   how="Edit the titles and paragraphs, then save."
-                  happens="Those pages update after rebuild."
+                  happens="Those pages update live for every visitor within a few seconds."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, projectsPage: { ...DEFAULT_CONTENT.projectsPage } })} title="Projects page">
                   <Field label="Eyebrow" value={content.projectsPage?.eyebrow || ''} onChange={(v) => setContent({ ...content, projectsPage: { ...content.projectsPage, eyebrow: v } })} />

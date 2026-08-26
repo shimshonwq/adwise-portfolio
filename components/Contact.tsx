@@ -5,20 +5,9 @@ import ContactChannels from './ContactChannels'
 import AnimatedText from './AnimatedText'
 import TurnstileField, { type TurnstileHandle } from './TurnstileField'
 import { friendlyContactError } from '../lib/contact-errors'
+import { WORKERS_API, looksLikeChallenge } from '../lib/api-fallback'
 
 type Status = 'idle' | 'submitting' | 'success' | 'error' | 'captcha'
-
-const WORKERS_API = 'https://adwise-portfolio.adwisecreativity.workers.dev'
-
-function looksLikeChallenge(text: string): boolean {
-  const t = text.toLowerCase()
-  return (
-    t.includes('just a moment') ||
-    t.includes('cf-mitigated') ||
-    t.includes('challenge-platform') ||
-    t.includes('<!doctype html')
-  )
-}
 
 async function postContact(payload: Record<string, string>, signal: AbortSignal) {
   const urls = [`/api/contact/`, `${WORKERS_API}/api/contact/`]

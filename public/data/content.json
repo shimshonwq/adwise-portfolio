@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-25T18:42:57.013Z",
+  "updatedAt": "2026-08-25T23:57:53.698Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -220,7 +220,7 @@
     {
       "id": "shloimy",
       "name": "Shloimy Friedlander",
-      "src": "/clients/shloimy.png",
+      "src": "/uploads/logos/shloimy.png",
       "order": 1,
       "visible": true
     },
@@ -248,7 +248,7 @@
     {
       "id": "planit",
       "name": "Planit Architecture",
-      "src": "/clients/planit.png",
+      "src": "/uploads/logos/planit.png",
       "order": 5,
       "visible": true
     },
@@ -324,7 +324,7 @@
   "projectsPage": {
     "eyebrow": "Portfolio",
     "title": "Our work",
-    "body": "Logo design, branding, signage, and print — selected projects from Adwise Media."
+    "body": "Logo design, branding, signage, and print - selected projects from Adwise Media."
   },
   "notFoundPage": {
     "title": "This page took a wrong turn",

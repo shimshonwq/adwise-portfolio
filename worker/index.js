@@ -20,6 +20,7 @@ import {
   publishSiteContent,
   readJsonFile,
   readSiteContent,
+  readTextOrBytes,
   writeBinaryFile,
   writeJsonFile,
 } from './github-store.js'
@@ -31,6 +32,7 @@ import {
   verifyTurnstileToken,
   friendlyContactError,
 } from './contact-mail.js'
+import { securityHeaders } from './security-headers.js'
 
 const CONTENT_KV_KEY = 'content:v1'
 const LEGACY_LOGOS_KEY = 'logos:v1'
@@ -39,8 +41,9 @@ const LOGIN_MAX_ATTEMPTS = 5
 const LOGIN_WINDOW_MS = 15 * 60 * 1000
 const CONTACT_MAX_ATTEMPTS = 8
 const CONTACT_WINDOW_MS = 15 * 60 * 1000
+const CONTENT_CACHE_MS = 10_000
 const PUBLISH_MSG =
-  'Saved to GitHub — Cloudflare will rebuild the site in about 1–3 minutes.'
+  'Saved. Live site updates for everyone within a few seconds — no rebuild needed for text, colors, or logos.'
 const CORS_ORIGINS = new Set([
   'https://adwisemedia.co',
   'https://www.adwisemedia.co',
@@ -53,6 +56,10 @@ const CORS_ORIGINS = new Set([
 
 /** @type {{ record: object | null, at: number }} */
 let authCache = { record: null, at: 0 }
+/** @type {{ data: object | null, at: number }} */
+let contentCache = { data: null, at: 0 }
+/** @type {Map<string, { bytes: Uint8Array, mime: string, at: number }>} */
+const uploadCache = new Map()
 const loginAttempts = new Map()
 const contactAttempts = new Map()
 
@@ -74,10 +81,34 @@ function json(body, status = 200, headers = {}) {
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       'Cache-Control': 'no-store',
-      'X-Content-Type-Options': 'nosniff',
+      ...securityHeaders(),
       ...headers,
     },
   })
+}
+
+function withSecurity(res) {
+  const headers = new Headers(res.headers)
+  for (const [key, value] of Object.entries(securityHeaders())) {
+    if (!headers.has(key)) headers.set(key, value)
+  }
+  return new Response(res.body, {
+    status: res.status,
+    statusText: res.statusText,
+    headers,
+  })
+}
+
+function adminOriginAllowed(request) {
+  const origin = request.headers.get('Origin')
+  if (origin) return CORS_ORIGINS.has(origin)
+  const referer = request.headers.get('Referer')
+  if (!referer) return true
+  try {
+    return CORS_ORIGINS.has(new URL(referer).origin)
+  } catch {
+    return false
+  }
 }
 
 function hasGithub(env) {
@@ -105,6 +136,10 @@ async function getAuthRecord(env) {
 
 function invalidateAuthCache() {
   authCache = { record: null, at: 0 }
+}
+
+function invalidateContentCache() {
+  contentCache = { data: null, at: 0 }
 }
 
 function clientIp(request) {
@@ -226,17 +261,25 @@ async function readContentKv(env) {
 }
 
 async function readContent(env) {
+  if (contentCache.data && Date.now() - contentCache.at < CONTENT_CACHE_MS) {
+    return contentCache.data
+  }
+  let result = null
   if (hasGithub(env)) {
     try {
       const fromGh = await readSiteContent(env)
-      if (fromGh?.site) return fromGh
+      if (fromGh?.site) result = fromGh
     } catch (err) {
       console.error('GitHub read failed:', err)
     }
   }
-  const fromKv = await readContentKv(env)
-  if (fromKv) return fromKv
-  return seedContent()
+  if (!result) {
+    const fromKv = await readContentKv(env)
+    if (fromKv) result = fromKv
+  }
+  if (!result) result = seedContent()
+  contentCache = { data: result, at: Date.now() }
+  return result
 }
 
 async function writeContentKv(env, content) {
@@ -250,9 +293,13 @@ async function persistContent(env, content, message = 'CMS: update site content'
   content = sanitizeDeep(content)
   if (hasGithub(env)) {
     await publishSiteContent(env, content, message)
+    invalidateContentCache()
+    contentCache = { data: content, at: Date.now() }
     return { content, publishMessage: PUBLISH_MSG, published: true }
   }
   await writeContentKv(env, content)
+  invalidateContentCache()
+  contentCache = { data: content, at: Date.now() }
   return { content, publishMessage: 'Saved.', published: true }
 }
 
@@ -279,6 +326,57 @@ async function requireAuth(request, env) {
   const record = await getAuthRecord(env)
   const token = parseCookies(request.headers.get('Cookie') || '')[ADMIN_COOKIE]
   return verifySessionToken(record.sessionKey, token)
+}
+
+function mimeForUploadPath(pathname) {
+  const lower = pathname.toLowerCase()
+  if (lower.endsWith('.png')) return 'image/png'
+  if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'image/jpeg'
+  if (lower.endsWith('.webp')) return 'image/webp'
+  if (lower.endsWith('.gif')) return 'image/gif'
+  if (lower.endsWith('.svg')) return 'image/svg+xml'
+  if (lower.endsWith('.ico')) return 'image/x-icon'
+  return 'application/octet-stream'
+}
+
+/**
+ * Serve CMS uploads: prefer static assets, else live from GitHub (so new logos
+ * appear for everyone immediately without a redeploy).
+ */
+async function serveUpload(request, env, pathname) {
+  if (env.ASSETS) {
+    const assetRes = await env.ASSETS.fetch(request)
+    if (assetRes.status !== 404) return assetRes
+  }
+
+  const cached = uploadCache.get(pathname)
+  if (cached && Date.now() - cached.at < 5 * 60_000) {
+    return new Response(cached.bytes, {
+      headers: {
+        'Content-Type': cached.mime,
+        'Cache-Control': 'public, max-age=300',
+      },
+    })
+  }
+
+  if (!hasGithub(env)) return new Response('Not found', { status: 404 })
+
+  const repoPath = `public${pathname}`
+  try {
+    const file = await readTextOrBytes(env, repoPath)
+    if (!file?.bytes?.length) return new Response('Not found', { status: 404 })
+    const mime = mimeForUploadPath(pathname)
+    uploadCache.set(pathname, { bytes: file.bytes, mime, at: Date.now() })
+    return new Response(file.bytes, {
+      headers: {
+        'Content-Type': mime,
+        'Cache-Control': 'public, max-age=300',
+      },
+    })
+  } catch (err) {
+    console.error('Upload proxy failed:', err)
+    return new Response('Not found', { status: 404 })
+  }
 }
 
 async function handleApi(request, env) {
@@ -386,6 +484,15 @@ async function handleApi(request, env) {
     } catch (err) {
       return json({ error: err.message }, 503)
     }
+  }
+
+  const mutating =
+    request.method === 'POST' ||
+    request.method === 'PUT' ||
+    request.method === 'PATCH' ||
+    request.method === 'DELETE'
+  if (mutating && pathname.startsWith('/api/admin') && !adminOriginAllowed(request)) {
+    return json({ error: 'Request origin not allowed.' }, 403)
   }
 
   if (request.method === 'POST' && pathname === '/api/admin/login') {
@@ -527,6 +634,7 @@ async function handleApi(request, env) {
     const src = `/uploads/logos/${file}`
     if (hasGithub(env)) {
       await writeBinaryFile(env, `public${src}`, parsed.bytes, `CMS: add logo ${name}`)
+      uploadCache.delete(src)
     }
     const content = await readContent(env)
     const maxOrder = content.logos.reduce((m, l) => Math.max(m, l.order ?? 0), -1)
@@ -611,6 +719,7 @@ async function handleApi(request, env) {
           /* ignore */
         }
       }
+      if (removed.src) uploadCache.delete(removed.src)
     }
     const result = await persistContent(env, content, `CMS: remove logo ${id}`)
     return json(okPayload(result))
@@ -622,14 +731,37 @@ async function handleApi(request, env) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url)
-    if (url.pathname.startsWith('/api/')) {
-      try {
+    const pathname = url.pathname.replace(/\/+$/, '') || '/'
+
+    try {
+      if (url.pathname.startsWith('/api/')) {
         return await handleApi(request, env)
-      } catch (err) {
+      }
+
+      if (pathname === '/data/content.json') {
+        const content = await readContent(env)
+        return withSecurity(
+          new Response(JSON.stringify(content), {
+            status: 200,
+            headers: {
+              'Content-Type': 'application/json; charset=utf-8',
+              'Cache-Control': 'no-store',
+            },
+          }),
+        )
+      }
+
+      if (url.pathname.startsWith('/uploads/')) {
+        return withSecurity(await serveUpload(request, env, pathname))
+      }
+
+      if (env.ASSETS) return withSecurity(await env.ASSETS.fetch(request))
+      return withSecurity(new Response('Not found', { status: 404 }))
+    } catch (err) {
+      if (url.pathname.startsWith('/api/')) {
         return json({ error: err?.message || 'Server error' }, 500)
       }
+      return withSecurity(new Response('Server error', { status: 500 }))
     }
-    if (env.ASSETS) return env.ASSETS.fetch(request)
-    return new Response('Not found', { status: 404 })
   },
 }
