@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-26T22:47:05.493Z",
+  "updatedAt": "2026-08-26T22:52:35.550Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -320,13 +320,6 @@
       "name": "Kalmys",
       "src": "/clients/kalmys.png",
       "order": 15,
-      "visible": true
-    },
-    {
-      "id": "challas-mtaonrwc",
-      "name": "Board? oh yaaa call me!",
-      "src": "/uploads/logos/challas-mtaonrwc.jpg",
-      "order": 16,
       "visible": true
     }
   ],
