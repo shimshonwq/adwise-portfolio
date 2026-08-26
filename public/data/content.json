@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-26T23:05:55.809Z",
+  "updatedAt": "2026-08-26T23:05:56.652Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -313,7 +313,7 @@
       "name": "FastLogoTest",
       "src": "/uploads/logos/fastlogotest-mtapcypz.png",
       "order": 14,
-      "visible": true
+      "visible": false
     }
   ],
   "theme": {
