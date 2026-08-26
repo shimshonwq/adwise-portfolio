@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-26T22:30:01.601Z",
+  "updatedAt": "2026-08-26T22:31:45.797Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -299,6 +299,13 @@
       "name": "Mendel Style Events",
       "src": "/clients/mendel-style.png",
       "order": 12,
+      "visible": true
+    },
+    {
+      "id": "speedtest-mtao50ty",
+      "name": "SpeedTest",
+      "src": "/uploads/logos/speedtest-mtao50ty.png",
+      "order": 13,
       "visible": true
     }
   ],
