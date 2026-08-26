@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-26T20:18:27.336Z",
+  "updatedAt": "2026-08-26T20:23:01.186Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -48,7 +48,7 @@
   },
   "hero": {
     "openName": "ADWISE MEDIA",
-    "eyebrow": "Made to be noticed",
+    "eyebrow": "fix-1787775781",
     "headline": "Turn heads. Grow brands.",
     "body": "Logo design, brand graphics, and marketing that make businesses look sharp - and get noticed.",
     "bodyAccent": "Creative that actually works.",
