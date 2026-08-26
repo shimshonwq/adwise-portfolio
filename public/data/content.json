@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-26T23:05:07.504Z",
+  "updatedAt": "2026-08-26T23:05:55.809Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -306,6 +306,13 @@
       "name": "Kalmys",
       "src": "/clients/kalmys.png",
       "order": 13,
+      "visible": true
+    },
+    {
+      "id": "fastlogotest-mtapcypz",
+      "name": "FastLogoTest",
+      "src": "/uploads/logos/fastlogotest-mtapcypz.png",
+      "order": 14,
       "visible": true
     }
   ],
