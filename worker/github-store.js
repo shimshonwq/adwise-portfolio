@@ -2,6 +2,29 @@
  * GitHub Contents API — used by local admin API and Cloudflare Worker.
  */
 
+/** @returns {'classic' | 'fine-grained' | 'ephemeral' | 'unknown'} */
+export function githubTokenKind(token) {
+  const t = String(token || '').trim()
+  if (t.startsWith('ghp_')) return 'classic'
+  if (t.startsWith('github_pat_')) return 'fine-grained'
+  if (t.startsWith('ghs_')) return 'ephemeral'
+  return 'unknown'
+}
+
+export function assertProductionGithubToken(token) {
+  const kind = githubTokenKind(token)
+  if (kind === 'ephemeral') {
+    throw new Error(
+      'GitHub token is short-lived (ghs_). Use a classic PAT with repo scope and no expiration as Worker secret ADWISE_GITHUB_TOKEN.',
+    )
+  }
+  if (kind === 'unknown' && token) {
+    throw new Error(
+      'Unrecognized GitHub token format. Use a classic PAT (ghp_…) with repo scope as ADWISE_GITHUB_TOKEN.',
+    )
+  }
+}
+
 export function githubConfig(env) {
   const token = String(
     env.ADWISE_GITHUB_TOKEN ||
@@ -18,7 +41,7 @@ export function githubConfig(env) {
       'GitHub not configured. Set ADWISE_GITHUB_TOKEN (or GITHUB_TOKEN) and GITHUB_REPO secrets.',
     )
   }
-  return { token, owner, repo: name, branch, fullRepo: `${owner}/${name}` }
+  return { token, owner, repo: name, branch, fullRepo: `${owner}/${name}`, tokenKind: githubTokenKind(token) }
 }
 
 export function bytesToBase64(bytes) {
@@ -57,13 +80,14 @@ async function ghRequest(cfg, path, init = {}) {
     }
     // Expired/truncated Worker secrets are the usual cause — guide the operator clearly.
     if (res.status === 401) {
-      const kind = cfg.token.startsWith('ghs_')
-        ? 'short-lived GitHub App token'
-        : cfg.token.startsWith('ghp_')
-          ? 'personal access token'
-          : 'GitHub token'
+      const kind =
+        cfg.tokenKind === 'ephemeral'
+          ? 'short-lived token (ghs_)'
+          : cfg.tokenKind === 'classic'
+            ? 'personal access token'
+            : 'GitHub token'
       throw new Error(
-        `GitHub API 401: Bad credentials (${kind}). Refresh the Worker secret ADWISE_GITHUB_TOKEN or GITHUB_TOKEN with a classic PAT (repo scope).`,
+        `GitHub API 401: Bad credentials (${kind}). Set Worker secret ADWISE_GITHUB_TOKEN to a classic PAT (repo scope, no expiration).`,
       )
     }
     throw new Error(`GitHub API ${res.status}: ${msg}`)

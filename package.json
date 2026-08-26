@@ -9,6 +9,7 @@
     "dev:next": "next dev",
     "dev:api": "node scripts/admin-api.mjs",
     "bootstrap:admin": "node scripts/bootstrap-admin-auth.mjs",
+    "secrets:worker": "node scripts/push-worker-secrets.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

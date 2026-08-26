@@ -11,11 +11,9 @@
     "html_handling": "auto-trailing-slash",
     "run_worker_first": ["/api/*", "/data/content.json", "/uploads/*"]
   }
-  // Secrets (recommended — saves commit to GitHub, Cloudflare rebuilds):
-  //   npx wrangler secret put GITHUB_TOKEN
-  //   npx wrangler secret put GITHUB_REPO      # owner/repo
-  //   npx wrangler secret put GITHUB_BRANCH    # optional, default main
-  // Admin password hash: data/admin-auth.json in repo (npm run bootstrap:admin)
+  // Secrets (recommended — durable classic PAT, repo scope, no expiration):
+  //   ADWISE_GITHUB_TOKEN=ghp_… npm run secrets:worker
+  // Admin password hash: data/admin-auth.json in GitHub only (npm run bootstrap:admin)
   //
   // Optional legacy fallback (instant saves without git):
   //   kv_namespaces: [{ "binding": "LOGOS", "id": "...", "preview_id": "..." }]

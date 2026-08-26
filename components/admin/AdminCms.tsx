@@ -255,8 +255,8 @@ function validateLogoFile(file: File, width: number, height: number): string | n
 /** Turn raw Worker/GitHub errors into actionable admin UI copy. */
 function friendlyAdminError(raw: unknown, fallback: string): string {
   const msg = raw instanceof Error ? raw.message : typeof raw === 'string' ? raw : ''
-  if (/GitHub API 401|Bad credentials|Refresh the Worker secret|short-lived GitHub/i.test(msg)) {
-    return 'GitHub access expired. Refresh the Cloudflare Worker secret ADWISE_GITHUB_TOKEN (or GITHUB_TOKEN) with a classic personal access token that has repo scope, then try again.'
+  if (/GitHub API 401|Bad credentials|short-lived|ADWISE_GITHUB_TOKEN|no expiration/i.test(msg)) {
+    return 'GitHub access is missing or expired. Add a classic personal access token (repo scope, no expiration) as the Cloudflare Worker secret ADWISE_GITHUB_TOKEN. Admin login always uses your current password from GitHub — old passwords never work after you change it.'
   }
   return msg || fallback
 }

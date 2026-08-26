@@ -4,7 +4,6 @@
  * Optional fallback: KV binding LOGOS (legacy).
  */
 import DEFAULT_CONTENT from './cms-default.json'
-import BUNDLED_ADMIN_AUTH from './admin-auth.json'
 import {
   ADMIN_COOKIE,
   SESSION_MAX_AGE_SEC,
@@ -82,7 +81,7 @@ function json(body, status = 200, headers = {}) {
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       'Cache-Control': 'no-store',
-      'X-Adwise-Build': '2026-08-26-admin-fix',
+      'X-Adwise-Build': '2026-08-26-github-only-auth',
       ...securityHeaders(),
       ...headers,
     },
@@ -127,28 +126,23 @@ async function getAuthRecord(env) {
     return authCache.record
   }
 
-  // Prefer live GitHub copy so password changes persist; fall back to bundled
-  // auth so login still works if GITHUB_TOKEN is expired/misconfigured.
-  if (hasGithub(env)) {
-    try {
-      const row = await readJsonFile(env, AUTH_REPO_PATH)
-      if (row?.data?.hash && row.data.sessionKey) {
-        authCache = { record: row.data, at: Date.now() }
-        return row.data
-      }
-    } catch (err) {
-      console.error('GitHub auth read failed, using bundled auth:', err?.message || err)
-    }
+  // Production auth always comes from GitHub so password changes take effect
+  // immediately and old/bootstrap passwords cannot bypass a rotation.
+  if (!hasGithub(env)) {
+    throw new Error(
+      'Admin auth requires ADWISE_GITHUB_TOKEN (or GITHUB_TOKEN) and GITHUB_REPO Worker secrets.',
+    )
   }
 
-  if (BUNDLED_ADMIN_AUTH?.hash && BUNDLED_ADMIN_AUTH.sessionKey) {
-    authCache = { record: BUNDLED_ADMIN_AUTH, at: Date.now() }
-    return BUNDLED_ADMIN_AUTH
+  const row = await readJsonFile(env, AUTH_REPO_PATH)
+  if (!row?.data?.hash || !row.data.sessionKey) {
+    throw new Error(
+      'Missing data/admin-auth.json in GitHub. Run npm run bootstrap:admin locally and push.',
+    )
   }
 
-  throw new Error(
-    'Admin auth is not available. Set a valid GITHUB_TOKEN Worker secret, or restore data/admin-auth.json.',
-  )
+  authCache = { record: row.data, at: Date.now() }
+  return row.data
 }
 
 function invalidateAuthCache() {
