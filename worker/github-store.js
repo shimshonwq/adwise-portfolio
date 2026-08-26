@@ -3,13 +3,19 @@
  */
 
 export function githubConfig(env) {
-  const token = env.GITHUB_TOKEN || env.github_token
-  const repo = env.GITHUB_REPO || env.github_repo || 'shimshonwq/adwise-portfolio'
-  const branch = env.GITHUB_BRANCH || env.github_branch || 'main'
+  const token = String(
+    env.ADWISE_GITHUB_TOKEN ||
+      env.adwise_github_token ||
+      env.GITHUB_TOKEN ||
+      env.github_token ||
+      '',
+  ).trim()
+  const repo = String(env.GITHUB_REPO || env.github_repo || 'shimshonwq/adwise-portfolio').trim()
+  const branch = String(env.GITHUB_BRANCH || env.github_branch || 'main').trim()
   const [owner, name] = String(repo).split('/')
   if (!token || !owner || !name) {
     throw new Error(
-      'GitHub not configured. Set GITHUB_TOKEN and GITHUB_REPO (owner/repo) secrets.',
+      'GitHub not configured. Set ADWISE_GITHUB_TOKEN (or GITHUB_TOKEN) and GITHUB_REPO secrets.',
     )
   }
   return { token, owner, repo: name, branch, fullRepo: `${owner}/${name}` }
@@ -48,6 +54,17 @@ async function ghRequest(cfg, path, init = {}) {
       msg = j.message || body
     } catch {
       /* ignore */
+    }
+    // Expired/truncated Worker secrets are the usual cause — guide the operator clearly.
+    if (res.status === 401) {
+      const kind = cfg.token.startsWith('ghs_')
+        ? 'short-lived GitHub App token'
+        : cfg.token.startsWith('ghp_')
+          ? 'personal access token'
+          : 'GitHub token'
+      throw new Error(
+        `GitHub API 401: Bad credentials (${kind}). Refresh the Worker secret ADWISE_GITHUB_TOKEN or GITHUB_TOKEN with a classic PAT (repo scope).`,
+      )
     }
     throw new Error(`GitHub API ${res.status}: ${msg}`)
   }

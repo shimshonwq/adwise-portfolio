@@ -4,6 +4,7 @@
  * Optional fallback: KV binding LOGOS (legacy).
  */
 import DEFAULT_CONTENT from './cms-default.json'
+import BUNDLED_ADMIN_AUTH from './admin-auth.json'
 import {
   ADMIN_COOKIE,
   SESSION_MAX_AGE_SEC,
@@ -81,6 +82,7 @@ function json(body, status = 200, headers = {}) {
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       'Cache-Control': 'no-store',
+      'X-Adwise-Build': '2026-08-26-admin-fix',
       ...securityHeaders(),
       ...headers,
     },
@@ -112,26 +114,41 @@ function adminOriginAllowed(request) {
 }
 
 function hasGithub(env) {
-  return Boolean(env.GITHUB_TOKEN || env.github_token)
+  return Boolean(
+    env.ADWISE_GITHUB_TOKEN ||
+      env.adwise_github_token ||
+      env.GITHUB_TOKEN ||
+      env.github_token,
+  )
 }
 
 async function getAuthRecord(env) {
-  if (!hasGithub(env)) {
-    throw new Error(
-      'Admin auth requires GITHUB_TOKEN + GITHUB_REPO secrets (credentials live in data/admin-auth.json).',
-    )
-  }
   if (authCache.record && Date.now() - authCache.at < 60_000) {
     return authCache.record
   }
-  const row = await readJsonFile(env, AUTH_REPO_PATH)
-  if (!row?.data?.hash || !row.data.sessionKey) {
-    throw new Error(
-      'Missing data/admin-auth.json in GitHub. Run npm run bootstrap:admin locally and push.',
-    )
+
+  // Prefer live GitHub copy so password changes persist; fall back to bundled
+  // auth so login still works if GITHUB_TOKEN is expired/misconfigured.
+  if (hasGithub(env)) {
+    try {
+      const row = await readJsonFile(env, AUTH_REPO_PATH)
+      if (row?.data?.hash && row.data.sessionKey) {
+        authCache = { record: row.data, at: Date.now() }
+        return row.data
+      }
+    } catch (err) {
+      console.error('GitHub auth read failed, using bundled auth:', err?.message || err)
+    }
   }
-  authCache = { record: row.data, at: Date.now() }
-  return row.data
+
+  if (BUNDLED_ADMIN_AUTH?.hash && BUNDLED_ADMIN_AUTH.sessionKey) {
+    authCache = { record: BUNDLED_ADMIN_AUTH, at: Date.now() }
+    return BUNDLED_ADMIN_AUTH
+  }
+
+  throw new Error(
+    'Admin auth is not available. Set a valid GITHUB_TOKEN Worker secret, or restore data/admin-auth.json.',
+  )
 }
 
 function invalidateAuthCache() {
@@ -456,7 +473,12 @@ async function handleApi(request, env) {
         siteName: content?.site?.name || 'Adwise Media',
         resendApiKey: env.RESEND_API_KEY || env.resend_api_key || '',
         resendFrom: env.RESEND_FROM || env.resend_from || '',
-        githubToken: env.GITHUB_TOKEN || env.github_token || '',
+        githubToken:
+          env.ADWISE_GITHUB_TOKEN ||
+          env.adwise_github_token ||
+          env.GITHUB_TOKEN ||
+          env.github_token ||
+          '',
         githubRepo: env.GITHUB_REPO || env.github_repo || 'shimshonwq/adwise-portfolio',
         githubBranch: env.GITHUB_BRANCH || env.github_branch || 'main',
       })

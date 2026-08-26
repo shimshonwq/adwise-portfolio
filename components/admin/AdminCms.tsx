@@ -252,6 +252,15 @@ function validateLogoFile(file: File, width: number, height: number): string | n
   return null
 }
 
+/** Turn raw Worker/GitHub errors into actionable admin UI copy. */
+function friendlyAdminError(raw: unknown, fallback: string): string {
+  const msg = raw instanceof Error ? raw.message : typeof raw === 'string' ? raw : ''
+  if (/GitHub API 401|Bad credentials|Refresh the Worker secret|short-lived GitHub/i.test(msg)) {
+    return 'GitHub access expired. Refresh the Cloudflare Worker secret ADWISE_GITHUB_TOKEN (or GITHUB_TOKEN) with a classic personal access token that has repo scope, then try again.'
+  }
+  return msg || fallback
+}
+
 export default function AdminCms() {
   const [phase, setPhase] = useState<Phase>('checking')
   const [password, setPassword] = useState('')
@@ -355,7 +364,7 @@ export default function AdminCms() {
       setPhase('app')
       setTab('start')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed')
+      setError(friendlyAdminError(err, 'Login failed'))
     } finally {
       setBusy(false)
     }
@@ -384,7 +393,7 @@ export default function AdminCms() {
       setConfirmPassword('')
       flash(data.message || 'Password updated.')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not change password')
+      setError(friendlyAdminError(err, 'Could not change password'))
     } finally {
       setBusy(false)
     }
@@ -404,7 +413,7 @@ export default function AdminCms() {
       if (!res.ok) throw new Error(data.error || 'Save failed')
       applyApiResult(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed')
+      setError(friendlyAdminError(err, 'Save failed'))
     } finally {
       setBusy(false)
     }
@@ -433,7 +442,7 @@ export default function AdminCms() {
       if (!res.ok) throw new Error(data.error || 'Reorder failed')
       applyApiResult(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Reorder failed')
+      setError(friendlyAdminError(err, 'Reorder failed'))
     } finally {
       setBusy(false)
     }
@@ -453,7 +462,7 @@ export default function AdminCms() {
       if (!res.ok) throw new Error(data.error || 'Update failed')
       applyApiResult(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Update failed')
+      setError(friendlyAdminError(err, 'Update failed'))
     } finally {
       setBusy(false)
     }
@@ -472,7 +481,7 @@ export default function AdminCms() {
       if (!res.ok) throw new Error(data.error || 'Remove failed')
       applyApiResult(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Remove failed')
+      setError(friendlyAdminError(err, 'Remove failed'))
     } finally {
       setBusy(false)
     }
@@ -496,7 +505,7 @@ export default function AdminCms() {
       if (!res.ok) throw new Error(data.error || 'Replace failed')
       applyApiResult(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Replace failed')
+      setError(friendlyAdminError(err, 'Replace failed'))
     } finally {
       setBusy(false)
     }
@@ -550,7 +559,7 @@ export default function AdminCms() {
       setUploadPreview(null)
       if (fileRef.current) fileRef.current.value = ''
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed')
+      setError(friendlyAdminError(err, 'Upload failed'))
     } finally {
       setBusy(false)
     }
