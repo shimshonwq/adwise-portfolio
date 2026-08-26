@@ -446,6 +446,7 @@ const server = http.createServer(async (req, res) => {
       const body = JSON.parse((await readBody(req)).toString('utf8') || '{}')
       const name = String(body.name || '').trim()
       const dataUrl = String(body.dataUrl || '')
+      const link = String(body.url || '').trim()
       if (!name) return json(res, 400, { error: 'Name is required' })
       const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/)
       if (!match) return json(res, 400, { error: 'Upload a PNG, JPG, or WebP' })
@@ -472,7 +473,14 @@ const server = http.createServer(async (req, res) => {
       }
       const content = await readContent()
       const maxOrder = content.logos.reduce((m, l) => Math.max(m, l.order ?? 0), -1)
-      content.logos.push({ id, name, src, order: maxOrder + 1, visible: true })
+      content.logos.push({
+        id,
+        name,
+        src,
+        order: maxOrder + 1,
+        visible: true,
+        ...(link ? { url: link } : {}),
+      })
       const result = await persistContent(content, `CMS: add logo ${name}`)
       return json(res, 200, okPayload(result))
     }
@@ -485,6 +493,11 @@ const server = http.createServer(async (req, res) => {
       if (idx === -1) return json(res, 404, { error: 'Logo not found' })
       if (body.name !== undefined) {
         content.logos[idx].name = String(body.name).trim() || content.logos[idx].name
+      }
+      if (body.url !== undefined) {
+        const link = String(body.url || '').trim()
+        if (link) content.logos[idx].url = link
+        else delete content.logos[idx].url
       }
       if (body.visible !== undefined) content.logos[idx].visible = Boolean(body.visible)
       if (body.dataUrl) {

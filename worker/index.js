@@ -646,6 +646,7 @@ async function handleApi(request, env) {
     const body = await request.json().catch(() => ({}))
     const name = String(body.name || '').trim()
     const dataUrl = String(body.dataUrl || '')
+    const link = String(body.url || '').trim()
     if (!name) return json({ error: 'Name is required' }, 400)
     const parsed = dataUrlToBytes(dataUrl)
     if (!parsed) return json({ error: 'Upload a PNG, JPG, or WebP' }, 400)
@@ -675,6 +676,7 @@ async function handleApi(request, env) {
       src: hasGithub(env) ? src : dataUrl,
       order: maxOrder + 1,
       visible: true,
+      ...(link ? { url: link } : {}),
     })
     const result = await persistContent(env, content, `CMS: add logo ${name}`)
     return json(okPayload(result))
@@ -688,6 +690,11 @@ async function handleApi(request, env) {
     if (idx === -1) return json({ error: 'Logo not found' }, 404)
     if (body.name !== undefined) {
       content.logos[idx].name = String(body.name).trim() || content.logos[idx].name
+    }
+    if (body.url !== undefined) {
+      const link = String(body.url || '').trim()
+      if (link) content.logos[idx].url = link
+      else delete content.logos[idx].url
     }
     if (body.visible !== undefined) content.logos[idx].visible = Boolean(body.visible)
     if (body.dataUrl) {

@@ -241,15 +241,15 @@ footer.bg-ink .brand-shimmer,
 
 .clients-strip {
   background:
-    radial-gradient(ellipse 50% 45% at 12% 20%, rgb(253 198 33 / 0.18), transparent 55%),
-    linear-gradient(160deg, #14130f 0%, #1a1712 55%, #0f0e0c 100%);
-  color: #fff;
+    radial-gradient(ellipse 55% 50% at 88% 15%, rgb(253 198 33 / 0.14), transparent 55%),
+    linear-gradient(180deg, #ffffff 0%, #f7f2ea 100%);
+  color: #14130f;
 }
 
 .clients-strip .clients-logo {
-  /* Force readable marks on the dark strip (fixes white-on-white logos) */
-  filter: brightness(0) invert(1);
-  opacity: 0.92;
+  /* Natural logo colors on the light bar */
+  filter: none;
+  opacity: 1;
 }
 
 .color-rail {
@@ -491,6 +491,14 @@ footer.bg-ink .brand-shimmer,
   max-width: 100%;
   max-height: 100%;
   pointer-events: none;
+}
+
+.logo-box a {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
 }
 
 .hero-shock {

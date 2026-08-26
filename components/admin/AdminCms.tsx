@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   DEFAULT_CONTENT,
   DEFAULT_THEME,
@@ -9,24 +9,17 @@ import {
 import { BODY_FONTS, DISPLAY_FONTS, SERIF_FONTS } from '../../lib/fonts'
 import {
   LOGO_ACCEPT_ATTR,
-  LOGO_BEST_HEIGHT,
-  LOGO_BEST_TIP,
-  LOGO_BEST_WIDTH,
   LOGO_EXT_LABEL,
   LOGO_HELP,
-  LOGO_MAX_BYTES,
-  LOGO_MAX_HEIGHT,
-  LOGO_MAX_WIDTH,
-  LOGO_MIN_HEIGHT,
-  LOGO_MIN_WIDTH,
-  logoMimeOk,
 } from '../../lib/logo-rules'
+import { exportLogoCrop, loadImageFromFile } from '../../lib/logo-crop'
 import {
   adminFetch,
   establishAdminSession,
   refreshAdminApiToken,
   setAdminApiToken,
 } from '../../lib/admin-api'
+import LogoUploadCrop from './LogoUploadCrop'
 
 type Phase = 'checking' | 'login' | 'app'
 type Tab =
@@ -218,46 +211,6 @@ function sortedLogos(logos: LogoItem[]) {
   return [...logos].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
 }
 
-async function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(String(reader.result || ''))
-    reader.onerror = () => reject(new Error('Could not read file'))
-    reader.readAsDataURL(file)
-  })
-}
-
-async function measureImage(file: File): Promise<{ width: number; height: number }> {
-  const url = URL.createObjectURL(file)
-  try {
-    const dims = await new Promise<{ width: number; height: number }>((resolve, reject) => {
-      const img = new Image()
-      img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight })
-      img.onerror = () => reject(new Error('Could not read image size'))
-      img.src = url
-    })
-    return dims
-  } finally {
-    URL.revokeObjectURL(url)
-  }
-}
-
-function validateLogoFile(file: File, width: number, height: number): string | null {
-  if (!logoMimeOk(file.type)) {
-    return `Wrong file type. Use ${LOGO_EXT_LABEL} only (not SVG, PDF, or HEIC).`
-  }
-  if (file.size > LOGO_MAX_BYTES) {
-    return 'File is too big. Max size is 2 MB.'
-  }
-  if (width < LOGO_MIN_WIDTH || width > LOGO_MAX_WIDTH) {
-    return `Width must be ${LOGO_MIN_WIDTH}–${LOGO_MAX_WIDTH}px (yours is ${width}px). Best: ${LOGO_BEST_WIDTH}.`
-  }
-  if (height < LOGO_MIN_HEIGHT || height > LOGO_MAX_HEIGHT) {
-    return `Height must be ${LOGO_MIN_HEIGHT}–${LOGO_MAX_HEIGHT}px (yours is ${height}px). Best: ${LOGO_BEST_HEIGHT}.`
-  }
-  return null
-}
-
 /** Turn raw Worker/GitHub errors into actionable admin UI copy. */
 function friendlyAdminError(raw: unknown, fallback: string): string {
   const msg = raw instanceof Error ? raw.message : typeof raw === 'string' ? raw : ''
@@ -277,13 +230,20 @@ export default function AdminCms() {
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [uploadName, setUploadName] = useState('')
-  const [uploadFile, setUploadFile] = useState<File | null>(null)
-  const [uploadPreview, setUploadPreview] = useState<{ width: number; height: number } | null>(null)
+  const [uploadUrl, setUploadUrl] = useState('')
+  const [uploadKey, setUploadKey] = useState(0)
+  const [cropPreview, setCropPreview] = useState<{ dataUrl: string; width: number; height: number } | null>(null)
   const [storageMode, setStorageMode] = useState<'github' | 'local' | 'kv' | 'unknown'>('unknown')
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const fileRef = useRef<HTMLInputElement>(null)
+
+  const onCropReady = useCallback(
+    (_file: File | null, preview: { dataUrl: string; width: number; height: number } | null) => {
+      setCropPreview(preview)
+    },
+    [],
+  )
 
   const logos = useMemo(() => sortedLogos(content.logos || []), [content.logos])
   const theme = content.theme || DEFAULT_THEME
@@ -514,14 +474,16 @@ export default function AdminCms() {
     setLogoBusy(id)
     setError(null)
     try {
-      const dims = await measureImage(file)
-      const err = validateLogoFile(file, dims.width, dims.height)
-      if (err) throw new Error(err)
-      const dataUrl = await readFileAsDataUrl(file)
+      const img = await loadImageFromFile(file)
+      const cropped = exportLogoCrop(img, 1, 0, 0)
       const res = await adminFetch(`/api/admin/logos/${encodeURIComponent(id)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dataUrl, width: dims.width, height: dims.height }),
+        body: JSON.stringify({
+          dataUrl: cropped.dataUrl,
+          width: cropped.width,
+          height: cropped.height,
+        }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Replace failed')
@@ -533,52 +495,33 @@ export default function AdminCms() {
     }
   }
 
-  const onPickFile = async (file: File | null) => {
-    setUploadFile(file)
-    setUploadPreview(null)
-    setError(null)
-    if (!file) return
-    try {
-      const dims = await measureImage(file)
-      setUploadPreview(dims)
-      const err = validateLogoFile(file, dims.width, dims.height)
-      if (err) setError(err)
-    } catch {
-      setError('Could not read that image. Try a PNG, JPG, or WebP.')
-      setUploadFile(null)
-    }
-  }
-
   const onUpload = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!uploadFile) {
-      setError('Choose a logo file first.')
+    if (!cropPreview) {
+      setError('Choose a logo picture first, then adjust the preview.')
       return
     }
     setLogoBusy('upload')
     setError(null)
     try {
-      const dims = uploadPreview || (await measureImage(uploadFile))
-      const err = validateLogoFile(uploadFile, dims.width, dims.height)
-      if (err) throw new Error(err)
-      const dataUrl = await readFileAsDataUrl(uploadFile)
       const res = await adminFetch('/api/admin/logos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: uploadName.trim() || uploadFile.name.replace(/\.[^.]+$/, ''),
-          dataUrl,
-          width: dims.width,
-          height: dims.height,
+          name: uploadName.trim() || 'Client logo',
+          dataUrl: cropPreview.dataUrl,
+          width: cropPreview.width,
+          height: cropPreview.height,
+          url: uploadUrl.trim() || undefined,
         }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Upload failed')
       applyApiResult(data)
       setUploadName('')
-      setUploadFile(null)
-      setUploadPreview(null)
-      if (fileRef.current) fileRef.current.value = ''
+      setUploadUrl('')
+      setCropPreview(null)
+      setUploadKey((k) => k + 1)
     } catch (err) {
       setError(friendlyAdminError(err, 'Upload failed'))
     } finally {
@@ -722,132 +665,143 @@ export default function AdminCms() {
                   className="soft-panel space-y-4 border border-ink/10 bg-white p-6"
                 >
                   <h2 className="font-display text-xl font-bold">Add a logo</h2>
-                  <div className="rounded-lg border border-dashed border-brass/40 bg-paper-deep/30 p-4 text-sm text-ink/75">
-                    <p className="font-semibold text-ink">Required file rules</p>
-                    <ul className="mt-2 list-disc space-y-1 pl-5">
-                      <li>
-                        Type: <strong>{LOGO_EXT_LABEL}</strong> only
-                      </li>
-                      <li>
-                        Best size: <strong>{LOGO_BEST_WIDTH}</strong>,{' '}
-                        <strong>{LOGO_BEST_HEIGHT}</strong>
-                      </li>
-                      <li>
-                        Allowed size: width {LOGO_MIN_WIDTH}–{LOGO_MAX_WIDTH}px · height{' '}
-                        {LOGO_MIN_HEIGHT}–{LOGO_MAX_HEIGHT}px
-                      </li>
-                      <li>Max file size: <strong>2 MB</strong></li>
-                      <li>{LOGO_BEST_TIP}</li>
-                    </ul>
-                  </div>
+                  <p className="text-sm text-ink/65">
+                    Pick any photo — big files are fine. Drag and zoom until it looks right, then
+                    click Add logo.
+                  </p>
                   <Field
                     label="Company name"
                     value={uploadName}
                     onChange={setUploadName}
-                    hint="Shown if the picture fails to load. Example: Coffee Break"
+                    hint="Example: Coffee Break"
                   />
-                  <label className="block text-sm">
-                    <span className="mb-1.5 block font-medium text-ink/70">
-                      Logo file ({LOGO_EXT_LABEL})
-                    </span>
-                    <input
-                      ref={fileRef}
-                      type="file"
-                      accept={LOGO_ACCEPT_ATTR}
-                      onChange={(e) => onPickFile(e.target.files?.[0] || null)}
-                      className="w-full text-sm"
-                    />
-                    {uploadPreview && (
-                      <span className="mt-1 block text-xs text-ink/55">
-                        Selected size: {uploadPreview.width}×{uploadPreview.height}px
-                        {uploadFile ? ` · ${(uploadFile.size / 1024).toFixed(0)} KB` : ''}
-                      </span>
-                    )}
-                  </label>
-                  <button type="submit" disabled={logoBusy === 'upload' || !uploadFile} className="btn btn-primary">
-                    {logoBusy === 'upload' ? 'Uploading…' : 'Add logo'}
+                  <Field
+                    label="Website (optional)"
+                    value={uploadUrl}
+                    onChange={setUploadUrl}
+                    hint="Example: https://coffeebreak.com — visitors can click the logo to visit"
+                  />
+                  <LogoUploadCrop
+                    key={uploadKey}
+                    disabled={logoBusy === 'upload'}
+                    onClear={() => setCropPreview(null)}
+                    onReady={onCropReady}
+                  />
+                  <button
+                    type="submit"
+                    disabled={logoBusy === 'upload' || !cropPreview}
+                    className="btn btn-primary"
+                  >
+                    {logoBusy === 'upload' ? 'Adding logo…' : 'Add logo'}
                   </button>
                 </form>
 
-                <div className="soft-panel space-y-3 border border-ink/10 bg-white p-6">
-                  <h2 className="font-display text-xl font-bold">Your logos (order = left to right)</h2>
+                <SectionSave
+                  busy={busy}
+                  onSave={() => saveContent(content)}
+                  title="Your logos"
+                  note="Change names or website links, then press Save changes. Use ↑ ↓ Hide Remove for quick actions."
+                >
                   <p className="text-sm text-ink/60">
-                    Use ↑ ↓ to change order. Hide removes it from the public bar without deleting.
+                    Order = left to right on the homepage bar. Hide removes a logo from the public
+                    bar without deleting it.
                   </p>
-                  {logos.map((logo, i) => (
-                    <div
-                      key={logo.id}
-                      className="flex flex-wrap items-center gap-3 rounded-xl border border-ink/10 p-3"
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={logo.src}
-                        alt={logo.name}
-                        className="h-12 w-24 object-contain bg-white"
-                      />
-                      <input
-                        className="min-w-[8rem] flex-1 rounded border border-ink/15 px-2 py-1.5 text-sm"
-                        value={logo.name}
-                        onChange={(e) =>
-                          setContent({
-                            ...content,
-                            logos: content.logos.map((l) =>
-                              l.id === logo.id ? { ...l, name: e.target.value } : l,
-                            ),
-                          })
-                        }
-                        onBlur={(e) => patchLogo(logo.id, { name: e.target.value })}
-                      />
-                      <div className="flex flex-wrap gap-1">
-                        <button
-                          type="button"
-                          disabled={logoControlsDisabled || i === 0}
-                          onClick={() => moveLogo(logo.id, -1)}
-                          className="btn btn-secondary !px-2 !py-1 text-xs"
-                        >
-                          {logoBusy === logo.id ? '…' : '↑'}
-                        </button>
-                        <button
-                          type="button"
-                          disabled={logoControlsDisabled || i === logos.length - 1}
-                          onClick={() => moveLogo(logo.id, 1)}
-                          className="btn btn-secondary !px-2 !py-1 text-xs"
-                        >
-                          {logoBusy === logo.id ? '…' : '↓'}
-                        </button>
-                        <button
-                          type="button"
-                          disabled={logoControlsDisabled}
-                          onClick={() => patchLogo(logo.id, { visible: logo.visible === false })}
-                          className="btn btn-secondary !px-2 !py-1 text-xs"
-                        >
-                          {logo.visible === false ? 'Show' : 'Hide'}
-                        </button>
-                        <label className="btn btn-secondary !px-2 !py-1 text-xs cursor-pointer">
-                          Replace
-                          <input
-                            type="file"
-                            accept={LOGO_ACCEPT_ATTR}
-                            className="hidden"
-                            onChange={(e) => {
-                              const f = e.target.files?.[0]
-                              if (f) replaceLogo(logo.id, f)
-                              e.target.value = ''
-                            }}
-                          />
-                        </label>
-                        <button
-                          type="button"
-                          disabled={logoControlsDisabled}
-                          onClick={() => removeLogo(logo.id)}
-                          className="btn btn-secondary !px-2 !py-1 text-xs text-red-700"
-                        >
-                          {logoBusy === logo.id ? '…' : 'Remove'}
-                        </button>
+                  <div className="space-y-3">
+                    {logos.map((logo, i) => (
+                      <div
+                        key={logo.id}
+                        className="flex flex-wrap items-start gap-3 rounded-xl border border-ink/10 p-3"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={logo.src}
+                          alt={logo.name}
+                          className="h-12 w-24 shrink-0 object-contain bg-white"
+                        />
+                        <div className="min-w-[12rem] flex-1 space-y-2">
+                          <label className="block text-xs font-medium text-ink/60">
+                            Name
+                            <input
+                              className="mt-1 w-full rounded border border-ink/15 px-2 py-1.5 text-sm"
+                              value={logo.name}
+                              onChange={(e) =>
+                                setContent({
+                                  ...content,
+                                  logos: content.logos.map((l) =>
+                                    l.id === logo.id ? { ...l, name: e.target.value } : l,
+                                  ),
+                                })
+                              }
+                            />
+                          </label>
+                          <label className="block text-xs font-medium text-ink/60">
+                            Website (optional)
+                            <input
+                              className="mt-1 w-full rounded border border-ink/15 px-2 py-1.5 text-sm"
+                              value={logo.url || ''}
+                              placeholder="https://example.com"
+                              onChange={(e) =>
+                                setContent({
+                                  ...content,
+                                  logos: content.logos.map((l) =>
+                                    l.id === logo.id ? { ...l, url: e.target.value } : l,
+                                  ),
+                                })
+                              }
+                            />
+                          </label>
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          <button
+                            type="button"
+                            disabled={logoControlsDisabled || i === 0}
+                            onClick={() => moveLogo(logo.id, -1)}
+                            className="btn btn-secondary !px-2 !py-1 text-xs"
+                          >
+                            {logoBusy === logo.id ? '…' : '↑'}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={logoControlsDisabled || i === logos.length - 1}
+                            onClick={() => moveLogo(logo.id, 1)}
+                            className="btn btn-secondary !px-2 !py-1 text-xs"
+                          >
+                            {logoBusy === logo.id ? '…' : '↓'}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={logoControlsDisabled}
+                            onClick={() => patchLogo(logo.id, { visible: logo.visible === false })}
+                            className="btn btn-secondary !px-2 !py-1 text-xs"
+                          >
+                            {logo.visible === false ? 'Show' : 'Hide'}
+                          </button>
+                          <label className="btn btn-secondary !px-2 !py-1 text-xs cursor-pointer">
+                            Replace
+                            <input
+                              type="file"
+                              accept={LOGO_ACCEPT_ATTR}
+                              className="hidden"
+                              onChange={(e) => {
+                                const f = e.target.files?.[0]
+                                if (f) replaceLogo(logo.id, f)
+                                e.target.value = ''
+                              }}
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            disabled={logoControlsDisabled}
+                            onClick={() => removeLogo(logo.id)}
+                            className="btn btn-secondary !px-2 !py-1 text-xs text-red-700"
+                          >
+                            {logoBusy === logo.id ? '…' : 'Remove'}
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                </SectionSave>
               </div>
             )}
 

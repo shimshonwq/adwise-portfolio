@@ -8,6 +8,8 @@ export type LogoItem = {
   src: string
   order: number
   visible: boolean
+  /** Optional client website — logo becomes clickable when set */
+  url?: string
 }
 
 export type NavItem = { href: string; label: string }

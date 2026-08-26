@@ -2,10 +2,10 @@
 
 export const LOGO_ACCEPT_MIME = ['image/png', 'image/jpeg', 'image/webp']
 export const LOGO_EXT_LABEL = 'PNG, JPG, or WebP'
-export const LOGO_MAX_BYTES = 2 * 1024 * 1024
-export const LOGO_MIN_WIDTH = 200
+export const LOGO_MAX_BYTES = 5 * 1024 * 1024
+export const LOGO_MIN_WIDTH = 100
 export const LOGO_MAX_WIDTH = 2400
-export const LOGO_MIN_HEIGHT = 40
+export const LOGO_MIN_HEIGHT = 32
 export const LOGO_MAX_HEIGHT = 1200
 
 export function logoMimeOk(mime) {
@@ -24,7 +24,7 @@ export function validateLogoUpload({ mime, size, width, height }) {
     return `Wrong file type. Use ${LOGO_EXT_LABEL} only.`
   }
   if (size > LOGO_MAX_BYTES) {
-    return 'File is too big. Max size is 2 MB.'
+    return 'File is too big after processing. Try a simpler image or zoom out a little.'
   }
   if (width != null && height != null) {
     if (width < LOGO_MIN_WIDTH || width > LOGO_MAX_WIDTH) {
