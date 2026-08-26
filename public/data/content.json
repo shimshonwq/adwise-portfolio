@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-26T22:52:35.550Z",
+  "updatedAt": "2026-08-26T22:52:43.883Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -311,7 +311,7 @@
     {
       "id": "shloimy",
       "name": "Shloimy Friedlander",
-      "src": "/uploads/logos/shloimy.jpg",
+      "src": "/uploads/logos/shloimy.png",
       "order": 14,
       "visible": true
     },
