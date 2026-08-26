@@ -402,40 +402,37 @@ async function handleApi(request, env) {
   const pathname = url.pathname.replace(/\/+$/, '') || '/'
   const secure = url.protocol === 'https:'
   const cors = corsHeaders(request)
+  const respond = (body, status = 200, extra = {}) => json(body, status, { ...cors, ...extra })
 
   if (request.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: cors })
   }
 
   if (request.method === 'GET' && pathname === '/api/health') {
-    return json({ ok: true, service: 'adwise-portfolio' }, 200, cors)
+    return respond({ ok: true, service: 'adwise-portfolio' })
   }
 
   if (request.method === 'GET' && pathname === '/api/content') {
     const content = await readContent(env)
-    return json({ content: { ...content, logos: visibleLogos(content) } }, 200, cors)
+    return respond({ content: { ...content, logos: visibleLogos(content) } })
   }
 
   if (request.method === 'GET' && pathname === '/api/logos') {
-    return json({ logos: visibleLogos(await readContent(env)) }, 200, cors)
+    return respond({ logos: visibleLogos(await readContent(env)) })
   }
 
   if (request.method === 'GET' && pathname === '/api/captcha-config') {
     const siteKey = String(env.TURNSTILE_SITE_KEY || env.turnstile_site_key || '').trim()
-    return json(
-      {
-        provider: siteKey ? 'turnstile' : null,
-        siteKey: siteKey || null,
-      },
-      200,
-      cors,
-    )
+    return respond({
+      provider: siteKey ? 'turnstile' : null,
+      siteKey: siteKey || null,
+    })
   }
 
   if (request.method === 'POST' && pathname === '/api/contact') {
     const ip = clientIp(request)
     if (contactRateLimited(ip)) {
-      return json(
+      return respond(
         { error: 'Too many messages from this connection. Please wait a bit and try again.' },
         429,
         cors,
@@ -444,13 +441,13 @@ async function handleApi(request, env) {
     recordContactAttempt(ip)
     const body = await request.json().catch(() => ({}))
     const checked = validateContactPayload(body)
-    if (checked.spam) return json({ ok: true }, 200, cors)
-    if (!checked.ok) return json({ error: checked.error }, checked.status, cors)
+    if (checked.spam) return respond({ ok: true }, 200, cors)
+    if (!checked.ok) return respond({ error: checked.error }, checked.status, cors)
 
     const turnstileSecret = String(env.TURNSTILE_SECRET_KEY || env.turnstile_secret_key || '').trim()
     const turnstileSiteKey = String(env.TURNSTILE_SITE_KEY || env.turnstile_site_key || '').trim()
     if (turnstileSiteKey && !turnstileSecret) {
-      return json(
+      return respond(
         { error: 'Human verification is not configured on the server.' },
         503,
         cors,
@@ -462,7 +459,7 @@ async function handleApi(request, env) {
         secret: turnstileSecret,
         ip,
       })
-      if (!captcha.ok) return json({ error: captcha.error }, 400, cors)
+      if (!captcha.ok) return respond({ error: captcha.error }, 400, cors)
     }
 
     const content = await readContent(env)
@@ -484,7 +481,7 @@ async function handleApi(request, env) {
         githubBranch: env.GITHUB_BRANCH || env.github_branch || 'main',
       })
       if (result.needsActivation) {
-        return json(
+        return respond(
           {
             ok: false,
             needsActivation: true,
@@ -494,10 +491,10 @@ async function handleApi(request, env) {
           cors,
         )
       }
-      return json({ ok: true, provider: result.provider }, 200, cors)
+      return respond({ ok: true, provider: result.provider }, 200, cors)
     } catch (err) {
       const message = friendlyContactError(err?.message || 'Could not send message right now.')
-      return json({ error: message }, 502, cors)
+      return respond({ error: message }, 502, cors)
     }
   }
 
@@ -505,7 +502,7 @@ async function handleApi(request, env) {
     try {
       await getAuthRecord(env)
     } catch (err) {
-      return json({ error: err.message }, 503)
+      return respond({ error: err.message }, 503)
     }
   }
 
@@ -515,13 +512,13 @@ async function handleApi(request, env) {
     request.method === 'PATCH' ||
     request.method === 'DELETE'
   if (mutating && pathname.startsWith('/api/admin') && !adminOriginAllowed(request)) {
-    return json({ error: 'Request origin not allowed.' }, 403)
+    return respond({ error: 'Request origin not allowed.' }, 403)
   }
 
   if (request.method === 'POST' && pathname === '/api/admin/login') {
     const ip = clientIp(request)
     if (loginRateLimited(ip)) {
-      return json(
+      return respond(
         { error: 'Too many login attempts. Wait about 15 minutes and try again.' },
         429,
       )
@@ -531,37 +528,37 @@ async function handleApi(request, env) {
     const record = await getAuthRecord(env)
     if (!(await verifyPassword(String(body.password || ''), record))) {
       recordLoginFailure(ip)
-      return json({ error: 'Wrong password' }, 401)
+      return respond({ error: 'Wrong password' }, 401)
     }
     clearLoginFailures(ip)
     const token = await makeSessionToken(record.sessionKey)
-    return json({ ok: true, token }, 200, { 'Set-Cookie': setCookie(token, secure) })
+    return respond({ ok: true, token }, 200, { 'Set-Cookie': setCookie(token, secure) })
   }
 
   if (request.method === 'POST' && pathname === '/api/admin/logout') {
-    return json({ ok: true }, 200, { 'Set-Cookie': clearCookie(secure) })
+    return respond({ ok: true }, 200, { 'Set-Cookie': clearCookie(secure) })
   }
 
   const authed = await requireAuth(request, env)
 
   if (request.method === 'GET' && pathname === '/api/admin/session') {
-    return json({ ok: authed })
+    return respond({ ok: authed })
   }
 
   if (request.method === 'GET' && pathname === '/api/admin/session-token') {
-    if (!authed) return json({ error: 'Please log in' }, 401)
+    if (!authed) return respond({ error: 'Please log in' }, 401)
     const cookies = parseCookies(request.headers.get('Cookie') || '')
     const token = cookies[ADMIN_COOKIE]
-    if (!token) return json({ error: 'No session' }, 401)
-    return json({ token })
+    if (!token) return respond({ error: 'No session' }, 401)
+    return respond({ token })
   }
 
   if (!authed && pathname.startsWith('/api/admin')) {
-    return json({ error: 'Please log in' }, 401)
+    return respond({ error: 'Please log in' }, 401)
   }
 
   if (request.method === 'GET' && pathname === '/api/admin/status') {
-    return json({
+    return respond({
       storage: hasGithub(env) ? 'github' : env.LOGOS ? 'kv' : 'none',
       repo: env.GITHUB_REPO || env.github_repo || 'shimshonwq/adwise-portfolio',
       branch: env.GITHUB_BRANCH || env.github_branch || 'main',
@@ -574,7 +571,7 @@ async function handleApi(request, env) {
     pathname.startsWith('/api/admin') &&
     pathname !== '/api/admin/status'
   ) {
-    return json(
+    return respond(
       {
         error:
           'Storage not configured. Set GITHUB_TOKEN + GITHUB_REPO secrets (recommended), or KV binding LOGOS.',
@@ -591,22 +588,22 @@ async function handleApi(request, env) {
 
     const record = await getAuthRecord(env)
     if (!(await verifyPassword(current, record))) {
-      return json({ error: 'Current password is incorrect' }, 401)
+      return respond({ error: 'Current password is incorrect' }, 401)
     }
     if (next !== confirm) {
-      return json({ error: 'New passwords do not match' }, 400)
+      return respond({ error: 'New passwords do not match' }, 400)
     }
     const strengthErr = validatePasswordStrength(next)
-    if (strengthErr) return json({ error: strengthErr }, 400)
+    if (strengthErr) return respond({ error: strengthErr }, 400)
     if (await verifyPassword(next, record)) {
-      return json({ error: 'Choose a different password than your current one' }, 400)
+      return respond({ error: 'Choose a different password than your current one' }, 400)
     }
 
     const updated = await rotatePassword(record, next)
     await writeJsonFile(env, AUTH_REPO_PATH, updated, 'CMS: change admin password')
     invalidateAuthCache()
     const token = await makeSessionToken(updated.sessionKey)
-    return json(
+    return respond(
       {
         ok: true,
         message: 'Password updated. All other sessions were signed out.',
@@ -618,26 +615,26 @@ async function handleApi(request, env) {
   }
 
   if (request.method === 'GET' && pathname === '/api/admin/content') {
-    return json({ content: await readContent(env) })
+    return respond({ content: await readContent(env) })
   }
 
   if (request.method === 'PUT' && pathname === '/api/admin/content') {
     const body = await request.json().catch(() => ({}))
     const raw = JSON.stringify(body?.content ?? body)
     if (raw.length > 512_000) {
-      return json({ error: 'Content payload is too large.' }, 413)
+      return respond({ error: 'Content payload is too large.' }, 413)
     }
     const next = body.content || body
     if (!next?.site || !Array.isArray(next.logos)) {
-      return json({ error: 'Invalid content payload' }, 400)
+      return respond({ error: 'Invalid content payload' }, 400)
     }
     const result = await persistContent(env, next, 'CMS: update site content')
-    return json(okPayload(result))
+    return respond(okPayload(result))
   }
 
   if (request.method === 'GET' && pathname === '/api/admin/logos') {
     const content = await readContent(env)
-    return json({
+    return respond({
       logos: [...content.logos].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
     })
   }
@@ -647,9 +644,9 @@ async function handleApi(request, env) {
     const name = String(body.name || '').trim()
     const dataUrl = String(body.dataUrl || '')
     const link = String(body.url || '').trim()
-    if (!name) return json({ error: 'Name is required' }, 400)
+    if (!name) return respond({ error: 'Name is required' }, 400)
     const parsed = dataUrlToBytes(dataUrl)
-    if (!parsed) return json({ error: 'Upload a PNG, JPG, or WebP' }, 400)
+    if (!parsed) return respond({ error: 'Upload a PNG, JPG, or WebP' }, 400)
     const width = body.width != null ? Number(body.width) : null
     const height = body.height != null ? Number(body.height) : null
     const bad = validateLogoUpload({
@@ -658,9 +655,9 @@ async function handleApi(request, env) {
       width: Number.isFinite(width) ? width : null,
       height: Number.isFinite(height) ? height : null,
     })
-    if (bad) return json({ error: bad }, 400)
+    if (bad) return respond({ error: bad }, 400)
     const ext = extForLogoMime(parsed.mime)
-    if (!ext) return json({ error: 'Upload a PNG, JPG, or WebP' }, 400)
+    if (!ext) return respond({ error: 'Upload a PNG, JPG, or WebP' }, 400)
     const id = `${slugify(name)}-${Date.now().toString(36)}`
     const file = `${id}.${ext}`
     const src = `/uploads/logos/${file}`
@@ -679,7 +676,7 @@ async function handleApi(request, env) {
       ...(link ? { url: link } : {}),
     })
     const result = await persistContent(env, content, `CMS: add logo ${name}`)
-    return json(okPayload(result))
+    return respond(okPayload(result))
   }
 
   if (request.method === 'PATCH' && pathname.startsWith('/api/admin/logos/')) {
@@ -687,7 +684,7 @@ async function handleApi(request, env) {
     const body = await request.json().catch(() => ({}))
     const content = await readContent(env)
     const idx = content.logos.findIndex((l) => l.id === id)
-    if (idx === -1) return json({ error: 'Logo not found' }, 404)
+    if (idx === -1) return respond({ error: 'Logo not found' }, 404)
     if (body.name !== undefined) {
       content.logos[idx].name = String(body.name).trim() || content.logos[idx].name
     }
@@ -699,7 +696,7 @@ async function handleApi(request, env) {
     if (body.visible !== undefined) content.logos[idx].visible = Boolean(body.visible)
     if (body.dataUrl) {
       const parsed = dataUrlToBytes(String(body.dataUrl))
-      if (!parsed) return json({ error: 'Upload a PNG, JPG, or WebP' }, 400)
+      if (!parsed) return respond({ error: 'Upload a PNG, JPG, or WebP' }, 400)
       const width = body.width != null ? Number(body.width) : null
       const height = body.height != null ? Number(body.height) : null
       const bad = validateLogoUpload({
@@ -708,9 +705,9 @@ async function handleApi(request, env) {
         width: Number.isFinite(width) ? width : null,
         height: Number.isFinite(height) ? height : null,
       })
-      if (bad) return json({ error: bad }, 400)
+      if (bad) return respond({ error: bad }, 400)
       const ext = extForLogoMime(parsed.mime)
-      if (!ext) return json({ error: 'Upload a PNG, JPG, or WebP' }, 400)
+      if (!ext) return respond({ error: 'Upload a PNG, JPG, or WebP' }, 400)
       const file = `${id}.${ext}`
       const src = `/uploads/logos/${file}`
       if (hasGithub(env)) {
@@ -721,13 +718,13 @@ async function handleApi(request, env) {
       }
     }
     const result = await persistContent(env, content, `CMS: update logo ${id}`)
-    return json(okPayload(result))
+    return respond(okPayload(result))
   }
 
   if (request.method === 'PUT' && pathname === '/api/admin/logos/reorder') {
     const body = await request.json().catch(() => ({}))
     const ids = body.ids
-    if (!Array.isArray(ids)) return json({ error: 'ids array required' }, 400)
+    if (!Array.isArray(ids)) return respond({ error: 'ids array required' }, 400)
     const content = await readContent(env)
     const map = new Map(content.logos.map((l) => [l.id, l]))
     const next = []
@@ -740,7 +737,7 @@ async function handleApi(request, env) {
     for (const left of map.values()) next.push(left)
     content.logos = reindexOrders(next)
     const result = await persistContent(env, content, 'CMS: reorder logos')
-    return json(okPayload(result))
+    return respond(okPayload(result))
   }
 
   if (request.method === 'DELETE' && pathname.startsWith('/api/admin/logos/')) {
@@ -760,10 +757,10 @@ async function handleApi(request, env) {
       if (removed.src) uploadCache.delete(removed.src)
     }
     const result = await persistContent(env, content, `CMS: remove logo ${id}`)
-    return json(okPayload(result))
+    return respond(okPayload(result))
   }
 
-  return json({ error: 'Not found' }, 404)
+  return respond({ error: 'Not found' }, 404)
 }
 
 export default {
@@ -797,7 +794,11 @@ export default {
       return withSecurity(new Response('Not found', { status: 404 }))
     } catch (err) {
       if (url.pathname.startsWith('/api/')) {
-        return json({ error: err?.message || 'Server error' }, 500)
+        return json(
+          { error: err?.message || 'Server error' },
+          500,
+          corsHeaders(request),
+        )
       }
       return withSecurity(new Response('Server error', { status: 500 }))
     }
