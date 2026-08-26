@@ -230,6 +230,28 @@ footer.bg-ink .brand-shimmer,
   -webkit-text-fill-color: #14130f;
 }
 
+/* Never allow washed-out / white headings on the gold contact field */
+.brand-field h1,
+.brand-field h2,
+.brand-field h3,
+.brand-field .eyebrow {
+  color: #14130f !important;
+  -webkit-text-fill-color: #14130f !important;
+}
+
+.clients-strip {
+  background:
+    radial-gradient(ellipse 50% 45% at 12% 20%, rgb(253 198 33 / 0.18), transparent 55%),
+    linear-gradient(160deg, #14130f 0%, #1a1712 55%, #0f0e0c 100%);
+  color: #fff;
+}
+
+.clients-strip .clients-logo {
+  /* Force readable marks on the dark strip (fixes white-on-white logos) */
+  filter: brightness(0) invert(1);
+  opacity: 0.92;
+}
+
 .color-rail {
   height: 4px;
   background: #fdc621;

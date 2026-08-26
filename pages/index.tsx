@@ -10,7 +10,8 @@ import Contact from '../components/Contact'
 import Footer from '../components/Footer'
 import JsonLd from '../components/JsonLd'
 import { useSiteContent } from '../lib/SiteContentContext'
-import { DEFAULT_CONTENT } from '../lib/content'
+import { DEFAULT_CONTENT, type CmsContent } from '../lib/content'
+import { loadBuildContent } from '../lib/load-build-content'
 
 export default function Home() {
   const { content } = useSiteContent()
@@ -38,7 +39,7 @@ export default function Home() {
 
       <JsonLd />
       <Navigation />
-      <main>
+      <main id="main-content">
         <Hero />
         <Services />
         <Clients />
@@ -50,4 +51,9 @@ export default function Home() {
       <Footer />
     </>
   )
+}
+
+export async function getStaticProps() {
+  const initialContent: CmsContent = loadBuildContent()
+  return { props: { initialContent } }
 }

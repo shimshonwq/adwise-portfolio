@@ -82,6 +82,8 @@ export default function Hero() {
   const { tagline } = content.site
   const openName = hero.openName
   const headline = hero.headline
+  const showOpening = hero.showOpening !== false
+  const showOrbit = hero.showOrbit !== false
   const letters = useMemo(() => openName.split(''), [openName])
 
   const [phase, setPhase] = useState<Phase>('void')
@@ -104,7 +106,7 @@ export default function Hero() {
     const reduce =
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (reduce) {
+    if (reduce || !showOpening) {
       setPhase('done')
       setReady(true)
       setTyped(headline)
@@ -128,7 +130,7 @@ export default function Hero() {
       window.clearTimeout(t4)
       window.clearTimeout(t5)
     }
-  }, [])
+  }, [showOpening, headline])
 
   useEffect(() => {
     if (!ready || typingDone) return
@@ -145,7 +147,7 @@ export default function Hero() {
     return () => window.clearInterval(id)
   }, [ready, typingDone, headline])
 
-  const showVeil = phase !== 'done'
+  const showVeil = showOpening && phase !== 'done'
 
   return (
     <section id="top" className="relative min-h-[100svh] overflow-hidden section-aurora text-ink">
@@ -237,8 +239,12 @@ export default function Hero() {
         </div>
 
         <div className="relative mx-auto flex w-full max-w-[34rem] flex-col items-center justify-center md:max-w-none md:items-end md:justify-end">
-          <HeroOrbit active={ready} />
-          <p className="mt-3 font-serif italic text-brass md:mr-8">{hero.orbitCaption}</p>
+          {showOrbit ? (
+            <>
+              <HeroOrbit active={ready} />
+              <p className="mt-3 font-serif italic text-brass md:mr-8">{hero.orbitCaption}</p>
+            </>
+          ) : null}
         </div>
       </div>
 

@@ -20,7 +20,8 @@ export default function Clients() {
     const reduce =
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const speed = 0.42
+    const speed = Number(copy.marqueeSpeed) > 0 ? Number(copy.marqueeSpeed) : 0.42
+    let visible = true
 
     const measure = () => {
       const el = trackRef.current
@@ -35,7 +36,7 @@ export default function Clients() {
     const tick = () => {
       const el = trackRef.current
       const w = loopWidthRef.current
-      if (el && !draggingRef.current && !reduce && w > 0) {
+      if (el && !draggingRef.current && !reduce && w > 0 && visible) {
         offsetRef.current -= speed
       }
       if (w > 0) {
@@ -47,12 +48,25 @@ export default function Clients() {
     }
     rafRef.current = window.requestAnimationFrame(tick)
 
+    const section = trackRef.current?.closest('section')
+    const io =
+      section && typeof IntersectionObserver !== 'undefined'
+        ? new IntersectionObserver(
+            (entries) => {
+              visible = entries.some((entry) => entry.isIntersecting)
+            },
+            { rootMargin: '120px' },
+          )
+        : null
+    if (section && io) io.observe(section)
+
     return () => {
       window.cancelAnimationFrame(rafRef.current)
       window.removeEventListener('resize', measure)
       ro?.disconnect()
+      io?.disconnect()
     }
-  }, [clients])
+  }, [clients, copy.marqueeSpeed])
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!clients.length) return
@@ -74,17 +88,17 @@ export default function Clients() {
   }
 
   return (
-    <section id="work" className="scroll-mt-24 relative overflow-hidden bg-white py-12 text-ink md:py-16">
+    <section id="work" className="scroll-mt-24 relative overflow-hidden clients-strip py-12 text-white md:py-16">
       <div className="color-rail" aria-hidden />
 
       <div className="site-shell relative z-10 text-center">
-        <p className="text-xs font-extrabold uppercase tracking-[0.28em] text-brass">
+        <p className="text-xs font-extrabold uppercase tracking-[0.28em] text-brand">
           {copy.eyebrow}
         </p>
-        <h2 className="mt-3 font-display text-[clamp(1.55rem,5.4vw,2.4rem)] font-bold tracking-tight text-ink">
+        <h2 className="mt-3 font-display text-[clamp(1.55rem,5.4vw,2.4rem)] font-bold tracking-tight text-white">
           {copy.title}
         </h2>
-        <p className="mx-auto mt-3 max-w-lg font-serif text-base italic text-ink/70 md:text-lg">
+        <p className="mx-auto mt-3 max-w-lg font-serif text-base italic text-white/75 md:text-lg">
           {copy.subtitle}
         </p>
       </div>
@@ -116,14 +130,14 @@ export default function Clients() {
                   draggable={false}
                   width={300}
                   height={96}
-                  className="h-14 w-full max-w-[14rem] object-contain object-center select-none md:h-16 md:max-w-[15rem]"
+                  className="clients-logo h-14 w-full max-w-[14rem] object-contain object-center select-none md:h-16 md:max-w-[15rem]"
                 />
               </div>
             ))}
           </div>
         ) : (
           <div className="flex h-[5.25rem] items-center justify-center px-6 md:h-[5.75rem]">
-            <p className="font-serif text-sm italic text-ink/45 md:text-base">
+            <p className="font-serif text-sm italic text-white/45 md:text-base">
               {copy.emptyMessage}
             </p>
           </div>
