@@ -214,6 +214,9 @@ function sortedLogos(logos: LogoItem[]) {
 /** Turn raw Worker/GitHub errors into actionable admin UI copy. */
 function friendlyAdminError(raw: unknown, fallback: string): string {
   const msg = raw instanceof Error ? raw.message : typeof raw === 'string' ? raw : ''
+  if (/failed to fetch|networkerror|load failed/i.test(msg)) {
+    return 'Could not reach the admin server. Hard-refresh this page (Ctrl+Shift+R) and log in again. If it keeps failing, try from a normal browser tab (not private mode).'
+  }
   if (/GitHub API 401|Bad credentials|short-lived|ADWISE_GITHUB_TOKEN|no expiration/i.test(msg)) {
     return 'GitHub access is missing or expired. Add a classic personal access token (repo scope, no expiration) as the Cloudflare Worker secret ADWISE_GITHUB_TOKEN. Admin login always uses your current password from GitHub — old passwords never work after you change it.'
   }

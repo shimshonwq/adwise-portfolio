@@ -33,16 +33,11 @@ function isCustomDomain(): boolean {
   return /(^|\.)adwisemedia\.co$/i.test(window.location.hostname)
 }
 
-function isWriteMethod(method: string): boolean {
-  return !['GET', 'HEAD', 'OPTIONS'].includes(method.toUpperCase())
-}
-
-function adminUrls(path: string, method: string): string[] {
+function adminUrls(path: string, _method: string): string[] {
   const local = normalizePath(path)
   const remote = `${WORKERS_API}${local}`
-  if (isCustomDomain() && isWriteMethod(method)) {
-    return [remote, local]
-  }
+  // Custom domain /api/* is CF-challenged — always prefer workers.dev there.
+  if (isCustomDomain()) return [remote, local]
   return [local, remote]
 }
 
@@ -65,18 +60,23 @@ export async function adminFetch(path: string, init: RequestInit = {}): Promise<
   for (let i = 0; i < urls.length; i++) {
     const url = urls[i]
     const crossOrigin = !url.startsWith('/')
-    const res = await fetch(url, {
-      ...init,
-      cache: 'no-store',
-      credentials: 'include',
-      mode: crossOrigin ? 'cors' : 'same-origin',
-      headers: authHeaders(init.headers),
-    })
-    last = res
-    const raw = await res.clone().text()
-    if (looksLikeChallenge(raw)) continue
-    if (!res.ok && crossOrigin && res.status === 401 && i === 0) continue
-    return res
+    try {
+      const res = await fetch(url, {
+        ...init,
+        cache: 'no-store',
+        // Cross-origin uses Bearer token — cookies + credentials break CORS on workers.dev.
+        credentials: crossOrigin ? 'omit' : 'include',
+        mode: crossOrigin ? 'cors' : 'same-origin',
+        headers: authHeaders(init.headers),
+      })
+      last = res
+      const raw = await res.clone().text()
+      if (looksLikeChallenge(raw)) continue
+      if (!res.ok && crossOrigin && res.status === 401 && i === 0) continue
+      return res
+    } catch {
+      /* network/CORS — try fallback URL */
+    }
   }
 
   return last || new Response(JSON.stringify({ error: 'Admin API unavailable' }), { status: 503 })
@@ -86,6 +86,30 @@ export async function adminFetch(path: string, init: RequestInit = {}): Promise<
 export async function establishAdminSession(password: string): Promise<Response> {
   const body = JSON.stringify({ password })
   const headers = { 'Content-Type': 'application/json', Accept: 'application/json' }
+
+  const mirrorLogin = () =>
+    fetch(`${WORKERS_API}/api/admin/login`, {
+      method: 'POST',
+      credentials: 'omit',
+      mode: 'cors',
+      headers: { ...headers, Origin: window.location.origin },
+      body,
+    }).catch(() => null)
+
+  if (isCustomDomain()) {
+    const mirror = await mirrorLogin()
+    if (mirror?.ok) {
+      try {
+        const data = await mirror.json()
+        if (data?.token) setAdminApiToken(String(data.token))
+      } catch {
+        /* ignore */
+      }
+      return mirror
+    }
+    return mirror || new Response(JSON.stringify({ error: 'Admin API unavailable' }), { status: 503 })
+  }
+
   const [primary, mirror] = await Promise.all([
     fetch(normalizePath('/api/admin/login'), {
       method: 'POST',
@@ -93,13 +117,7 @@ export async function establishAdminSession(password: string): Promise<Response>
       headers,
       body,
     }),
-    fetch(`${WORKERS_API}/api/admin/login`, {
-      method: 'POST',
-      credentials: 'include',
-      mode: 'cors',
-      headers: { ...headers, Origin: window.location.origin },
-      body,
-    }).catch(() => null),
+    mirrorLogin(),
   ])
 
   if (primary.ok) {
@@ -128,10 +146,7 @@ export async function establishAdminSession(password: string): Promise<Response>
 export async function refreshAdminApiToken(): Promise<void> {
   if (getAdminApiToken()) return
   try {
-    const res = await fetch(normalizePath('/api/admin/session-token'), {
-      credentials: 'include',
-      cache: 'no-store',
-    })
+    const res = await adminFetch('/api/admin/session-token')
     if (!res.ok) return
     const data = await res.json()
     if (data?.token) setAdminApiToken(String(data.token))
