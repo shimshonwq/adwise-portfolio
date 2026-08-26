@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-26T22:52:43.883Z",
+  "updatedAt": "2026-08-26T23:05:05.200Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -211,115 +211,108 @@
   },
   "logos": [
     {
-      "id": "speedtest-mtao9qoh",
-      "name": "SpeedTest",
-      "src": "/uploads/logos/speedtest-mtao9qoh.png",
-      "order": 0,
-      "visible": true
-    },
-    {
       "id": "bearertest-mtao9pjd",
       "name": "BearerTest",
       "src": "/uploads/logos/bearertest-mtao9pjd.png",
-      "order": 1,
+      "order": 0,
       "visible": true
     },
     {
       "id": "speedtest-mtao50ty",
       "name": "SpeedTest",
       "src": "/uploads/logos/speedtest-mtao50ty.png",
-      "order": 2,
+      "order": 1,
       "visible": true
     },
     {
       "id": "mendel-style",
       "name": "Mendel Style Events",
       "src": "/clients/mendel-style.png",
-      "order": 3,
+      "order": 2,
       "visible": true
     },
     {
       "id": "greenpower",
       "name": "Green Power Electric",
       "src": "/clients/greenpower.png",
-      "order": 4,
+      "order": 3,
       "visible": true
     },
     {
       "id": "shvitz",
       "name": "The Shvitz",
       "src": "/clients/shvitz.png",
-      "order": 5,
+      "order": 4,
       "visible": true
     },
     {
       "id": "vish-vash",
       "name": "Vish Vash",
       "src": "/clients/vish-vash.png",
-      "order": 6,
+      "order": 5,
       "visible": true
     },
     {
       "id": "hvn",
       "name": "HVN",
       "src": "/clients/hvn.png",
-      "order": 7,
+      "order": 6,
       "visible": true
     },
     {
       "id": "garden-gourmet",
       "name": "Garden Gourmet",
       "src": "/clients/garden-gourmet.png",
-      "order": 8,
+      "order": 7,
       "visible": true
     },
     {
       "id": "icontact",
       "name": "iContact Studio",
       "src": "/clients/icontact.png",
-      "order": 9,
+      "order": 8,
       "visible": true
     },
     {
       "id": "planit",
       "name": "Planit Architecture",
       "src": "/uploads/logos/planit.png",
-      "order": 10,
+      "order": 9,
       "visible": true
     },
     {
       "id": "ride-24",
       "name": "Ride 24",
       "src": "/clients/ride-24.png",
-      "order": 11,
+      "order": 10,
       "visible": true
     },
     {
       "id": "flavor-max",
       "name": "Flavor Max",
       "src": "/clients/flavor-max.png",
-      "order": 12,
+      "order": 11,
       "visible": true
     },
     {
       "id": "coffee-break",
       "name": "Coffee Break",
       "src": "/clients/coffee-break.png",
-      "order": 13,
+      "order": 12,
       "visible": true
     },
     {
       "id": "shloimy",
       "name": "Shloimy Friedlander",
       "src": "/uploads/logos/shloimy.png",
-      "order": 14,
+      "order": 13,
       "visible": true
     },
     {
       "id": "kalmys",
       "name": "Kalmys",
       "src": "/clients/kalmys.png",
-      "order": 15,
+      "order": 14,
       "visible": true
     }
   ],
