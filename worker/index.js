@@ -19,7 +19,6 @@ import {
   logoRepoPath,
   publishSiteContent,
   readJsonFile,
-  readSiteContent,
   readTextOrBytes,
   writeBinaryFile,
   writeJsonFile,
@@ -56,8 +55,8 @@ const CORS_ORIGINS = new Set([
 
 /** @type {{ record: object | null, at: number }} */
 let authCache = { record: null, at: 0 }
-/** @type {{ data: object | null, at: number }} */
-let contentCache = { data: null, at: 0 }
+/** @type {{ data: object | null, sha: string | null, at: number }} */
+let contentCache = { data: null, sha: null, at: 0 }
 /** @type {Map<string, { bytes: Uint8Array, mime: string, at: number }>} */
 const uploadCache = new Map()
 const loginAttempts = new Map()
@@ -68,8 +67,8 @@ function corsHeaders(request) {
   if (!origin || !CORS_ORIGINS.has(origin)) return {}
   return {
     'Access-Control-Allow-Origin': origin,
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Accept',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Accept, Authorization',
     'Access-Control-Max-Age': '86400',
     Vary: 'Origin',
   }
@@ -81,7 +80,7 @@ function json(body, status = 200, headers = {}) {
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       'Cache-Control': 'no-store',
-      'X-Adwise-Build': '2026-08-26-github-only-auth',
+      'X-Adwise-Build': '2026-08-26-fast-logos',
       ...securityHeaders(),
       ...headers,
     },
@@ -150,7 +149,7 @@ function invalidateAuthCache() {
 }
 
 function invalidateContentCache() {
-  contentCache = { data: null, at: 0 }
+  contentCache = { data: null, sha: null, at: 0 }
 }
 
 function clientIp(request) {
@@ -276,10 +275,14 @@ async function readContent(env) {
     return contentCache.data
   }
   let result = null
+  let sha = null
   if (hasGithub(env)) {
     try {
-      const fromGh = await readSiteContent(env)
-      if (fromGh?.site) result = fromGh
+      const fromGh = await readJsonFile(env, 'public/data/content.json')
+      if (fromGh?.data?.site) {
+        result = fromGh.data
+        sha = fromGh.sha || null
+      }
     } catch (err) {
       console.error('GitHub read failed:', err)
     }
@@ -289,7 +292,7 @@ async function readContent(env) {
     if (fromKv) result = fromKv
   }
   if (!result) result = seedContent()
-  contentCache = { data: result, at: Date.now() }
+  contentCache = { data: result, sha, at: Date.now() }
   return result
 }
 
@@ -303,14 +306,13 @@ async function writeContentKv(env, content) {
 async function persistContent(env, content, message = 'CMS: update site content') {
   content = sanitizeDeep(content)
   if (hasGithub(env)) {
-    await publishSiteContent(env, content, message)
-    invalidateContentCache()
-    contentCache = { data: content, at: Date.now() }
-    return { content, publishMessage: PUBLISH_MSG, published: true }
+    const published = await publishSiteContent(env, content, message, contentCache.sha)
+    contentCache = { data: published.content, sha: published.sha, at: Date.now() }
+    return { content: published.content, publishMessage: PUBLISH_MSG, published: true }
   }
   await writeContentKv(env, content)
   invalidateContentCache()
-  contentCache = { data: content, at: Date.now() }
+  contentCache = { data: content, sha: null, at: Date.now() }
   return { content, publishMessage: 'Saved.', published: true }
 }
 
@@ -335,7 +337,12 @@ function dataUrlToBytes(dataUrl) {
 
 async function requireAuth(request, env) {
   const record = await getAuthRecord(env)
-  const token = parseCookies(request.headers.get('Cookie') || '')[ADMIN_COOKIE]
+  const cookies = parseCookies(request.headers.get('Cookie') || '')
+  let token = cookies[ADMIN_COOKIE]
+  if (!token) {
+    const auth = request.headers.get('Authorization') || ''
+    if (auth.startsWith('Bearer ')) token = auth.slice(7).trim()
+  }
   return verifySessionToken(record.sessionKey, token)
 }
 
@@ -528,7 +535,7 @@ async function handleApi(request, env) {
     }
     clearLoginFailures(ip)
     const token = await makeSessionToken(record.sessionKey)
-    return json({ ok: true }, 200, { 'Set-Cookie': setCookie(token, secure) })
+    return json({ ok: true, token }, 200, { 'Set-Cookie': setCookie(token, secure) })
   }
 
   if (request.method === 'POST' && pathname === '/api/admin/logout') {
@@ -539,6 +546,14 @@ async function handleApi(request, env) {
 
   if (request.method === 'GET' && pathname === '/api/admin/session') {
     return json({ ok: authed })
+  }
+
+  if (request.method === 'GET' && pathname === '/api/admin/session-token') {
+    if (!authed) return json({ error: 'Please log in' }, 401)
+    const cookies = parseCookies(request.headers.get('Cookie') || '')
+    const token = cookies[ADMIN_COOKIE]
+    if (!token) return json({ error: 'No session' }, 401)
+    return json({ token })
   }
 
   if (!authed && pathname.startsWith('/api/admin')) {
@@ -650,9 +665,9 @@ async function handleApi(request, env) {
     const src = `/uploads/logos/${file}`
     if (hasGithub(env)) {
       await writeBinaryFile(env, `public${src}`, parsed.bytes, `CMS: add logo ${name}`)
-      uploadCache.delete(src)
+      uploadCache.set(src, { bytes: parsed.bytes, mime: parsed.mime, at: Date.now() })
     }
-    const content = await readContent(env)
+    const content = structuredClone(await readContent(env))
     const maxOrder = content.logos.reduce((m, l) => Math.max(m, l.order ?? 0), -1)
     content.logos.push({
       id,

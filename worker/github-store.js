@@ -134,10 +134,15 @@ export async function writeFile(env, repoPath, base64Content, message, sha = nul
   })
 }
 
-export async function writeJsonFile(env, repoPath, data, message) {
-  const existing = await readJsonFile(env, repoPath).catch(() => null)
+export async function writeJsonFile(env, repoPath, data, message, sha = undefined) {
+  let existingSha = sha
+  if (existingSha === undefined) {
+    const existing = await readJsonFile(env, repoPath).catch(() => null)
+    existingSha = existing?.sha || null
+  }
   const text = `${JSON.stringify(data, null, 2)}\n`
-  await writeFile(env, repoPath, textToBase64(text), message, existing?.sha || null)
+  const result = await writeFile(env, repoPath, textToBase64(text), message, existingSha)
+  return result?.content?.sha || null
 }
 
 export async function writeBinaryFile(env, repoPath, bytes, message) {
@@ -164,11 +169,11 @@ export async function readSiteContent(env) {
   return null
 }
 
-export async function publishSiteContent(env, content, message = 'CMS: update site content') {
+export async function publishSiteContent(env, content, message = 'CMS: update site content', sha = undefined) {
   content.version = 1
   content.updatedAt = new Date().toISOString()
-  await writeJsonFile(env, CONTENT_REPO_PATH, content, message)
-  return content
+  const nextSha = await writeJsonFile(env, CONTENT_REPO_PATH, content, message, sha)
+  return { content, sha: nextSha }
 }
 
 export function logoRepoPath(src) {

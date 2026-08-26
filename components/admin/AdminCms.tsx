@@ -21,6 +21,12 @@ import {
   LOGO_MIN_WIDTH,
   logoMimeOk,
 } from '../../lib/logo-rules'
+import {
+  adminFetch,
+  establishAdminSession,
+  refreshAdminApiToken,
+  setAdminApiToken,
+} from '../../lib/admin-api'
 
 type Phase = 'checking' | 'login' | 'app'
 type Tab =
@@ -267,6 +273,7 @@ export default function AdminCms() {
   const [tab, setTab] = useState<Tab>('start')
   const [content, setContent] = useState<CmsContent>(DEFAULT_CONTENT)
   const [busy, setBusy] = useState(false)
+  const [logoBusy, setLogoBusy] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [uploadName, setUploadName] = useState('')
@@ -297,7 +304,7 @@ export default function AdminCms() {
   }
 
   const loadContent = useCallback(async () => {
-    const res = await fetch('/api/admin/content/', { credentials: 'include' })
+    const res = await adminFetch('/api/admin/content')
     if (!res.ok) throw new Error('Session expired — log in again')
     const data = await res.json()
     const next = data.content || DEFAULT_CONTENT
@@ -316,13 +323,14 @@ export default function AdminCms() {
     let cancelled = false
     ;(async () => {
       try {
-        const res = await fetch('/api/admin/session/', { credentials: 'include' })
+        const res = await adminFetch('/api/admin/session')
         const data = await res.json()
         if (cancelled) return
         if (data.ok) {
+          await refreshAdminApiToken()
           await loadContent()
           try {
-            const st = await fetch('/api/admin/status/', { credentials: 'include' })
+            const st = await adminFetch('/api/admin/status')
             if (st.ok) {
               const status = await st.json()
               if (status.storage === 'github' || status.storage === 'local' || status.storage === 'kv') {
@@ -351,12 +359,7 @@ export default function AdminCms() {
     setBusy(true)
     setError(null)
     try {
-      const res = await fetch('/api/admin/login/', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
-      })
+      const res = await establishAdminSession(password)
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Login failed')
       await loadContent()
@@ -371,7 +374,8 @@ export default function AdminCms() {
   }
 
   const onLogout = async () => {
-    await fetch('/api/admin/logout/', { method: 'POST', credentials: 'include' })
+    setAdminApiToken(null)
+    await adminFetch('/api/admin/logout', { method: 'POST' })
     setPhase('login')
   }
 
@@ -380,9 +384,8 @@ export default function AdminCms() {
     setBusy(true)
     setError(null)
     try {
-      const res = await fetch('/api/admin/password/', {
+      const res = await adminFetch('/api/admin/password', {
         method: 'POST',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ currentPassword, newPassword, confirmPassword }),
       })
@@ -403,9 +406,8 @@ export default function AdminCms() {
     setBusy(true)
     setError(null)
     try {
-      const res = await fetch('/api/admin/content/', {
+      const res = await adminFetch('/api/admin/content', {
         method: 'PUT',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: next }),
       })
@@ -429,12 +431,20 @@ export default function AdminCms() {
     const j = i + dir
     if (i < 0 || j < 0 || j >= ids.length) return
     ;[ids[i], ids[j]] = [ids[j], ids[i]]
-    setBusy(true)
+    const prevLogos = content.logos
+    const map = new Map(content.logos.map((l) => [l.id, l]))
+    const optimistic = ids
+      .map((logoId, order) => {
+        const row = map.get(logoId)
+        return row ? { ...row, order } : null
+      })
+      .filter(Boolean) as LogoItem[]
+    setContent({ ...content, logos: optimistic })
+    setLogoBusy(id)
     setError(null)
     try {
-      const res = await fetch('/api/admin/logos/reorder/', {
+      const res = await adminFetch('/api/admin/logos/reorder', {
         method: 'PUT',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids }),
       })
@@ -442,19 +452,26 @@ export default function AdminCms() {
       if (!res.ok) throw new Error(data.error || 'Reorder failed')
       applyApiResult(data)
     } catch (err) {
+      setContent({ ...content, logos: prevLogos })
       setError(friendlyAdminError(err, 'Reorder failed'))
     } finally {
-      setBusy(false)
+      setLogoBusy(null)
     }
   }
 
   const patchLogo = async (id: string, patch: { name?: string; visible?: boolean }) => {
-    setBusy(true)
+    const prevLogos = content.logos
+    if (patch.visible !== undefined || patch.name !== undefined) {
+      setContent({
+        ...content,
+        logos: content.logos.map((l) => (l.id === id ? { ...l, ...patch } : l)),
+      })
+    }
+    setLogoBusy(id)
     setError(null)
     try {
-      const res = await fetch(`/api/admin/logos/${encodeURIComponent(id)}/`, {
+      const res = await adminFetch(`/api/admin/logos/${encodeURIComponent(id)}`, {
         method: 'PATCH',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(patch),
       })
@@ -462,42 +479,47 @@ export default function AdminCms() {
       if (!res.ok) throw new Error(data.error || 'Update failed')
       applyApiResult(data)
     } catch (err) {
+      setContent({ ...content, logos: prevLogos })
       setError(friendlyAdminError(err, 'Update failed'))
     } finally {
-      setBusy(false)
+      setLogoBusy(null)
     }
   }
 
   const removeLogo = async (id: string) => {
     if (!confirm('Remove this logo from the website?')) return
-    setBusy(true)
+    const prevLogos = content.logos
+    setContent({
+      ...content,
+      logos: prevLogos.filter((l) => l.id !== id).map((l, order) => ({ ...l, order })),
+    })
+    setLogoBusy(id)
     setError(null)
     try {
-      const res = await fetch(`/api/admin/logos/${encodeURIComponent(id)}/`, {
+      const res = await adminFetch(`/api/admin/logos/${encodeURIComponent(id)}`, {
         method: 'DELETE',
-        credentials: 'include',
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Remove failed')
       applyApiResult(data)
     } catch (err) {
+      setContent({ ...content, logos: prevLogos })
       setError(friendlyAdminError(err, 'Remove failed'))
     } finally {
-      setBusy(false)
+      setLogoBusy(null)
     }
   }
 
   const replaceLogo = async (id: string, file: File) => {
-    setBusy(true)
+    setLogoBusy(id)
     setError(null)
     try {
       const dims = await measureImage(file)
       const err = validateLogoFile(file, dims.width, dims.height)
       if (err) throw new Error(err)
       const dataUrl = await readFileAsDataUrl(file)
-      const res = await fetch(`/api/admin/logos/${encodeURIComponent(id)}/`, {
+      const res = await adminFetch(`/api/admin/logos/${encodeURIComponent(id)}`, {
         method: 'PATCH',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ dataUrl, width: dims.width, height: dims.height }),
       })
@@ -507,7 +529,7 @@ export default function AdminCms() {
     } catch (err) {
       setError(friendlyAdminError(err, 'Replace failed'))
     } finally {
-      setBusy(false)
+      setLogoBusy(null)
     }
   }
 
@@ -533,16 +555,15 @@ export default function AdminCms() {
       setError('Choose a logo file first.')
       return
     }
-    setBusy(true)
+    setLogoBusy('upload')
     setError(null)
     try {
       const dims = uploadPreview || (await measureImage(uploadFile))
       const err = validateLogoFile(uploadFile, dims.width, dims.height)
       if (err) throw new Error(err)
       const dataUrl = await readFileAsDataUrl(uploadFile)
-      const res = await fetch('/api/admin/logos/', {
+      const res = await adminFetch('/api/admin/logos', {
         method: 'POST',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: uploadName.trim() || uploadFile.name.replace(/\.[^.]+$/, ''),
@@ -561,9 +582,11 @@ export default function AdminCms() {
     } catch (err) {
       setError(friendlyAdminError(err, 'Upload failed'))
     } finally {
-      setBusy(false)
+      setLogoBusy(null)
     }
   }
+
+  const logoControlsDisabled = Boolean(logoBusy)
 
   return (
     <div className="min-h-[100svh] bg-paper text-ink">
@@ -741,8 +764,8 @@ export default function AdminCms() {
                       </span>
                     )}
                   </label>
-                  <button type="submit" disabled={busy || !uploadFile} className="btn btn-primary">
-                    {busy ? 'Uploading…' : 'Add logo'}
+                  <button type="submit" disabled={logoBusy === 'upload' || !uploadFile} className="btn btn-primary">
+                    {logoBusy === 'upload' ? 'Uploading…' : 'Add logo'}
                   </button>
                 </form>
 
@@ -778,23 +801,23 @@ export default function AdminCms() {
                       <div className="flex flex-wrap gap-1">
                         <button
                           type="button"
-                          disabled={busy || i === 0}
+                          disabled={logoControlsDisabled || i === 0}
                           onClick={() => moveLogo(logo.id, -1)}
                           className="btn btn-secondary !px-2 !py-1 text-xs"
                         >
-                          ↑
+                          {logoBusy === logo.id ? '…' : '↑'}
                         </button>
                         <button
                           type="button"
-                          disabled={busy || i === logos.length - 1}
+                          disabled={logoControlsDisabled || i === logos.length - 1}
                           onClick={() => moveLogo(logo.id, 1)}
                           className="btn btn-secondary !px-2 !py-1 text-xs"
                         >
-                          ↓
+                          {logoBusy === logo.id ? '…' : '↓'}
                         </button>
                         <button
                           type="button"
-                          disabled={busy}
+                          disabled={logoControlsDisabled}
                           onClick={() => patchLogo(logo.id, { visible: logo.visible === false })}
                           className="btn btn-secondary !px-2 !py-1 text-xs"
                         >
@@ -815,11 +838,11 @@ export default function AdminCms() {
                         </label>
                         <button
                           type="button"
-                          disabled={busy}
+                          disabled={logoControlsDisabled}
                           onClick={() => removeLogo(logo.id)}
                           className="btn btn-secondary !px-2 !py-1 text-xs text-red-700"
                         >
-                          Remove
+                          {logoBusy === logo.id ? '…' : 'Remove'}
                         </button>
                       </div>
                     </div>
