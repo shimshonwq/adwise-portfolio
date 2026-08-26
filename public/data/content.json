@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-26T22:31:45.797Z",
+  "updatedAt": "2026-08-26T22:35:24.204Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -306,6 +306,13 @@
       "name": "SpeedTest",
       "src": "/uploads/logos/speedtest-mtao50ty.png",
       "order": 13,
+      "visible": true
+    },
+    {
+      "id": "bearertest-mtao9pjd",
+      "name": "BearerTest",
+      "src": "/uploads/logos/bearertest-mtao9pjd.png",
+      "order": 14,
       "visible": true
     }
   ],
