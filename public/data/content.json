@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-27T14:56:52.564Z",
+  "updatedAt": "2026-08-27T14:56:54.781Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -278,7 +278,7 @@
       "name": "Flavor Max",
       "src": "/clients/flavor-max.png",
       "order": 9,
-      "visible": false
+      "visible": true
     },
     {
       "id": "coffee-break",
