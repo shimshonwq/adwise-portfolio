@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-27T14:54:05.952Z",
+  "updatedAt": "2026-08-27T14:56:43.549Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -300,14 +300,6 @@
       "src": "/clients/kalmys.png",
       "order": 12,
       "visible": true
-    },
-    {
-      "id": "adwise-media-mtbn7vto",
-      "name": "Adwise media",
-      "src": "/uploads/logos/adwise-media-mtbn7vto.png",
-      "order": 13,
-      "visible": true,
-      "url": "Adwisemedia.co"
     }
   ],
   "theme": {
