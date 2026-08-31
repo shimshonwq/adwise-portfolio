@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-27T14:56:54.781Z",
+  "updatedAt": "2026-08-31T02:16:28.441Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -213,7 +213,7 @@
     {
       "id": "mendel-style",
       "name": "Mendel Style Events",
-      "src": "/clients/mendel-style.png",
+      "src": "/uploads/logos/mendel-style.png",
       "order": 0,
       "visible": true
     },
