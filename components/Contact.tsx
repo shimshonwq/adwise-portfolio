@@ -1,18 +1,72 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useSiteContent } from '../lib/SiteContentContext'
 import ContactChannels from './ContactChannels'
 import AnimatedText from './AnimatedText'
+import TurnstileField, { type TurnstileHandle } from './TurnstileField'
 
 type Status = 'idle' | 'submitting' | 'success' | 'error' | 'captcha'
-type CaptchaPhase = 'idle' | 'checking' | 'verified'
+
+const WORKERS_API = 'https://adwise-portfolio.adwisecreativity.workers.dev'
+
+function looksLikeChallenge(text: string): boolean {
+  const t = text.toLowerCase()
+  return (
+    t.includes('just a moment') ||
+    t.includes('cf-mitigated') ||
+    t.includes('challenge-platform') ||
+    t.includes('<!doctype html')
+  )
+}
+
+async function postContact(payload: Record<string, string>, signal: AbortSignal) {
+  const urls = [`/api/contact/`, `${WORKERS_API}/api/contact/`]
+  let lastError = 'Could not send your message.'
+
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(payload),
+        signal,
+        credentials: url.startsWith('/') ? 'same-origin' : 'omit',
+        mode: 'cors',
+      })
+      const raw = await res.text()
+      if (looksLikeChallenge(raw)) {
+        lastError = 'Security check blocked the request. Retrying…'
+        continue
+      }
+      let data: { ok?: boolean; error?: string; provider?: string } = {}
+      try {
+        data = raw ? (JSON.parse(raw) as typeof data) : {}
+      } catch {
+        lastError = 'Unexpected response from the server.'
+        continue
+      }
+      return { res, data }
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') throw err
+      lastError = err instanceof Error ? err.message : 'Network error'
+    }
+  }
+
+  throw new Error(lastError)
+}
 
 export default function Contact() {
   const { content, channels } = useSiteContent()
   const { site, contact: copy } = content
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' })
   const [status, setStatus] = useState<Status>('idle')
-  const [captcha, setCaptcha] = useState<CaptchaPhase>('idle')
+  const [errorMessage, setErrorMessage] = useState('')
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
+  const [turnstileSiteKey, setTurnstileSiteKey] = useState<string | null>(null)
+  const [turnstileRequired, setTurnstileRequired] = useState(false)
+  const [captchaConfigLoaded, setCaptchaConfigLoaded] = useState(false)
+  const turnstileRef = useRef<TurnstileHandle | null>(null)
+  const feedbackRef = useRef<HTMLParagraphElement | null>(null)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -20,24 +74,112 @@ export default function Contact() {
     if (params.get('sent') === '1') setStatus('success')
   }, [])
 
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      const urls = ['/api/captcha-config/', `${WORKERS_API}/api/captcha-config/`]
+      for (const url of urls) {
+        try {
+          const res = await fetch(url, { credentials: url.startsWith('/') ? 'same-origin' : 'omit' })
+          const raw = await res.text()
+          if (looksLikeChallenge(raw)) continue
+          const data = JSON.parse(raw) as { siteKey?: string | null }
+          if (cancelled) return
+          const key = String(data.siteKey || '').trim()
+          if (key) {
+            setTurnstileSiteKey(key)
+            setTurnstileRequired(true)
+            setCaptchaConfigLoaded(true)
+            return
+          }
+        } catch {
+          /* try next */
+        }
+      }
+      if (!cancelled) {
+        setTurnstileSiteKey(null)
+        setTurnstileRequired(false)
+        setCaptchaConfigLoaded(true)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    if (status === 'error' || status === 'captcha' || status === 'success') {
+      feedbackRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
+  }, [status, errorMessage])
+
   const onChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const onCaptchaPress = () => {
-    if (captcha === 'checking' || captcha === 'verified') return
-    setCaptcha('checking')
-    setStatus((s) => (s === 'captcha' ? 'idle' : s))
-    window.setTimeout(() => setCaptcha('verified'), 650)
-  }
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    if (captcha !== 'verified') {
-      e.preventDefault()
+    const token =
+      turnstileRef.current?.getToken() ||
+      turnstileToken ||
+      ''
+
+    if (turnstileRequired && !token) {
       setStatus('captcha')
+      setErrorMessage('Please complete the “Verify you are human” check, then press Send again.')
       return
     }
+
     setStatus('submitting')
+    setErrorMessage('')
+
+    const payload = {
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      phone: formData.phone.trim(),
+      message: formData.message.trim(),
+      turnstileToken: token,
+      _honey: '',
+    }
+
+    try {
+      const controller = new AbortController()
+      const timer = window.setTimeout(() => controller.abort(), 30000)
+      const { res, data } = await postContact(payload, controller.signal)
+      window.clearTimeout(timer)
+
+      if (res.ok && data.ok) {
+        setStatus('success')
+        setFormData({ name: '', email: '', phone: '', message: '' })
+        setTurnstileToken(null)
+        turnstileRef.current?.reset()
+        return
+      }
+
+      setStatus('error')
+      setErrorMessage(
+        data.error ||
+          copy.errorMessage ||
+          `Something went wrong — email us at ${site.email}.`,
+      )
+      // Keep Turnstile token usable for a quick retry unless server rejected captcha.
+      if (/human verification|verify you/i.test(String(data.error || ''))) {
+        setTurnstileToken(null)
+        turnstileRef.current?.reset()
+      }
+    } catch (err) {
+      setStatus('error')
+      const aborted = err instanceof Error && err.name === 'AbortError'
+      setErrorMessage(
+        aborted
+          ? `Sending timed out — please email us at ${site.email}.`
+          : err instanceof Error
+            ? err.message
+            : copy.errorMessage || 'Something went wrong. Please try again.',
+      )
+    }
   }
 
   return (
@@ -58,13 +200,13 @@ export default function Contact() {
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.45 }}
         >
-          <p className="eyebrow !text-ink/55">{copy.eyebrow}</p>
+          <p className="eyebrow !text-ink/80">{copy.eyebrow}</p>
           <AnimatedText
             as="h2"
             text={copy.title}
             className="mt-3 font-display text-[clamp(1.65rem,6vw,3.25rem)] font-bold tracking-tight text-ink"
           />
-          <p className="mt-5 max-w-md font-serif text-base italic text-ink/75 md:text-lg">
+          <p className="mt-5 max-w-md font-serif text-base italic text-ink/80 md:text-lg">
             {copy.intro}
           </p>
 
@@ -75,7 +217,7 @@ export default function Contact() {
             <a href={channels.call} className="block font-semibold hover:underline">
               {site.phoneDisplay}
             </a>
-            <p className="text-ink/55">{site.location}</p>
+            <p className="text-ink/70">{site.location}</p>
           </div>
 
           <ContactChannels variant="light" className="mt-8" />
@@ -86,8 +228,6 @@ export default function Contact() {
           whileInView={{ y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.45, delay: 0.06 }}
-          action={`https://formsubmit.co/${site.email}`}
-          method="POST"
           onSubmit={onSubmit}
           className="soft-panel space-y-5 border border-white/10 bg-ink p-7 text-white md:p-10"
         >
@@ -98,61 +238,62 @@ export default function Contact() {
             <p className="mt-2 font-serif text-sm italic text-white/70">{copy.formNote}</p>
           </div>
 
-          <input
-            type="hidden"
-            name="_subject"
-            value={`New inquiry from ${formData.name || 'website'} — ${site.name}`}
-          />
-          <input type="hidden" name="_template" value="table" />
-          <input type="hidden" name="_captcha" value="true" />
-          <input type="hidden" name="_next" value={`${site.url}/?sent=1#contact`} />
+          {/* Server-only honeypot name that password managers rarely autofill */}
           <input
             type="text"
-            name="_honey"
+            name="ne_hp_field"
+            defaultValue=""
             tabIndex={-1}
             autoComplete="off"
             className="absolute left-[-9999px] h-0 w-0 opacity-0"
             aria-hidden
+            onChange={(e) => {
+              // If something fills this, ignore client-side — server still filters _honey if sent.
+              void e
+            }}
           />
 
           <div className="grid gap-5 sm:grid-cols-2">
             <label className="block text-sm">
-              <span className="mb-2 block text-white/55">{copy.nameLabel}</span>
+              <span className="mb-2 block text-white/70">{copy.nameLabel}</span>
               <input
                 name="name"
                 required
                 value={formData.name}
                 onChange={onChange}
+                autoComplete="name"
                 className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
                 placeholder={copy.namePlaceholder}
               />
             </label>
             <label className="block text-sm">
-              <span className="mb-2 block text-white/55">{copy.emailLabel}</span>
+              <span className="mb-2 block text-white/70">{copy.emailLabel}</span>
               <input
                 type="email"
                 name="email"
                 required
                 value={formData.email}
                 onChange={onChange}
+                autoComplete="email"
                 className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
                 placeholder={copy.emailPlaceholder}
               />
             </label>
           </div>
           <label className="block text-sm">
-            <span className="mb-2 block text-white/55">{copy.phoneLabel}</span>
+            <span className="mb-2 block text-white/70">{copy.phoneLabel}</span>
             <input
               type="tel"
               name="phone"
               value={formData.phone}
               onChange={onChange}
+              autoComplete="tel"
               className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
               placeholder={copy.phonePlaceholder}
             />
           </label>
           <label className="block text-sm">
-            <span className="mb-2 block text-white/55">{copy.messageLabel}</span>
+            <span className="mb-2 block text-white/70">{copy.messageLabel}</span>
             <textarea
               name="message"
               required
@@ -164,72 +305,57 @@ export default function Contact() {
             />
           </label>
 
-          <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/40">
-              Verify you’re human
-            </p>
-            <button
-              type="button"
-              onClick={onCaptchaPress}
-              aria-pressed={captcha === 'verified'}
-              className={`flex w-full max-w-sm items-center gap-3 rounded-lg border px-3 py-3 text-left transition ${
-                status === 'captcha'
-                  ? 'border-brand bg-brand/10'
-                  : 'border-white bg-white hover:bg-white'
-              }`}
-            >
-              <span
-                className={`flex h-7 w-7 shrink-0 items-center justify-center border-2 ${
-                  captcha === 'verified'
-                    ? 'border-emerald-600 bg-emerald-500 text-white'
-                    : 'border-black/35 bg-white'
-                }`}
-                aria-hidden
-              >
-                {captcha === 'checking' && (
-                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-ink/25 border-t-ink" />
-                )}
-                {captcha === 'verified' && (
-                  <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden>
-                    <path
-                      d="M5 10.5 8.2 13.5 15 6.5"
-                      stroke="currentColor"
-                      strokeWidth="2.4"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                )}
-              </span>
-              <span className="flex-1 text-sm font-medium text-ink">
-                {captcha === 'checking'
-                  ? 'Checking…'
-                  : captcha === 'verified'
-                    ? 'Verified'
-                    : 'I’m not a robot'}
-              </span>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-ink/40">
-                reCAPTCHA
-              </span>
-            </button>
-            {status === 'captcha' && (
-              <p className="text-sm text-brand">Please press “I’m not a robot” before sending.</p>
-            )}
-          </div>
+          {(!captchaConfigLoaded || turnstileSiteKey) && (
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
+                {copy.captchaLabel || 'Verify you’re human'}
+              </p>
+              {!captchaConfigLoaded ? (
+                <p className="text-sm text-white/55">Loading security check…</p>
+              ) : turnstileSiteKey ? (
+                <div className="max-w-sm rounded-lg bg-white p-3">
+                  <TurnstileField
+                    ref={turnstileRef}
+                    siteKey={turnstileSiteKey}
+                    theme="light"
+                    onToken={(token) => {
+                      setTurnstileToken(token)
+                      if (token) {
+                        setStatus((s) => (s === 'captcha' ? 'idle' : s))
+                        setErrorMessage('')
+                      }
+                    }}
+                  />
+                </div>
+              ) : null}
+            </div>
+          )}
 
           <button
             type="submit"
-            disabled={status === 'submitting' || captcha === 'checking'}
-            className="btn btn-on-dark mt-2"
+            disabled={status === 'submitting'}
+            className="btn btn-on-dark mt-2 disabled:opacity-70"
           >
-            {status === 'submitting' ? copy.sendingLabel : copy.submitLabel}
+            {status === 'submitting' ? copy.sendingLabel || 'Sending…' : copy.submitLabel}
           </button>
 
+          {status === 'captcha' && (
+            <p ref={feedbackRef} className="text-sm font-medium text-brand" role="alert">
+              {errorMessage || 'Please complete the “Verify you are human” check, then press Send again.'}
+            </p>
+          )}
           {status === 'success' && (
-            <p className="text-sm text-brand">{copy.successMessage}</p>
+            <p ref={feedbackRef} className="text-sm font-medium text-brand" role="status">
+              {copy.successMessage}
+            </p>
           )}
           {status === 'error' && (
-            <p className="text-sm text-red-300">{copy.errorMessage}</p>
+            <p ref={feedbackRef} className="text-sm font-medium text-red-300" role="alert">
+              {errorMessage || copy.errorMessage}{' '}
+              <a className="underline" href={`mailto:${site.email}`}>
+                {site.email}
+              </a>
+            </p>
           )}
         </motion.form>
       </div>

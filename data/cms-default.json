@@ -185,7 +185,12 @@
     "namePlaceholder": "Your name",
     "emailPlaceholder": "you@company.com",
     "phonePlaceholder": "Optional",
-    "messagePlaceholder": "What are you building?"
+    "messagePlaceholder": "What are you building?",
+    "background": "brand",
+    "captchaLabel": "Verify you're human",
+    "captchaIdle": "I'm not a robot",
+    "captchaChecking": "Checking...",
+    "captchaVerified": "Verified"
   },
   "logos": [
     {
