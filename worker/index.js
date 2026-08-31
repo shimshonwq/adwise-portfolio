@@ -25,18 +25,22 @@ import {
 } from './github-store.js'
 import { validateLogoUpload, extForLogoMime, LOGO_MAX_BYTES } from './logo-rules.js'
 import { sanitizeDeep } from './text-sanitize.js'
+import { deliverContactMessage, validateContactPayload } from './contact-mail.js'
 
 const CONTENT_KV_KEY = 'content:v1'
 const LEGACY_LOGOS_KEY = 'logos:v1'
 const MAX_BYTES = LOGO_MAX_BYTES
 const LOGIN_MAX_ATTEMPTS = 5
 const LOGIN_WINDOW_MS = 15 * 60 * 1000
+const CONTACT_MAX_ATTEMPTS = 8
+const CONTACT_WINDOW_MS = 15 * 60 * 1000
 const PUBLISH_MSG =
   'Saved to GitHub — Cloudflare will rebuild the site in about 1–3 minutes.'
 
 /** @type {{ record: object | null, at: number }} */
 let authCache = { record: null, at: 0 }
 const loginAttempts = new Map()
+const contactAttempts = new Map()
 
 function json(body, status = 200, headers = {}) {
   return new Response(JSON.stringify(body), {
@@ -107,6 +111,26 @@ function recordLoginFailure(ip) {
 
 function clearLoginFailures(ip) {
   loginAttempts.delete(ip)
+}
+
+function contactRateLimited(ip) {
+  const now = Date.now()
+  let entry = contactAttempts.get(ip)
+  if (!entry || now > entry.resetAt) {
+    entry = { count: 0, resetAt: now + CONTACT_WINDOW_MS }
+    contactAttempts.set(ip, entry)
+  }
+  return entry.count >= CONTACT_MAX_ATTEMPTS
+}
+
+function recordContactAttempt(ip) {
+  const now = Date.now()
+  let entry = contactAttempts.get(ip)
+  if (!entry || now > entry.resetAt) {
+    entry = { count: 0, resetAt: now + CONTACT_WINDOW_MS }
+  }
+  entry.count += 1
+  contactAttempts.set(ip, entry)
 }
 
 function parseCookies(header) {
@@ -246,6 +270,48 @@ async function handleApi(request, env) {
 
   if (request.method === 'GET' && pathname === '/api/logos') {
     return json({ logos: visibleLogos(await readContent(env)) })
+  }
+
+  if (request.method === 'POST' && pathname === '/api/contact') {
+    const ip = clientIp(request)
+    if (contactRateLimited(ip)) {
+      return json(
+        { error: 'Too many messages from this connection. Please wait a bit and try again.' },
+        429,
+      )
+    }
+    recordContactAttempt(ip)
+    const body = await request.json().catch(() => ({}))
+    const checked = validateContactPayload(body)
+    if (checked.spam) return json({ ok: true })
+    if (!checked.ok) return json({ error: checked.error }, checked.status)
+
+    const content = await readContent(env)
+    const to = String(content?.site?.email || '').trim()
+    try {
+      const result = await deliverContactMessage({
+        to,
+        payload: checked.data,
+        siteName: content?.site?.name || 'Adwise Media',
+        resendApiKey: env.RESEND_API_KEY || env.resend_api_key || '',
+        resendFrom: env.RESEND_FROM || env.resend_from || '',
+      })
+      if (result.needsActivation) {
+        return json({
+          ok: false,
+          needsActivation: true,
+          error: result.message,
+        })
+      }
+      return json({ ok: true, provider: result.provider })
+    } catch (err) {
+      const message = err?.message || 'Could not send message right now.'
+      // Tell the browser form to fall back to client-side FormSubmit when CF blocks us.
+      if (String(message).includes('FORMSUBMIT_CF_BLOCKED') || String(message).includes('Just a moment')) {
+        return json({ ok: false, error: 'FORMSUBMIT_CF_BLOCKED', fallback: 'client' }, 502)
+      }
+      return json({ error: message }, 502)
+    }
   }
 
   if (request.method === 'GET' && pathname === '/api/admin/status') {
