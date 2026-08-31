@@ -591,6 +591,11 @@ export default function AdminCms() {
               <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-brass">Admin</p>
               <h2 className="mt-2 font-display text-2xl font-bold">Log in</h2>
             </div>
+            {error && (
+              <p className="rounded-lg border border-red-700/20 bg-red-50 px-4 py-3 text-sm text-red-800">
+                {error}
+              </p>
+            )}
             <PasswordField
               label="Password"
               value={password}

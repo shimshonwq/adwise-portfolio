@@ -3,8 +3,10 @@
 import { WORKERS_API, looksLikeChallenge } from './api-fallback'
 
 const SESSION_TOKEN_KEY = 'adwise_admin_api_token'
+let memoryToken: string | null = null
 
 export function getAdminApiToken(): string | null {
+  if (memoryToken) return memoryToken
   if (typeof window === 'undefined') return null
   try {
     return sessionStorage.getItem(SESSION_TOKEN_KEY)
@@ -14,6 +16,7 @@ export function getAdminApiToken(): string | null {
 }
 
 export function setAdminApiToken(token: string | null) {
+  memoryToken = token
   if (typeof window === 'undefined') return
   try {
     if (token) sessionStorage.setItem(SESSION_TOKEN_KEY, token)
@@ -149,7 +152,7 @@ export async function establishAdminSession(password: string): Promise<AdminLogi
   const headers = { 'Content-Type': 'application/json', Accept: 'application/json' }
 
   const mirrorLogin = () =>
-    fetch(`${WORKERS_API}/api/admin/login`, {
+    fetch(`${WORKERS_API}/api/admin/login/`, {
       method: 'POST',
       credentials: 'omit',
       mode: 'cors',
