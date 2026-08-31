@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-31T02:39:56.642Z",
+  "updatedAt": "2026-08-31T02:54:00.176Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -65,9 +65,7 @@
     "eyebrow": "Some of our partnerships",
     "title": "Brands we work with",
     "subtitle": "Logos and campaigns for the brands we help grow.",
-    "emptyMessage": "Original brand marks, coming soon.",
-    "background": "white",
-    "marqueeSpeed": 0.42
+    "emptyMessage": "Original brand marks, coming soon."
   },
   "services": {
     "eyebrow": "How we move you forward",
@@ -139,7 +137,7 @@
         "num": "01",
         "title": "Research",
         "body": "We learn the business, audience, and goal - so creative isn't a guess.",
-        "tone": "white"
+        "tone": "ink"
       },
       {
         "id": "create",
