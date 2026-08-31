@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-31T02:18:17.928Z",
+  "updatedAt": "2026-08-31T02:18:28.388Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -234,7 +234,7 @@
     {
       "id": "vish-vash",
       "name": "Vish Vash",
-      "src": "/clients/vish-vash.png",
+      "src": "/uploads/logos/vish-vash.png",
       "order": 3,
       "visible": true
     },
