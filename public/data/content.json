@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-31T02:16:35.246Z",
+  "updatedAt": "2026-08-31T02:17:32.881Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -213,7 +213,7 @@
     {
       "id": "greenpower",
       "name": "Green Power Electric",
-      "src": "/clients/greenpower.png",
+      "src": "/uploads/logos/greenpower.png",
       "order": 0,
       "visible": true
     },
