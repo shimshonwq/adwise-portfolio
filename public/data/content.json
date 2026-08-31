@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-31T02:28:10.039Z",
+  "updatedAt": "2026-08-31T02:28:18.026Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -269,7 +269,7 @@
     {
       "id": "ride-24",
       "name": "Ride 24",
-      "src": "/clients/ride-24.png",
+      "src": "/uploads/logos/ride-24.png",
       "order": 8,
       "visible": true
     },
