@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-31T02:28:28.134Z",
+  "updatedAt": "2026-08-31T02:28:37.698Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -283,7 +283,7 @@
     {
       "id": "coffee-break",
       "name": "Coffee Break",
-      "src": "/clients/coffee-break.png",
+      "src": "/uploads/logos/coffee-break.png",
       "order": 10,
       "visible": true
     },
