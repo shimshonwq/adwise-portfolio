@@ -16,6 +16,7 @@ import { exportLogoCrop, loadImageFromFile } from '../../lib/logo-crop'
 import {
   adminFetch,
   establishAdminSession,
+  readAdminJson,
   refreshAdminApiToken,
   setAdminApiToken,
 } from '../../lib/admin-api'
@@ -214,6 +215,9 @@ function sortedLogos(logos: LogoItem[]) {
 /** Turn raw Worker/GitHub errors into actionable admin UI copy. */
 function friendlyAdminError(raw: unknown, fallback: string): string {
   const msg = raw instanceof Error ? raw.message : typeof raw === 'string' ? raw : ''
+  if (/body stream already read|failed to execute 'json'|body has already been read|body is unusable/i.test(msg)) {
+    return 'Login hit a stale page. Hard-refresh (Ctrl+Shift+R) and try again.'
+  }
   if (/failed to fetch|networkerror|load failed/i.test(msg)) {
     return 'Could not reach the admin server. Hard-refresh this page (Ctrl+Shift+R) and log in again. If it keeps failing, try from a normal browser tab (not private mode).'
   }
@@ -256,10 +260,11 @@ export default function AdminCms() {
     setError(null)
   }
 
-  const applyApiResult = (data: { content?: CmsContent; publishMessage?: string }) => {
-    if (data.content) setContent({ ...DEFAULT_CONTENT, ...data.content, theme: { ...DEFAULT_THEME, ...data.content.theme } })
+  const applyApiResult = (data: { content?: unknown; publishMessage?: unknown }) => {
+    const next = data.content as CmsContent | undefined
+    if (next) setContent({ ...DEFAULT_CONTENT, ...next, theme: { ...DEFAULT_THEME, ...next.theme } })
     flash(
-      data.publishMessage ||
+      (typeof data.publishMessage === 'string' && data.publishMessage) ||
         (storageMode === 'github'
           ? 'Saved. Live site updates for everyone within a few seconds.'
           : 'Saved.'),
@@ -269,8 +274,8 @@ export default function AdminCms() {
   const loadContent = useCallback(async () => {
     const res = await adminFetch('/api/admin/content')
     if (!res.ok) throw new Error('Session expired — log in again')
-    const data = await res.json()
-    const next = data.content || DEFAULT_CONTENT
+    const data = await readAdminJson(res)
+    const next = (data.content || DEFAULT_CONTENT) as CmsContent
     setContent({
       ...DEFAULT_CONTENT,
       ...next,
@@ -287,7 +292,7 @@ export default function AdminCms() {
     ;(async () => {
       try {
         const res = await adminFetch('/api/admin/session')
-        const data = await res.json()
+        const data = await readAdminJson(res)
         if (cancelled) return
         if (data.ok) {
           await refreshAdminApiToken()
@@ -295,7 +300,7 @@ export default function AdminCms() {
           try {
             const st = await adminFetch('/api/admin/status')
             if (st.ok) {
-              const status = await st.json()
+              const status = await readAdminJson(st)
               if (status.storage === 'github' || status.storage === 'local' || status.storage === 'kv') {
                 setStorageMode(status.storage)
               }
@@ -322,9 +327,8 @@ export default function AdminCms() {
     setBusy(true)
     setError(null)
     try {
-      const res = await establishAdminSession(password)
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Login failed')
+      const result = await establishAdminSession(password)
+      if (!result.ok) throw new Error(String(result.data.error || 'Login failed'))
       await loadContent()
       setPassword('')
       setPhase('app')
@@ -352,12 +356,12 @@ export default function AdminCms() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ currentPassword, newPassword, confirmPassword }),
       })
-      const data = await res.json()
+      const data = await readAdminJson(res)
       if (!res.ok) throw new Error(data.error || 'Could not change password')
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
-      flash(data.message || 'Password updated.')
+      flash(typeof data.message === 'string' ? data.message : 'Password updated.')
     } catch (err) {
       setError(friendlyAdminError(err, 'Could not change password'))
     } finally {
@@ -374,7 +378,7 @@ export default function AdminCms() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: next }),
       })
-      const data = await res.json()
+      const data = await readAdminJson(res)
       if (!res.ok) throw new Error(data.error || 'Save failed')
       applyApiResult(data)
     } catch (err) {
@@ -411,7 +415,7 @@ export default function AdminCms() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids }),
       })
-      const data = await res.json()
+      const data = await readAdminJson(res)
       if (!res.ok) throw new Error(data.error || 'Reorder failed')
       applyApiResult(data)
     } catch (err) {
@@ -438,7 +442,7 @@ export default function AdminCms() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(patch),
       })
-      const data = await res.json()
+      const data = await readAdminJson(res)
       if (!res.ok) throw new Error(data.error || 'Update failed')
       applyApiResult(data)
     } catch (err) {
@@ -462,7 +466,7 @@ export default function AdminCms() {
       const res = await adminFetch(`/api/admin/logos/${encodeURIComponent(id)}`, {
         method: 'DELETE',
       })
-      const data = await res.json()
+      const data = await readAdminJson(res)
       if (!res.ok) throw new Error(data.error || 'Remove failed')
       applyApiResult(data)
     } catch (err) {
@@ -488,7 +492,7 @@ export default function AdminCms() {
           height: cropped.height,
         }),
       })
-      const data = await res.json()
+      const data = await readAdminJson(res)
       if (!res.ok) throw new Error(data.error || 'Replace failed')
       applyApiResult(data)
     } catch (err) {
@@ -518,7 +522,7 @@ export default function AdminCms() {
           url: uploadUrl.trim() || undefined,
         }),
       })
-      const data = await res.json()
+      const data = await readAdminJson(res)
       if (!res.ok) throw new Error(data.error || 'Upload failed')
       applyApiResult(data)
       setUploadName('')

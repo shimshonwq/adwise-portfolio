@@ -51,6 +51,67 @@ function authHeaders(extra?: HeadersInit): Headers {
   return headers
 }
 
+export type AdminApiPayload = {
+  ok?: boolean
+  token?: string
+  error?: string
+  content?: unknown
+  publishMessage?: string
+  storage?: string
+  [key: string]: unknown
+}
+
+export type AdminLoginResult = {
+  ok: boolean
+  status: number
+  data: AdminApiPayload
+}
+
+/**
+ * Parse JSON from a Response without consuming the original body.
+ * Callers can safely read the same Response more than once.
+ */
+export async function readAdminJson<T = AdminApiPayload>(res: Response): Promise<T> {
+  let raw = ''
+  try {
+    raw = await res.clone().text()
+  } catch {
+    try {
+      raw = await res.text()
+    } catch {
+      throw new Error('Could not read the server response. Refresh the page and try again.')
+    }
+  }
+  if (looksLikeChallenge(raw)) {
+    throw new Error('Security check blocked the request. Refresh the page and try again.')
+  }
+  if (!raw.trim()) return {} as T
+  try {
+    return JSON.parse(raw) as T
+  } catch {
+    throw new Error('Unexpected response from the server.')
+  }
+}
+
+async function parseLoginResponse(res: Response | null): Promise<AdminLoginResult> {
+  if (!res) {
+    return { ok: false, status: 503, data: { error: 'Admin API unavailable' } }
+  }
+  try {
+    const data = await readAdminJson(res)
+    if (typeof data?.token === 'string' && data.token) {
+      setAdminApiToken(String(data.token))
+    }
+    return { ok: res.ok, status: res.status, data }
+  } catch (err) {
+    return {
+      ok: false,
+      status: res.status || 503,
+      data: { error: err instanceof Error ? err.message : 'Login failed' },
+    }
+  }
+}
+
 /** Fetch admin API; retries on workers.dev when the zone returns a CF challenge page. */
 export async function adminFetch(path: string, init: RequestInit = {}): Promise<Response> {
   const method = (init.method || 'GET').toUpperCase()
@@ -83,7 +144,7 @@ export async function adminFetch(path: string, init: RequestInit = {}): Promise<
 }
 
 /** Mirror login to workers.dev and persist Bearer token for cross-origin admin calls. */
-export async function establishAdminSession(password: string): Promise<Response> {
+export async function establishAdminSession(password: string): Promise<AdminLoginResult> {
   const body = JSON.stringify({ password })
   const headers = { 'Content-Type': 'application/json', Accept: 'application/json' }
 
@@ -92,22 +153,12 @@ export async function establishAdminSession(password: string): Promise<Response>
       method: 'POST',
       credentials: 'omit',
       mode: 'cors',
-      headers: { ...headers, Origin: window.location.origin },
+      headers,
       body,
     }).catch(() => null)
 
   if (isCustomDomain()) {
-    const mirror = await mirrorLogin()
-    if (mirror?.ok) {
-      try {
-        const data = await mirror.json()
-        if (data?.token) setAdminApiToken(String(data.token))
-      } catch {
-        /* ignore */
-      }
-      return mirror
-    }
-    return mirror || new Response(JSON.stringify({ error: 'Admin API unavailable' }), { status: 503 })
+    return parseLoginResponse(await mirrorLogin())
   }
 
   const [primary, mirror] = await Promise.all([
@@ -120,26 +171,9 @@ export async function establishAdminSession(password: string): Promise<Response>
     mirrorLogin(),
   ])
 
-  if (primary.ok) {
-    try {
-      const data = await primary.clone().json()
-      if (data?.token) setAdminApiToken(String(data.token))
-    } catch {
-      /* ignore */
-    }
-  }
-
-  if (!primary.ok && mirror?.ok) {
-    try {
-      const data = await mirror.json()
-      if (data?.token) setAdminApiToken(String(data.token))
-    } catch {
-      /* ignore */
-    }
-    return mirror
-  }
-
-  return primary
+  if (primary.ok) return parseLoginResponse(primary)
+  if (mirror?.ok) return parseLoginResponse(mirror)
+  return parseLoginResponse(primary)
 }
 
 /** Load Bearer token for workers.dev fallback when user already has a cookie session. */
@@ -148,7 +182,7 @@ export async function refreshAdminApiToken(): Promise<void> {
   try {
     const res = await adminFetch('/api/admin/session-token')
     if (!res.ok) return
-    const data = await res.json()
+    const data = await readAdminJson(res)
     if (data?.token) setAdminApiToken(String(data.token))
   } catch {
     /* ignore */
