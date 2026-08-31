@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-31T02:28:18.026Z",
+  "updatedAt": "2026-08-31T02:28:28.134Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -276,7 +276,7 @@
     {
       "id": "flavor-max",
       "name": "Flavor Max",
-      "src": "/clients/flavor-max.png",
+      "src": "/uploads/logos/flavor-max.png",
       "order": 9,
       "visible": true
     },
