@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-31T02:18:28.388Z",
+  "updatedAt": "2026-08-31T02:26:42.693Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -248,7 +248,7 @@
     {
       "id": "garden-gourmet",
       "name": "Garden Gourmet",
-      "src": "/clients/garden-gourmet.png",
+      "src": "/uploads/logos/garden-gourmet.png",
       "order": 5,
       "visible": true
     },
