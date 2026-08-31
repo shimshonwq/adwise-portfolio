@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-31T02:16:28.441Z",
+  "updatedAt": "2026-08-31T02:16:35.246Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -211,16 +211,16 @@
   },
   "logos": [
     {
-      "id": "mendel-style",
-      "name": "Mendel Style Events",
-      "src": "/uploads/logos/mendel-style.png",
+      "id": "greenpower",
+      "name": "Green Power Electric",
+      "src": "/clients/greenpower.png",
       "order": 0,
       "visible": true
     },
     {
-      "id": "greenpower",
-      "name": "Green Power Electric",
-      "src": "/clients/greenpower.png",
+      "id": "mendel-style",
+      "name": "Mendel Style Events",
+      "src": "/uploads/logos/mendel-style.png",
       "order": 1,
       "visible": true
     },
