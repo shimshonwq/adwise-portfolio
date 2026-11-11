@@ -6,6 +6,8 @@ interface LogoProps {
   className?: string
   size?: 'sm' | 'md' | 'lg'
   bright?: boolean
+  /** brand = yellow mark (default); ink = dark mark for gold/cream backgrounds */
+  tone?: 'brand' | 'ink'
 }
 
 const sizes = {
@@ -14,12 +16,19 @@ const sizes = {
   lg: 'h-14 md:h-16',
 }
 
-export default function Logo({ href = '/', className = '', size = 'md', bright = false }: LogoProps) {
+export default function Logo({
+  href = '/',
+  className = '',
+  size = 'md',
+  bright = false,
+  tone = 'brand',
+}: LogoProps) {
+  const src = tone === 'ink' ? '/logo-ink.png' : '/logo.png'
   return (
     <Link href={href} className={`inline-flex items-center ${className}`} aria-label={siteConfig.name}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/logo.png"
+        src={src}
         alt={siteConfig.name}
         width={200}
         height={62}
