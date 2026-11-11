@@ -33,7 +33,7 @@ const serifFont = EB_Garamond({
   variable: '--font-serif-face',
   display: 'swap',
   style: ['normal', 'italic'],
-  weight: ['500', '600', '700'],
+  weight: ['400', '700'],
 })
 
 export default function App({ Component, pageProps }: AppProps & { pageProps: PageProps }) {
