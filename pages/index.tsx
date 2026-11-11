@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import Navigation from '../components/Navigation'
 import Hero from '../components/Hero'
+import BrandCraft from '../components/BrandCraft'
 import Clients from '../components/Clients'
 import Services from '../components/Services'
 import Spotlight from '../components/Spotlight'
@@ -41,6 +42,7 @@ export default function Home() {
       <Navigation />
       <main id="main-content">
         <Hero />
+        <BrandCraft />
         <Services />
         <Clients />
         <Spotlight />

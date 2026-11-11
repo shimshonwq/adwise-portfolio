@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-11T05:00:00.000Z",
+  "updatedAt": "2026-11-11T08:30:00.000Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
     "tagline": "Thinking Your Next Thing",
-    "description": "Logo design, brand graphics, and marketing for businesses that want to look sharp and get noticed.",
+    "description": "Logo design, branding, and marketing that turn heads.",
     "url": "https://adwisemedia.co",
     "email": "adwisecreativity@gmail.com",
     "phone": "8455515506",
@@ -14,32 +14,28 @@
     "navCta": "Start a project",
     "nav": [
       {
-        "href": "#work",
-        "label": "Clients"
+        "href": "#craft",
+        "label": "Craft"
       },
       {
         "href": "#services",
         "label": "Services"
       },
       {
-        "href": "#process",
-        "label": "Process"
+        "href": "#work",
+        "label": "Clients"
       },
       {
         "href": "/projects/",
         "label": "Work"
       },
       {
-        "href": "#about",
-        "label": "About"
-      },
-      {
         "href": "#contact",
         "label": "Contact"
       }
     ],
-    "footerBlurb": "Logos, graphics, and marketing for businesses worldwide.",
-    "footerMeta": "Marketing | Content | Design",
+    "footerBlurb": "Logos. Graphics. Campaigns.",
+    "footerMeta": "Brand \u00b7 Marketing \u00b7 Design",
     "navCtaHref": "/#contact",
     "footerExploreHeading": "Explore",
     "footerContactHeading": "Contact",
@@ -47,13 +43,13 @@
     "seoKeywords": "logo design, graphic design, marketing, brand identity, Adwise Media"
   },
   "hero": {
-    "openName": "ADWISE MEDIA",
+    "openName": "ADWISE",
     "eyebrow": "Branding \u00b7 Marketing \u00b7 Design",
-    "headline": "Make them look twice.",
-    "body": "Bold logos, sharp graphics, and campaigns that get noticed.",
-    "bodyAccent": "Creative with a business edge.",
-    "ctaPrimaryLabel": "See clients",
-    "ctaPrimaryHref": "#work",
+    "headline": "Look twice.",
+    "body": "Logos. Graphics. Campaigns.",
+    "bodyAccent": "Made to be noticed",
+    "ctaPrimaryLabel": "See the work",
+    "ctaPrimaryHref": "#craft",
     "ctaSecondaryLabel": "Start a project",
     "ctaSecondaryHref": "#contact",
     "orbitCaption": "Scroll",
@@ -62,11 +58,11 @@
     "background": "ink"
   },
   "clients": {
-    "eyebrow": "Partnerships",
-    "title": "Brands that trust us",
-    "subtitle": "Marks and campaigns built to travel.",
-    "emptyMessage": "Original brand marks, coming soon.",
-    "background": "white",
+    "eyebrow": "Clients",
+    "title": "Trusted by",
+    "subtitle": "bold brands",
+    "emptyMessage": "Marks coming soon.",
+    "background": "ink",
     "marqueeSpeed": 0.42
   },
   "services": {
@@ -78,50 +74,50 @@
         "id": "marketing",
         "num": "01",
         "title": "Marketing",
-        "description": "Campaigns and creative that get attention - social, paid, and always on-brand.",
+        "description": "",
         "points": [
-          "Social strategy",
-          "Paid advertising",
-          "Campaign management"
+          "Social",
+          "Paid",
+          "Campaigns"
         ],
-        "tone": "white"
+        "tone": "gold"
       },
       {
         "id": "content",
         "num": "02",
-        "title": "Content Creation",
-        "description": "Video, photography, and copy your audience actually wants to watch.",
+        "title": "Content",
+        "description": "",
         "points": [
-          "Short-form video",
-          "Editorial & copy",
-          "Content calendars"
+          "Video",
+          "Photo",
+          "Copy"
         ],
         "tone": "ink"
       },
       {
         "id": "design",
         "num": "03",
-        "title": "Graphic Design",
-        "description": "Logos, identity, and print that hold up at every size and channel.",
+        "title": "Design",
+        "description": "",
         "points": [
-          "Logo & branding",
-          "Print & digital",
-          "Design systems"
+          "Logo",
+          "Identity",
+          "Print"
         ],
-        "tone": "gold"
+        "tone": "white"
       }
     ],
-    "background": "brand"
+    "background": "ink"
   },
   "spotlight": {
     "eyebrow": "Manifesto",
     "titleLines": [
       "Thinking",
-      "Your",
-      "Next",
-      "Thing"
+      "your",
+      "next",
+      "thing"
     ],
-    "body": "Safe work gets safe results. We build brands that turn heads \u2014 and move the business.",
+    "body": "Safe work gets safe results.",
     "accent": "Unexpected on purpose.",
     "ctaPrimaryLabel": "Start a project",
     "ctaPrimaryHref": "/#contact",
@@ -132,65 +128,65 @@
   "process": {
     "eyebrow": "Method",
     "title": "How we work",
-    "subtitle": "Research. Create. Launch.",
+    "subtitle": "\u2014 fast.",
     "steps": [
       {
         "id": "research",
         "num": "01",
         "title": "Research",
-        "body": "Business, audience, goal \u2014 so creative isn't a guess.",
+        "body": "",
         "tone": "white"
       },
       {
         "id": "create",
         "num": "02",
         "title": "Create",
-        "body": "Logos, visuals, and campaigns that stay sharp on every channel.",
+        "body": "",
         "tone": "gold"
       },
       {
         "id": "launch",
         "num": "03",
         "title": "Launch",
-        "body": "Ship, measure, refine \u2014 so the work keeps earning attention.",
+        "body": "",
         "tone": "ink"
       }
     ],
     "background": "paper"
   },
   "about": {
-    "eyebrow": "About {shortName}",
+    "eyebrow": "{shortName}",
     "title": "Local roots. Global reach.",
-    "body": "We help ambitious businesses look sharp and stay consistent \u2014 from first sketch to campaign rollout.",
+    "body": "",
     "accent": "Made to be noticed.",
     "principles": [
       {
         "id": "strategy",
         "title": "Strategy first",
-        "body": "Every decision ties back to a goal.",
+        "body": "",
         "tone": "ink"
       },
       {
         "id": "craft",
         "title": "Craft obsessed",
-        "body": "Details that make a brand feel considered.",
+        "body": "",
         "tone": "gold"
       },
       {
         "id": "lasting",
         "title": "Built to last",
-        "body": "Work that reads on a sign, a screen, and a card.",
+        "body": "",
         "tone": "paper"
       }
     ],
-    "background": "ink"
+    "background": "brand"
   },
   "contact": {
     "eyebrow": "Contact",
     "title": "Let's build.",
-    "intro": "Tell us what you're building \u2014 or reach us on WhatsApp, email, call, or text.",
+    "intro": "WhatsApp, email, call, or text.",
     "formEyebrow": "Project inquiry",
-    "formNote": "Usually reply within one business day.",
+    "formNote": "Reply within one business day.",
     "successMessage": "Thanks! We'll be in touch shortly.",
     "errorMessage": "Something went wrong - email or call us instead.",
     "nameLabel": "Name",
@@ -211,44 +207,44 @@
   },
   "logos": [
     {
-      "id": "kalmys",
-      "name": "Kalmys",
-      "src": "/clients/kalmys.png",
+      "id": "greenpower",
+      "name": "Green Power Electric",
+      "src": "/clients/greenpower.png",
       "order": 0,
       "visible": true
     },
     {
-      "id": "shloimy",
-      "name": "Shloimy Friedlander",
-      "src": "/clients/shloimy.png",
+      "id": "mendel-style",
+      "name": "Mendel Style Events",
+      "src": "/clients/mendel-style.png",
       "order": 1,
       "visible": true
     },
     {
-      "id": "coffee-break",
-      "name": "Coffee Break",
-      "src": "/clients/coffee-break.png",
+      "id": "shvitz",
+      "name": "The Shvitz",
+      "src": "/clients/shvitz.png",
       "order": 2,
       "visible": true
     },
     {
-      "id": "flavor-max",
-      "name": "Flavor Max",
-      "src": "/clients/flavor-max.png",
+      "id": "vish-vash",
+      "name": "Vish Vash",
+      "src": "/clients/vish-vash.png",
       "order": 3,
       "visible": true
     },
     {
-      "id": "ride-24",
-      "name": "Ride 24",
-      "src": "/clients/ride-24.png",
+      "id": "hvn",
+      "name": "HVN",
+      "src": "/clients/hvn.png",
       "order": 4,
       "visible": true
     },
     {
-      "id": "planit",
-      "name": "Planit Architecture",
-      "src": "/clients/planit.png",
+      "id": "garden-gourmet",
+      "name": "Garden Gourmet",
+      "src": "/clients/garden-gourmet.png",
       "order": 5,
       "visible": true
     },
@@ -260,60 +256,60 @@
       "visible": true
     },
     {
-      "id": "garden-gourmet",
-      "name": "Garden Gourmet",
-      "src": "/clients/garden-gourmet.png",
+      "id": "planit",
+      "name": "Planit Architecture",
+      "src": "/clients/planit.png",
       "order": 7,
       "visible": true
     },
     {
-      "id": "hvn",
-      "name": "HVN",
-      "src": "/clients/hvn.png",
+      "id": "ride-24",
+      "name": "Ride 24",
+      "src": "/clients/ride-24.png",
       "order": 8,
       "visible": true
     },
     {
-      "id": "vish-vash",
-      "name": "Vish Vash",
-      "src": "/clients/vish-vash.png",
+      "id": "flavor-max",
+      "name": "Flavor Max",
+      "src": "/clients/flavor-max.png",
       "order": 9,
       "visible": true
     },
     {
-      "id": "shvitz",
-      "name": "The Shvitz",
-      "src": "/clients/shvitz.png",
+      "id": "coffee-break",
+      "name": "Coffee Break",
+      "src": "/clients/coffee-break.png",
       "order": 10,
       "visible": true
     },
     {
-      "id": "greenpower",
-      "name": "Green Power Electric",
-      "src": "/clients/greenpower.png",
+      "id": "shloimy",
+      "name": "Shloimy Friedlander",
+      "src": "/clients/shloimy.png",
       "order": 11,
       "visible": true
     },
     {
-      "id": "mendel-style",
-      "name": "Mendel Style Events",
-      "src": "/clients/mendel-style.png",
+      "id": "kalmys",
+      "name": "Kalmys",
+      "src": "/clients/kalmys.png",
       "order": 12,
       "visible": true
     }
   ],
   "theme": {
-    "ink": "#050505",
-    "inkSoft": "#111111",
-    "paper": "#f7f7f5",
-    "paperDeep": "#ecece8",
+    "ink": "#14130f",
+    "inkSoft": "#1f1c16",
+    "paper": "#f4f1ea",
+    "paperDeep": "#d9cdb8",
     "brand": "#fdc621",
     "brandDeep": "#e0a800",
-    "brass": "#a8892a",
-    "muted": "#6b6b66",
+    "brass": "#8f7343",
+    "muted": "#5c5548",
     "fontDisplay": "syne",
     "fontBody": "outfit",
-    "fontSerif": "outfit",
+    "fontSerif": "eb-garamond",
     "fontDisplayCustom": "",
     "fontBodyCustom": "",
     "fontSerifCustom": "",
@@ -324,92 +320,16 @@
   "projectsPage": {
     "eyebrow": "Portfolio",
     "title": "Selected work",
-    "body": "Logos, branding, and campaigns from Adwise Media."
+    "body": "Logos, branding, and campaigns."
   },
   "notFoundPage": {
     "title": "This page took a wrong turn",
     "body": "The link may be old, or the page may have moved. Head home and keep exploring.",
     "ctaLabel": "Back to home"
   },
-  "textStyles": {
-    "hero.eyebrow": {
-      "fontSize": "0.875rem",
-      "fontWeight": "800",
-      "color": "#8f7343"
-    }
-  },
   "brand": {
     "logoSrc": "/logo.png",
     "faviconSrc": "/uploads/brand/favicon-mt7x99rh.png",
     "ogImageSrc": "/logo.png"
-  },
-  "layout": {
-    "sections": [
-      {
-        "id": "hero",
-        "visible": true,
-        "order": 0,
-        "background": "aurora"
-      },
-      {
-        "id": "services",
-        "visible": true,
-        "order": 1,
-        "background": "brand"
-      },
-      {
-        "id": "clients",
-        "visible": true,
-        "order": 2,
-        "background": "white"
-      },
-      {
-        "id": "spotlight",
-        "visible": true,
-        "order": 3,
-        "background": "ink"
-      },
-      {
-        "id": "process",
-        "visible": true,
-        "order": 4,
-        "background": "aurora"
-      },
-      {
-        "id": "about",
-        "visible": true,
-        "order": 5,
-        "background": "inkGold"
-      },
-      {
-        "id": "contact",
-        "visible": true,
-        "order": 6,
-        "background": "brand"
-      }
-    ]
-  },
-  "channels": [
-    {
-      "id": "whatsapp",
-      "label": "WhatsApp",
-      "visible": true
-    },
-    {
-      "id": "email",
-      "label": "Email",
-      "visible": true
-    },
-    {
-      "id": "call",
-      "label": "Call",
-      "visible": true
-    },
-    {
-      "id": "sms",
-      "label": "SMS",
-      "visible": true
-    }
-  ],
-  "customPages": []
+  }
 }
