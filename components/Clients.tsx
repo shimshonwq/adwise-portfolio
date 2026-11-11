@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSiteContent } from '../lib/SiteContentContext'
 
-/** Partnerships strip — light stage, auto-slide, optional logo links */
+/** Partnerships strip — dark stage, auto-slide, optional logo links */
 export default function Clients() {
   const { content, logos } = useSiteContent()
   const trackRef = useRef<HTMLDivElement>(null)
@@ -92,12 +92,12 @@ export default function Clients() {
       <div className="site-shell relative z-10">
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="eyebrow !text-ink/50">{copy.eyebrow}</p>
-            <h2 className="mt-3 font-display text-[clamp(1.7rem,4.5vw,2.8rem)] font-extrabold tracking-tight text-ink">
+            <p className="eyebrow !text-brand">{copy.eyebrow}</p>
+            <h2 className="mt-3 font-display text-[clamp(1.7rem,4.5vw,2.8rem)] font-extrabold tracking-tight text-white">
               {copy.title}
             </h2>
           </div>
-          <p className="max-w-sm text-sm text-ink/55 md:text-right">{copy.subtitle}</p>
+          <p className="max-w-sm text-sm text-white/55 md:text-right">{copy.subtitle}</p>
         </div>
       </div>
 
@@ -151,7 +151,7 @@ export default function Clients() {
           </div>
         ) : (
           <div className="flex h-16 items-center justify-center px-6">
-            <p className="text-sm text-ink/45">{copy.emptyMessage}</p>
+            <p className="text-sm text-white/45">{copy.emptyMessage}</p>
           </div>
         )}
       </div>
