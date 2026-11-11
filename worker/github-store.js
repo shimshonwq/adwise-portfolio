@@ -2,17 +2,46 @@
  * GitHub Contents API — used by local admin API and Cloudflare Worker.
  */
 
+/** @returns {'classic' | 'fine-grained' | 'ephemeral' | 'unknown'} */
+export function githubTokenKind(token) {
+  const t = String(token || '').trim()
+  if (t.startsWith('ghp_')) return 'classic'
+  if (t.startsWith('github_pat_')) return 'fine-grained'
+  if (t.startsWith('ghs_')) return 'ephemeral'
+  return 'unknown'
+}
+
+export function assertProductionGithubToken(token) {
+  const kind = githubTokenKind(token)
+  if (kind === 'ephemeral') {
+    throw new Error(
+      'GitHub token is short-lived (ghs_). Use a classic PAT with repo scope and no expiration as Worker secret ADWISE_GITHUB_TOKEN.',
+    )
+  }
+  if (kind === 'unknown' && token) {
+    throw new Error(
+      'Unrecognized GitHub token format. Use a classic PAT (ghp_…) with repo scope as ADWISE_GITHUB_TOKEN.',
+    )
+  }
+}
+
 export function githubConfig(env) {
-  const token = env.GITHUB_TOKEN || env.github_token
-  const repo = env.GITHUB_REPO || env.github_repo || 'shimshonwq/adwise-portfolio'
-  const branch = env.GITHUB_BRANCH || env.github_branch || 'main'
+  const token = String(
+    env.ADWISE_GITHUB_TOKEN ||
+      env.adwise_github_token ||
+      env.GITHUB_TOKEN ||
+      env.github_token ||
+      '',
+  ).trim()
+  const repo = String(env.GITHUB_REPO || env.github_repo || 'shimshonwq/adwise-portfolio').trim()
+  const branch = String(env.GITHUB_BRANCH || env.github_branch || 'main').trim()
   const [owner, name] = String(repo).split('/')
   if (!token || !owner || !name) {
     throw new Error(
-      'GitHub not configured. Set GITHUB_TOKEN and GITHUB_REPO (owner/repo) secrets.',
+      'GitHub not configured. Set ADWISE_GITHUB_TOKEN (or GITHUB_TOKEN) and GITHUB_REPO secrets.',
     )
   }
-  return { token, owner, repo: name, branch, fullRepo: `${owner}/${name}` }
+  return { token, owner, repo: name, branch, fullRepo: `${owner}/${name}`, tokenKind: githubTokenKind(token) }
 }
 
 export function bytesToBase64(bytes) {
@@ -48,6 +77,18 @@ async function ghRequest(cfg, path, init = {}) {
       msg = j.message || body
     } catch {
       /* ignore */
+    }
+    // Expired/truncated Worker secrets are the usual cause — guide the operator clearly.
+    if (res.status === 401) {
+      const kind =
+        cfg.tokenKind === 'ephemeral'
+          ? 'short-lived token (ghs_)'
+          : cfg.tokenKind === 'classic'
+            ? 'personal access token'
+            : 'GitHub token'
+      throw new Error(
+        `GitHub API 401: Bad credentials (${kind}). Set Worker secret ADWISE_GITHUB_TOKEN to a classic PAT (repo scope, no expiration).`,
+      )
     }
     throw new Error(`GitHub API ${res.status}: ${msg}`)
   }
@@ -93,10 +134,15 @@ export async function writeFile(env, repoPath, base64Content, message, sha = nul
   })
 }
 
-export async function writeJsonFile(env, repoPath, data, message) {
-  const existing = await readJsonFile(env, repoPath).catch(() => null)
+export async function writeJsonFile(env, repoPath, data, message, sha = undefined) {
+  let existingSha = sha
+  if (existingSha === undefined) {
+    const existing = await readJsonFile(env, repoPath).catch(() => null)
+    existingSha = existing?.sha || null
+  }
   const text = `${JSON.stringify(data, null, 2)}\n`
-  await writeFile(env, repoPath, textToBase64(text), message, existing?.sha || null)
+  const result = await writeFile(env, repoPath, textToBase64(text), message, existingSha)
+  return result?.content?.sha || null
 }
 
 export async function writeBinaryFile(env, repoPath, bytes, message) {
@@ -123,11 +169,11 @@ export async function readSiteContent(env) {
   return null
 }
 
-export async function publishSiteContent(env, content, message = 'CMS: update site content') {
+export async function publishSiteContent(env, content, message = 'CMS: update site content', sha = undefined) {
   content.version = 1
   content.updatedAt = new Date().toISOString()
-  await writeJsonFile(env, CONTENT_REPO_PATH, content, message)
-  return content
+  const nextSha = await writeJsonFile(env, CONTENT_REPO_PATH, content, message, sha)
+  return { content, sha: nextSha }
 }
 
 export function logoRepoPath(src) {

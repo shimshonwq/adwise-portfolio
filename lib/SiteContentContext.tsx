@@ -17,6 +17,8 @@ import {
   type LogoItem,
 } from './content'
 import { googleFontsHref } from './fonts'
+import { safeStylesheetUrl } from './safe-stylesheet-url'
+import { fetchJsonWithFallback } from './api-fallback'
 
 type SiteContentValue = {
   content: CmsContent
@@ -37,22 +39,16 @@ const SiteContentContext = createContext<SiteContentValue>({
 const FONT_LINK_ID = 'adwise-cms-fonts'
 
 async function fetchContent(): Promise<CmsContent> {
-  try {
-    const res = await fetch('/api/content/', { cache: 'no-store' })
-    if (res.ok) {
-      const data = await res.json()
-      if (data?.content) return normalizeContent(data.content)
-      if (data?.site) return normalizeContent(data)
-    }
-  } catch {
-    /* fall through */
-  }
-  try {
-    const res = await fetch('/data/content.json', { cache: 'no-store' })
-    if (res.ok) return normalizeContent(await res.json())
-  } catch {
-    /* fall through */
-  }
+  const live = await fetchJsonWithFallback<{ content?: CmsContent } & Partial<CmsContent>>(
+    '/api/content/',
+  )
+  if (live?.content) return normalizeContent(live.content)
+  if (live?.site) return normalizeContent(live)
+
+  // Last resort: static file (also served live by Worker when configured)
+  const staticJson = await fetchJsonWithFallback<CmsContent>('/data/content.json')
+  if (staticJson?.site) return normalizeContent(staticJson)
+
   return DEFAULT_CONTENT
 }
 
@@ -88,8 +84,8 @@ function applyTheme(content: CmsContent) {
     ['adwise-font-serif-custom', theme.fontSerifUrl],
   ] as const) {
     let el = document.getElementById(key) as HTMLLinkElement | null
-    const u = String(url || '').trim()
-    if (u && u.startsWith('http')) {
+    const u = safeStylesheetUrl(String(url || ''))
+    if (u) {
       if (!el) {
         el = document.createElement('link')
         el.id = key
@@ -103,9 +99,16 @@ function applyTheme(content: CmsContent) {
   }
 }
 
-export function SiteContentProvider({ children }: { children: ReactNode }) {
-  const [content, setContent] = useState<CmsContent>(DEFAULT_CONTENT)
-  const [ready, setReady] = useState(false)
+export function SiteContentProvider({
+  children,
+  initialContent,
+}: {
+  children: ReactNode
+  initialContent?: CmsContent | null
+}) {
+  const seeded = initialContent ? normalizeContent(initialContent) : DEFAULT_CONTENT
+  const [content, setContent] = useState<CmsContent>(seeded)
+  const [ready, setReady] = useState(Boolean(initialContent))
 
   const refresh = useCallback(async () => {
     const next = await fetchContent()
@@ -116,6 +119,26 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     refresh()
+  }, [refresh])
+
+  // Keep open tabs in sync after admin saves (or another device edits).
+  useEffect(() => {
+    const onFocus = () => {
+      void refresh()
+    }
+    const onVis = () => {
+      if (document.visibilityState === 'visible') void refresh()
+    }
+    window.addEventListener('focus', onFocus)
+    document.addEventListener('visibilitychange', onVis)
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') void refresh()
+    }, 60_000)
+    return () => {
+      window.removeEventListener('focus', onFocus)
+      document.removeEventListener('visibilitychange', onVis)
+      window.clearInterval(timer)
+    }
   }, [refresh])
 
   useEffect(() => {

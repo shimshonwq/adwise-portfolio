@@ -19,24 +19,60 @@ import {
   logoRepoPath,
   publishSiteContent,
   readJsonFile,
-  readSiteContent,
+  readTextOrBytes,
   writeBinaryFile,
   writeJsonFile,
 } from './github-store.js'
 import { validateLogoUpload, extForLogoMime, LOGO_MAX_BYTES } from './logo-rules.js'
 import { sanitizeDeep } from './text-sanitize.js'
+import {
+  deliverContactMessage,
+  validateContactPayload,
+  verifyTurnstileToken,
+  friendlyContactError,
+} from './contact-mail.js'
+import { securityHeaders } from './security-headers.js'
 
 const CONTENT_KV_KEY = 'content:v1'
 const LEGACY_LOGOS_KEY = 'logos:v1'
 const MAX_BYTES = LOGO_MAX_BYTES
 const LOGIN_MAX_ATTEMPTS = 5
 const LOGIN_WINDOW_MS = 15 * 60 * 1000
+const CONTACT_MAX_ATTEMPTS = 8
+const CONTACT_WINDOW_MS = 15 * 60 * 1000
+const CONTENT_CACHE_MS = 10_000
 const PUBLISH_MSG =
-  'Saved to GitHub — Cloudflare will rebuild the site in about 1–3 minutes.'
+  'Saved. Live site updates for everyone within a few seconds — no rebuild needed for text, colors, or logos.'
+const CORS_ORIGINS = new Set([
+  'https://adwisemedia.co',
+  'https://www.adwisemedia.co',
+  'https://adwise-portfolio.adwisecreativity.workers.dev',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:3001',
+  'http://127.0.0.1:3001',
+])
 
 /** @type {{ record: object | null, at: number }} */
 let authCache = { record: null, at: 0 }
+/** @type {{ data: object | null, sha: string | null, at: number }} */
+let contentCache = { data: null, sha: null, at: 0 }
+/** @type {Map<string, { bytes: Uint8Array, mime: string, at: number }>} */
+const uploadCache = new Map()
 const loginAttempts = new Map()
+const contactAttempts = new Map()
+
+function corsHeaders(request) {
+  const origin = request.headers.get('Origin') || ''
+  if (!origin || !CORS_ORIGINS.has(origin)) return {}
+  return {
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Accept, Authorization',
+    'Access-Control-Max-Age': '86400',
+    Vary: 'Origin',
+  }
+}
 
 function json(body, status = 200, headers = {}) {
   return new Response(JSON.stringify(body), {
@@ -44,37 +80,76 @@ function json(body, status = 200, headers = {}) {
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       'Cache-Control': 'no-store',
-      'X-Content-Type-Options': 'nosniff',
+      'X-Adwise-Build': '2026-08-26-fast-logos',
+      ...securityHeaders(),
       ...headers,
     },
   })
 }
 
+function withSecurity(res) {
+  const headers = new Headers(res.headers)
+  for (const [key, value] of Object.entries(securityHeaders())) {
+    if (!headers.has(key)) headers.set(key, value)
+  }
+  return new Response(res.body, {
+    status: res.status,
+    statusText: res.statusText,
+    headers,
+  })
+}
+
+function adminOriginAllowed(request) {
+  const origin = request.headers.get('Origin')
+  if (origin) return CORS_ORIGINS.has(origin)
+  const referer = request.headers.get('Referer')
+  if (!referer) return true
+  try {
+    return CORS_ORIGINS.has(new URL(referer).origin)
+  } catch {
+    return false
+  }
+}
+
 function hasGithub(env) {
-  return Boolean(env.GITHUB_TOKEN || env.github_token)
+  return Boolean(
+    env.ADWISE_GITHUB_TOKEN ||
+      env.adwise_github_token ||
+      env.GITHUB_TOKEN ||
+      env.github_token,
+  )
 }
 
 async function getAuthRecord(env) {
-  if (!hasGithub(env)) {
-    throw new Error(
-      'Admin auth requires GITHUB_TOKEN + GITHUB_REPO secrets (credentials live in data/admin-auth.json).',
-    )
-  }
   if (authCache.record && Date.now() - authCache.at < 60_000) {
     return authCache.record
   }
+
+  // Production auth always comes from GitHub so password changes take effect
+  // immediately and old/bootstrap passwords cannot bypass a rotation.
+  if (!hasGithub(env)) {
+    throw new Error(
+      'Admin auth requires ADWISE_GITHUB_TOKEN (or GITHUB_TOKEN) and GITHUB_REPO Worker secrets.',
+    )
+  }
+
   const row = await readJsonFile(env, AUTH_REPO_PATH)
   if (!row?.data?.hash || !row.data.sessionKey) {
     throw new Error(
       'Missing data/admin-auth.json in GitHub. Run npm run bootstrap:admin locally and push.',
     )
   }
+
   authCache = { record: row.data, at: Date.now() }
   return row.data
 }
 
 function invalidateAuthCache() {
   authCache = { record: null, at: 0 }
+}
+
+function invalidateContentCache() {
+  contentCache = { data: null, sha: null, at: 0 }
 }
 
 function clientIp(request) {
@@ -107,6 +182,26 @@ function recordLoginFailure(ip) {
 
 function clearLoginFailures(ip) {
   loginAttempts.delete(ip)
+}
+
+function contactRateLimited(ip) {
+  const now = Date.now()
+  let entry = contactAttempts.get(ip)
+  if (!entry || now > entry.resetAt) {
+    entry = { count: 0, resetAt: now + CONTACT_WINDOW_MS }
+    contactAttempts.set(ip, entry)
+  }
+  return entry.count >= CONTACT_MAX_ATTEMPTS
+}
+
+function recordContactAttempt(ip) {
+  const now = Date.now()
+  let entry = contactAttempts.get(ip)
+  if (!entry || now > entry.resetAt) {
+    entry = { count: 0, resetAt: now + CONTACT_WINDOW_MS }
+  }
+  entry.count += 1
+  contactAttempts.set(ip, entry)
 }
 
 function parseCookies(header) {
@@ -176,17 +271,29 @@ async function readContentKv(env) {
 }
 
 async function readContent(env) {
+  if (contentCache.data && Date.now() - contentCache.at < CONTENT_CACHE_MS) {
+    return contentCache.data
+  }
+  let result = null
+  let sha = null
   if (hasGithub(env)) {
     try {
-      const fromGh = await readSiteContent(env)
-      if (fromGh?.site) return fromGh
+      const fromGh = await readJsonFile(env, 'public/data/content.json')
+      if (fromGh?.data?.site) {
+        result = fromGh.data
+        sha = fromGh.sha || null
+      }
     } catch (err) {
       console.error('GitHub read failed:', err)
     }
   }
-  const fromKv = await readContentKv(env)
-  if (fromKv) return fromKv
-  return seedContent()
+  if (!result) {
+    const fromKv = await readContentKv(env)
+    if (fromKv) result = fromKv
+  }
+  if (!result) result = seedContent()
+  contentCache = { data: result, sha, at: Date.now() }
+  return result
 }
 
 async function writeContentKv(env, content) {
@@ -199,10 +306,13 @@ async function writeContentKv(env, content) {
 async function persistContent(env, content, message = 'CMS: update site content') {
   content = sanitizeDeep(content)
   if (hasGithub(env)) {
-    await publishSiteContent(env, content, message)
-    return { content, publishMessage: PUBLISH_MSG, published: true }
+    const published = await publishSiteContent(env, content, message, contentCache.sha)
+    contentCache = { data: published.content, sha: published.sha, at: Date.now() }
+    return { content: published.content, publishMessage: PUBLISH_MSG, published: true }
   }
   await writeContentKv(env, content)
+  invalidateContentCache()
+  contentCache = { data: content, sha: null, at: Date.now() }
   return { content, publishMessage: 'Saved.', published: true }
 }
 
@@ -227,38 +337,164 @@ function dataUrlToBytes(dataUrl) {
 
 async function requireAuth(request, env) {
   const record = await getAuthRecord(env)
-  const token = parseCookies(request.headers.get('Cookie') || '')[ADMIN_COOKIE]
+  const cookies = parseCookies(request.headers.get('Cookie') || '')
+  let token = cookies[ADMIN_COOKIE]
+  if (!token) {
+    const auth = request.headers.get('Authorization') || ''
+    if (auth.startsWith('Bearer ')) token = auth.slice(7).trim()
+  }
   return verifySessionToken(record.sessionKey, token)
+}
+
+function mimeForUploadPath(pathname) {
+  const lower = pathname.toLowerCase()
+  if (lower.endsWith('.png')) return 'image/png'
+  if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'image/jpeg'
+  if (lower.endsWith('.webp')) return 'image/webp'
+  if (lower.endsWith('.gif')) return 'image/gif'
+  if (lower.endsWith('.svg')) return 'image/svg+xml'
+  if (lower.endsWith('.ico')) return 'image/x-icon'
+  return 'application/octet-stream'
+}
+
+/**
+ * Serve CMS uploads: prefer static assets, else live from GitHub (so new logos
+ * appear for everyone immediately without a redeploy).
+ */
+async function serveUpload(request, env, pathname) {
+  if (env.ASSETS) {
+    const assetRes = await env.ASSETS.fetch(request)
+    if (assetRes.status !== 404) return assetRes
+  }
+
+  const cached = uploadCache.get(pathname)
+  if (cached && Date.now() - cached.at < 5 * 60_000) {
+    return new Response(cached.bytes, {
+      headers: {
+        'Content-Type': cached.mime,
+        'Cache-Control': 'public, max-age=300',
+      },
+    })
+  }
+
+  if (!hasGithub(env)) return new Response('Not found', { status: 404 })
+
+  const repoPath = `public${pathname}`
+  try {
+    const file = await readTextOrBytes(env, repoPath)
+    if (!file?.bytes?.length) return new Response('Not found', { status: 404 })
+    const mime = mimeForUploadPath(pathname)
+    uploadCache.set(pathname, { bytes: file.bytes, mime, at: Date.now() })
+    return new Response(file.bytes, {
+      headers: {
+        'Content-Type': mime,
+        'Cache-Control': 'public, max-age=300',
+      },
+    })
+  } catch (err) {
+    console.error('Upload proxy failed:', err)
+    return new Response('Not found', { status: 404 })
+  }
 }
 
 async function handleApi(request, env) {
   const url = new URL(request.url)
   const pathname = url.pathname.replace(/\/+$/, '') || '/'
   const secure = url.protocol === 'https:'
+  const cors = corsHeaders(request)
+  const respond = (body, status = 200, extra = {}) => json(body, status, { ...cors, ...extra })
 
   if (request.method === 'OPTIONS') {
-    return new Response(null, { status: 204 })
+    return new Response(null, { status: 204, headers: cors })
+  }
+
+  if (request.method === 'GET' && pathname === '/api/health') {
+    return respond({ ok: true, service: 'adwise-portfolio' })
   }
 
   if (request.method === 'GET' && pathname === '/api/content') {
-    return json({ content: await readContent(env) })
+    const content = await readContent(env)
+    return respond({ content: { ...content, logos: visibleLogos(content) } })
   }
 
   if (request.method === 'GET' && pathname === '/api/logos') {
-    return json({ logos: visibleLogos(await readContent(env)) })
+    return respond({ logos: visibleLogos(await readContent(env)) })
   }
 
-  if (request.method === 'GET' && pathname === '/api/admin/status') {
-    try {
-      const record = await getAuthRecord(env)
-      return json({
-        storage: hasGithub(env) ? 'github' : env.LOGOS ? 'kv' : 'none',
-        repo: env.GITHUB_REPO || env.github_repo || 'shimshonwq/adwise-portfolio',
-        branch: env.GITHUB_BRANCH || env.github_branch || 'main',
-        authUpdatedAt: record.updatedAt || null,
+  if (request.method === 'GET' && pathname === '/api/captcha-config') {
+    const siteKey = String(env.TURNSTILE_SITE_KEY || env.turnstile_site_key || '').trim()
+    return respond({
+      provider: siteKey ? 'turnstile' : null,
+      siteKey: siteKey || null,
+    })
+  }
+
+  if (request.method === 'POST' && pathname === '/api/contact') {
+    const ip = clientIp(request)
+    if (contactRateLimited(ip)) {
+      return respond(
+        { error: 'Too many messages from this connection. Please wait a bit and try again.' },
+        429,
+        cors,
+      )
+    }
+    recordContactAttempt(ip)
+    const body = await request.json().catch(() => ({}))
+    const checked = validateContactPayload(body)
+    if (checked.spam) return respond({ ok: true }, 200, cors)
+    if (!checked.ok) return respond({ error: checked.error }, checked.status, cors)
+
+    const turnstileSecret = String(env.TURNSTILE_SECRET_KEY || env.turnstile_secret_key || '').trim()
+    const turnstileSiteKey = String(env.TURNSTILE_SITE_KEY || env.turnstile_site_key || '').trim()
+    if (turnstileSiteKey && !turnstileSecret) {
+      return respond(
+        { error: 'Human verification is not configured on the server.' },
+        503,
+        cors,
+      )
+    }
+    if (turnstileSecret) {
+      const captcha = await verifyTurnstileToken({
+        token: checked.data.turnstileToken,
+        secret: turnstileSecret,
+        ip,
       })
+      if (!captcha.ok) return respond({ error: captcha.error }, 400, cors)
+    }
+
+    const content = await readContent(env)
+    const to = String(content?.site?.email || '').trim()
+    try {
+      const result = await deliverContactMessage({
+        to,
+        payload: checked.data,
+        siteName: content?.site?.name || 'Adwise Media',
+        resendApiKey: env.RESEND_API_KEY || env.resend_api_key || '',
+        resendFrom: env.RESEND_FROM || env.resend_from || '',
+        githubToken:
+          env.ADWISE_GITHUB_TOKEN ||
+          env.adwise_github_token ||
+          env.GITHUB_TOKEN ||
+          env.github_token ||
+          '',
+        githubRepo: env.GITHUB_REPO || env.github_repo || 'shimshonwq/adwise-portfolio',
+        githubBranch: env.GITHUB_BRANCH || env.github_branch || 'main',
+      })
+      if (result.needsActivation) {
+        return respond(
+          {
+            ok: false,
+            needsActivation: true,
+            error: result.message,
+          },
+          200,
+          cors,
+        )
+      }
+      return respond({ ok: true, provider: result.provider }, 200, cors)
     } catch (err) {
-      return json({ error: err.message }, 503)
+      const message = friendlyContactError(err?.message || 'Could not send message right now.')
+      return respond({ error: message }, 502, cors)
     }
   }
 
@@ -266,14 +502,23 @@ async function handleApi(request, env) {
     try {
       await getAuthRecord(env)
     } catch (err) {
-      return json({ error: err.message }, 503)
+      return respond({ error: err.message }, 503)
     }
+  }
+
+  const mutating =
+    request.method === 'POST' ||
+    request.method === 'PUT' ||
+    request.method === 'PATCH' ||
+    request.method === 'DELETE'
+  if (mutating && pathname.startsWith('/api/admin') && !adminOriginAllowed(request)) {
+    return respond({ error: 'Request origin not allowed.' }, 403)
   }
 
   if (request.method === 'POST' && pathname === '/api/admin/login') {
     const ip = clientIp(request)
     if (loginRateLimited(ip)) {
-      return json(
+      return respond(
         { error: 'Too many login attempts. Wait about 15 minutes and try again.' },
         429,
       )
@@ -283,25 +528,41 @@ async function handleApi(request, env) {
     const record = await getAuthRecord(env)
     if (!(await verifyPassword(String(body.password || ''), record))) {
       recordLoginFailure(ip)
-      return json({ error: 'Wrong password' }, 401)
+      return respond({ error: 'Wrong password' }, 401)
     }
     clearLoginFailures(ip)
     const token = await makeSessionToken(record.sessionKey)
-    return json({ ok: true }, 200, { 'Set-Cookie': setCookie(token, secure) })
+    return respond({ ok: true, token }, 200, { 'Set-Cookie': setCookie(token, secure) })
   }
 
   if (request.method === 'POST' && pathname === '/api/admin/logout') {
-    return json({ ok: true }, 200, { 'Set-Cookie': clearCookie(secure) })
+    return respond({ ok: true }, 200, { 'Set-Cookie': clearCookie(secure) })
   }
 
   const authed = await requireAuth(request, env)
 
   if (request.method === 'GET' && pathname === '/api/admin/session') {
-    return json({ ok: authed })
+    return respond({ ok: authed })
+  }
+
+  if (request.method === 'GET' && pathname === '/api/admin/session-token') {
+    if (!authed) return respond({ error: 'Please log in' }, 401)
+    const cookies = parseCookies(request.headers.get('Cookie') || '')
+    const token = cookies[ADMIN_COOKIE]
+    if (!token) return respond({ error: 'No session' }, 401)
+    return respond({ token })
   }
 
   if (!authed && pathname.startsWith('/api/admin')) {
-    return json({ error: 'Please log in' }, 401)
+    return respond({ error: 'Please log in' }, 401)
+  }
+
+  if (request.method === 'GET' && pathname === '/api/admin/status') {
+    return respond({
+      storage: hasGithub(env) ? 'github' : env.LOGOS ? 'kv' : 'none',
+      repo: env.GITHUB_REPO || env.github_repo || 'shimshonwq/adwise-portfolio',
+      branch: env.GITHUB_BRANCH || env.github_branch || 'main',
+    })
   }
 
   if (
@@ -310,7 +571,7 @@ async function handleApi(request, env) {
     pathname.startsWith('/api/admin') &&
     pathname !== '/api/admin/status'
   ) {
-    return json(
+    return respond(
       {
         error:
           'Storage not configured. Set GITHUB_TOKEN + GITHUB_REPO secrets (recommended), or KV binding LOGOS.',
@@ -327,22 +588,22 @@ async function handleApi(request, env) {
 
     const record = await getAuthRecord(env)
     if (!(await verifyPassword(current, record))) {
-      return json({ error: 'Current password is incorrect' }, 401)
+      return respond({ error: 'Current password is incorrect' }, 401)
     }
     if (next !== confirm) {
-      return json({ error: 'New passwords do not match' }, 400)
+      return respond({ error: 'New passwords do not match' }, 400)
     }
     const strengthErr = validatePasswordStrength(next)
-    if (strengthErr) return json({ error: strengthErr }, 400)
+    if (strengthErr) return respond({ error: strengthErr }, 400)
     if (await verifyPassword(next, record)) {
-      return json({ error: 'Choose a different password than your current one' }, 400)
+      return respond({ error: 'Choose a different password than your current one' }, 400)
     }
 
     const updated = await rotatePassword(record, next)
     await writeJsonFile(env, AUTH_REPO_PATH, updated, 'CMS: change admin password')
     invalidateAuthCache()
     const token = await makeSessionToken(updated.sessionKey)
-    return json(
+    return respond(
       {
         ok: true,
         message: 'Password updated. All other sessions were signed out.',
@@ -354,22 +615,26 @@ async function handleApi(request, env) {
   }
 
   if (request.method === 'GET' && pathname === '/api/admin/content') {
-    return json({ content: await readContent(env) })
+    return respond({ content: await readContent(env) })
   }
 
   if (request.method === 'PUT' && pathname === '/api/admin/content') {
     const body = await request.json().catch(() => ({}))
+    const raw = JSON.stringify(body?.content ?? body)
+    if (raw.length > 512_000) {
+      return respond({ error: 'Content payload is too large.' }, 413)
+    }
     const next = body.content || body
     if (!next?.site || !Array.isArray(next.logos)) {
-      return json({ error: 'Invalid content payload' }, 400)
+      return respond({ error: 'Invalid content payload' }, 400)
     }
     const result = await persistContent(env, next, 'CMS: update site content')
-    return json(okPayload(result))
+    return respond(okPayload(result))
   }
 
   if (request.method === 'GET' && pathname === '/api/admin/logos') {
     const content = await readContent(env)
-    return json({
+    return respond({
       logos: [...content.logos].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
     })
   }
@@ -378,9 +643,10 @@ async function handleApi(request, env) {
     const body = await request.json().catch(() => ({}))
     const name = String(body.name || '').trim()
     const dataUrl = String(body.dataUrl || '')
-    if (!name) return json({ error: 'Name is required' }, 400)
+    const link = String(body.url || '').trim()
+    if (!name) return respond({ error: 'Name is required' }, 400)
     const parsed = dataUrlToBytes(dataUrl)
-    if (!parsed) return json({ error: 'Upload a PNG, JPG, or WebP' }, 400)
+    if (!parsed) return respond({ error: 'Upload a PNG, JPG, or WebP' }, 400)
     const width = body.width != null ? Number(body.width) : null
     const height = body.height != null ? Number(body.height) : null
     const bad = validateLogoUpload({
@@ -389,16 +655,17 @@ async function handleApi(request, env) {
       width: Number.isFinite(width) ? width : null,
       height: Number.isFinite(height) ? height : null,
     })
-    if (bad) return json({ error: bad }, 400)
+    if (bad) return respond({ error: bad }, 400)
     const ext = extForLogoMime(parsed.mime)
-    if (!ext) return json({ error: 'Upload a PNG, JPG, or WebP' }, 400)
+    if (!ext) return respond({ error: 'Upload a PNG, JPG, or WebP' }, 400)
     const id = `${slugify(name)}-${Date.now().toString(36)}`
     const file = `${id}.${ext}`
     const src = `/uploads/logos/${file}`
     if (hasGithub(env)) {
       await writeBinaryFile(env, `public${src}`, parsed.bytes, `CMS: add logo ${name}`)
+      uploadCache.set(src, { bytes: parsed.bytes, mime: parsed.mime, at: Date.now() })
     }
-    const content = await readContent(env)
+    const content = structuredClone(await readContent(env))
     const maxOrder = content.logos.reduce((m, l) => Math.max(m, l.order ?? 0), -1)
     content.logos.push({
       id,
@@ -406,9 +673,10 @@ async function handleApi(request, env) {
       src: hasGithub(env) ? src : dataUrl,
       order: maxOrder + 1,
       visible: true,
+      ...(link ? { url: link } : {}),
     })
     const result = await persistContent(env, content, `CMS: add logo ${name}`)
-    return json(okPayload(result))
+    return respond(okPayload(result))
   }
 
   if (request.method === 'PATCH' && pathname.startsWith('/api/admin/logos/')) {
@@ -416,14 +684,19 @@ async function handleApi(request, env) {
     const body = await request.json().catch(() => ({}))
     const content = await readContent(env)
     const idx = content.logos.findIndex((l) => l.id === id)
-    if (idx === -1) return json({ error: 'Logo not found' }, 404)
+    if (idx === -1) return respond({ error: 'Logo not found' }, 404)
     if (body.name !== undefined) {
       content.logos[idx].name = String(body.name).trim() || content.logos[idx].name
+    }
+    if (body.url !== undefined) {
+      const link = String(body.url || '').trim()
+      if (link) content.logos[idx].url = link
+      else delete content.logos[idx].url
     }
     if (body.visible !== undefined) content.logos[idx].visible = Boolean(body.visible)
     if (body.dataUrl) {
       const parsed = dataUrlToBytes(String(body.dataUrl))
-      if (!parsed) return json({ error: 'Upload a PNG, JPG, or WebP' }, 400)
+      if (!parsed) return respond({ error: 'Upload a PNG, JPG, or WebP' }, 400)
       const width = body.width != null ? Number(body.width) : null
       const height = body.height != null ? Number(body.height) : null
       const bad = validateLogoUpload({
@@ -432,9 +705,9 @@ async function handleApi(request, env) {
         width: Number.isFinite(width) ? width : null,
         height: Number.isFinite(height) ? height : null,
       })
-      if (bad) return json({ error: bad }, 400)
+      if (bad) return respond({ error: bad }, 400)
       const ext = extForLogoMime(parsed.mime)
-      if (!ext) return json({ error: 'Upload a PNG, JPG, or WebP' }, 400)
+      if (!ext) return respond({ error: 'Upload a PNG, JPG, or WebP' }, 400)
       const file = `${id}.${ext}`
       const src = `/uploads/logos/${file}`
       if (hasGithub(env)) {
@@ -445,13 +718,13 @@ async function handleApi(request, env) {
       }
     }
     const result = await persistContent(env, content, `CMS: update logo ${id}`)
-    return json(okPayload(result))
+    return respond(okPayload(result))
   }
 
   if (request.method === 'PUT' && pathname === '/api/admin/logos/reorder') {
     const body = await request.json().catch(() => ({}))
     const ids = body.ids
-    if (!Array.isArray(ids)) return json({ error: 'ids array required' }, 400)
+    if (!Array.isArray(ids)) return respond({ error: 'ids array required' }, 400)
     const content = await readContent(env)
     const map = new Map(content.logos.map((l) => [l.id, l]))
     const next = []
@@ -464,7 +737,7 @@ async function handleApi(request, env) {
     for (const left of map.values()) next.push(left)
     content.logos = reindexOrders(next)
     const result = await persistContent(env, content, 'CMS: reorder logos')
-    return json(okPayload(result))
+    return respond(okPayload(result))
   }
 
   if (request.method === 'DELETE' && pathname.startsWith('/api/admin/logos/')) {
@@ -481,25 +754,53 @@ async function handleApi(request, env) {
           /* ignore */
         }
       }
+      if (removed.src) uploadCache.delete(removed.src)
     }
     const result = await persistContent(env, content, `CMS: remove logo ${id}`)
-    return json(okPayload(result))
+    return respond(okPayload(result))
   }
 
-  return json({ error: 'Not found' }, 404)
+  return respond({ error: 'Not found' }, 404)
 }
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url)
-    if (url.pathname.startsWith('/api/')) {
-      try {
+    const pathname = url.pathname.replace(/\/+$/, '') || '/'
+
+    try {
+      if (url.pathname.startsWith('/api/')) {
         return await handleApi(request, env)
-      } catch (err) {
-        return json({ error: err?.message || 'Server error' }, 500)
       }
+
+      if (pathname === '/data/content.json') {
+        const content = await readContent(env)
+        return withSecurity(
+          new Response(JSON.stringify(content), {
+            status: 200,
+            headers: {
+              'Content-Type': 'application/json; charset=utf-8',
+              'Cache-Control': 'no-store',
+            },
+          }),
+        )
+      }
+
+      if (url.pathname.startsWith('/uploads/')) {
+        return withSecurity(await serveUpload(request, env, pathname))
+      }
+
+      if (env.ASSETS) return withSecurity(await env.ASSETS.fetch(request))
+      return withSecurity(new Response('Not found', { status: 404 }))
+    } catch (err) {
+      if (url.pathname.startsWith('/api/')) {
+        return json(
+          { error: err?.message || 'Server error' },
+          500,
+          corsHeaders(request),
+        )
+      }
+      return withSecurity(new Response('Server error', { status: 500 }))
     }
-    if (env.ASSETS) return env.ASSETS.fetch(request)
-    return new Response('Not found', { status: 404 })
   },
 }

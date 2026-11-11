@@ -20,7 +20,8 @@ export default function Clients() {
     const reduce =
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const speed = 0.42
+    const speed = Number(copy.marqueeSpeed) > 0 ? Number(copy.marqueeSpeed) : 0.42
+    let visible = true
 
     const measure = () => {
       const el = trackRef.current
@@ -35,7 +36,7 @@ export default function Clients() {
     const tick = () => {
       const el = trackRef.current
       const w = loopWidthRef.current
-      if (el && !draggingRef.current && !reduce && w > 0) {
+      if (el && !draggingRef.current && !reduce && w > 0 && visible) {
         offsetRef.current -= speed
       }
       if (w > 0) {
@@ -47,12 +48,25 @@ export default function Clients() {
     }
     rafRef.current = window.requestAnimationFrame(tick)
 
+    const section = trackRef.current?.closest('section')
+    const io =
+      section && typeof IntersectionObserver !== 'undefined'
+        ? new IntersectionObserver(
+            (entries) => {
+              visible = entries.some((entry) => entry.isIntersecting)
+            },
+            { rootMargin: '120px' },
+          )
+        : null
+    if (section && io) io.observe(section)
+
     return () => {
       window.cancelAnimationFrame(rafRef.current)
       window.removeEventListener('resize', measure)
       ro?.disconnect()
+      io?.disconnect()
     }
-  }, [clients])
+  }, [clients, copy.marqueeSpeed])
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!clients.length) return
@@ -74,7 +88,7 @@ export default function Clients() {
   }
 
   return (
-    <section id="work" className="scroll-mt-24 relative overflow-hidden bg-white py-12 text-ink md:py-16">
+    <section id="work" className="scroll-mt-24 relative overflow-hidden clients-strip py-12 text-ink md:py-16">
       <div className="color-rail" aria-hidden />
 
       <div className="site-shell relative z-10 text-center">
@@ -103,23 +117,41 @@ export default function Clients() {
             ref={trackRef}
             className="logo-marquee-track flex w-max items-center px-6 md:px-10"
           >
-            {loop.map((client, i) => (
-              <div
-                key={`${client.id}-${i}`}
-                className="logo-box flex h-[5.25rem] w-[15rem] shrink-0 items-center justify-center md:h-[5.75rem] md:w-[16rem]"
-                title={client.name}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+            {loop.map((client, i) => {
+              const logoImg = (
+                /* eslint-disable-next-line @next/next/no-img-element */
                 <img
                   src={client.src}
                   alt={client.name}
                   draggable={false}
                   width={300}
                   height={96}
-                  className="h-14 w-full max-w-[14rem] object-contain object-center select-none md:h-16 md:max-w-[15rem]"
+                  className="clients-logo h-14 w-full max-w-[14rem] object-contain object-center select-none md:h-16 md:max-w-[15rem]"
                 />
+              )
+              const href = String(client.url || '').trim()
+              const external = href.startsWith('http://') || href.startsWith('https://')
+              return (
+              <div
+                key={`${client.id}-${i}`}
+                className="logo-box flex h-[5.25rem] w-[15rem] shrink-0 items-center justify-center md:h-[5.75rem] md:w-[16rem]"
+                title={client.name}
+              >
+                {external ? (
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-full w-full items-center justify-center px-2 transition opacity-90 hover:opacity-100"
+                    aria-label={`Visit ${client.name}`}
+                  >
+                    {logoImg}
+                  </a>
+                ) : (
+                  logoImg
+                )}
               </div>
-            ))}
+            )})}
           </div>
         ) : (
           <div className="flex h-[5.25rem] items-center justify-center px-6 md:h-[5.75rem]">

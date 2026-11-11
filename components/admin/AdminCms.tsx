@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   DEFAULT_CONTENT,
   DEFAULT_THEME,
@@ -9,18 +9,18 @@ import {
 import { BODY_FONTS, DISPLAY_FONTS, SERIF_FONTS } from '../../lib/fonts'
 import {
   LOGO_ACCEPT_ATTR,
-  LOGO_BEST_HEIGHT,
-  LOGO_BEST_TIP,
-  LOGO_BEST_WIDTH,
   LOGO_EXT_LABEL,
   LOGO_HELP,
-  LOGO_MAX_BYTES,
-  LOGO_MAX_HEIGHT,
-  LOGO_MAX_WIDTH,
-  LOGO_MIN_HEIGHT,
-  LOGO_MIN_WIDTH,
-  logoMimeOk,
 } from '../../lib/logo-rules'
+import { exportLogoCrop, loadImageFromFile } from '../../lib/logo-crop'
+import {
+  adminFetch,
+  establishAdminSession,
+  readAdminJson,
+  refreshAdminApiToken,
+  setAdminApiToken,
+} from '../../lib/admin-api'
+import LogoUploadCrop from './LogoUploadCrop'
 
 type Phase = 'checking' | 'login' | 'app'
 type Tab =
@@ -212,44 +212,19 @@ function sortedLogos(logos: LogoItem[]) {
   return [...logos].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
 }
 
-async function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(String(reader.result || ''))
-    reader.onerror = () => reject(new Error('Could not read file'))
-    reader.readAsDataURL(file)
-  })
-}
-
-async function measureImage(file: File): Promise<{ width: number; height: number }> {
-  const url = URL.createObjectURL(file)
-  try {
-    const dims = await new Promise<{ width: number; height: number }>((resolve, reject) => {
-      const img = new Image()
-      img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight })
-      img.onerror = () => reject(new Error('Could not read image size'))
-      img.src = url
-    })
-    return dims
-  } finally {
-    URL.revokeObjectURL(url)
+/** Turn raw Worker/GitHub errors into actionable admin UI copy. */
+function friendlyAdminError(raw: unknown, fallback: string): string {
+  const msg = raw instanceof Error ? raw.message : typeof raw === 'string' ? raw : ''
+  if (/body stream already read|failed to execute 'json'|body has already been read|body is unusable/i.test(msg)) {
+    return 'Login hit a stale page. Hard-refresh (Ctrl+Shift+R) and try again.'
   }
-}
-
-function validateLogoFile(file: File, width: number, height: number): string | null {
-  if (!logoMimeOk(file.type)) {
-    return `Wrong file type. Use ${LOGO_EXT_LABEL} only (not SVG, PDF, or HEIC).`
+  if (/failed to fetch|networkerror|load failed/i.test(msg)) {
+    return 'Could not reach the admin server. Hard-refresh this page (Ctrl+Shift+R) and log in again. If it keeps failing, try from a normal browser tab (not private mode).'
   }
-  if (file.size > LOGO_MAX_BYTES) {
-    return 'File is too big. Max size is 2 MB.'
+  if (/GitHub API 401|Bad credentials|short-lived|ADWISE_GITHUB_TOKEN|no expiration/i.test(msg)) {
+    return 'GitHub access is missing or expired. Add a classic personal access token (repo scope, no expiration) as the Cloudflare Worker secret ADWISE_GITHUB_TOKEN. Admin login always uses your current password from GitHub — old passwords never work after you change it.'
   }
-  if (width < LOGO_MIN_WIDTH || width > LOGO_MAX_WIDTH) {
-    return `Width must be ${LOGO_MIN_WIDTH}–${LOGO_MAX_WIDTH}px (yours is ${width}px). Best: ${LOGO_BEST_WIDTH}.`
-  }
-  if (height < LOGO_MIN_HEIGHT || height > LOGO_MAX_HEIGHT) {
-    return `Height must be ${LOGO_MIN_HEIGHT}–${LOGO_MAX_HEIGHT}px (yours is ${height}px). Best: ${LOGO_BEST_HEIGHT}.`
-  }
-  return null
+  return msg || fallback
 }
 
 export default function AdminCms() {
@@ -258,16 +233,24 @@ export default function AdminCms() {
   const [tab, setTab] = useState<Tab>('start')
   const [content, setContent] = useState<CmsContent>(DEFAULT_CONTENT)
   const [busy, setBusy] = useState(false)
+  const [logoBusy, setLogoBusy] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [uploadName, setUploadName] = useState('')
-  const [uploadFile, setUploadFile] = useState<File | null>(null)
-  const [uploadPreview, setUploadPreview] = useState<{ width: number; height: number } | null>(null)
+  const [uploadUrl, setUploadUrl] = useState('')
+  const [uploadKey, setUploadKey] = useState(0)
+  const [cropPreview, setCropPreview] = useState<{ dataUrl: string; width: number; height: number } | null>(null)
   const [storageMode, setStorageMode] = useState<'github' | 'local' | 'kv' | 'unknown'>('unknown')
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const fileRef = useRef<HTMLInputElement>(null)
+
+  const onCropReady = useCallback(
+    (_file: File | null, preview: { dataUrl: string; width: number; height: number } | null) => {
+      setCropPreview(preview)
+    },
+    [],
+  )
 
   const logos = useMemo(() => sortedLogos(content.logos || []), [content.logos])
   const theme = content.theme || DEFAULT_THEME
@@ -277,21 +260,22 @@ export default function AdminCms() {
     setError(null)
   }
 
-  const applyApiResult = (data: { content?: CmsContent; publishMessage?: string }) => {
-    if (data.content) setContent({ ...DEFAULT_CONTENT, ...data.content, theme: { ...DEFAULT_THEME, ...data.content.theme } })
+  const applyApiResult = (data: { content?: unknown; publishMessage?: unknown }) => {
+    const next = data.content as CmsContent | undefined
+    if (next) setContent({ ...DEFAULT_CONTENT, ...next, theme: { ...DEFAULT_THEME, ...next.theme } })
     flash(
-      data.publishMessage ||
+      (typeof data.publishMessage === 'string' && data.publishMessage) ||
         (storageMode === 'github'
-          ? 'Saved to GitHub — Cloudflare will rebuild in about 1–3 minutes.'
+          ? 'Saved. Live site updates for everyone within a few seconds.'
           : 'Saved.'),
     )
   }
 
   const loadContent = useCallback(async () => {
-    const res = await fetch('/api/admin/content/', { credentials: 'include' })
+    const res = await adminFetch('/api/admin/content')
     if (!res.ok) throw new Error('Session expired — log in again')
-    const data = await res.json()
-    const next = data.content || DEFAULT_CONTENT
+    const data = await readAdminJson(res)
+    const next = (data.content || DEFAULT_CONTENT) as CmsContent
     setContent({
       ...DEFAULT_CONTENT,
       ...next,
@@ -307,15 +291,16 @@ export default function AdminCms() {
     let cancelled = false
     ;(async () => {
       try {
-        const res = await fetch('/api/admin/session/', { credentials: 'include' })
-        const data = await res.json()
+        const res = await adminFetch('/api/admin/session')
+        const data = await readAdminJson(res)
         if (cancelled) return
         if (data.ok) {
+          await refreshAdminApiToken()
           await loadContent()
           try {
-            const st = await fetch('/api/admin/status/', { credentials: 'include' })
+            const st = await adminFetch('/api/admin/status')
             if (st.ok) {
-              const status = await st.json()
+              const status = await readAdminJson(st)
               if (status.storage === 'github' || status.storage === 'local' || status.storage === 'kv') {
                 setStorageMode(status.storage)
               }
@@ -342,27 +327,22 @@ export default function AdminCms() {
     setBusy(true)
     setError(null)
     try {
-      const res = await fetch('/api/admin/login/', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Login failed')
+      const result = await establishAdminSession(password)
+      if (!result.ok) throw new Error(String(result.data.error || 'Login failed'))
       await loadContent()
       setPassword('')
       setPhase('app')
       setTab('start')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed')
+      setError(friendlyAdminError(err, 'Login failed'))
     } finally {
       setBusy(false)
     }
   }
 
   const onLogout = async () => {
-    await fetch('/api/admin/logout/', { method: 'POST', credentials: 'include' })
+    setAdminApiToken(null)
+    await adminFetch('/api/admin/logout', { method: 'POST' })
     setPhase('login')
   }
 
@@ -371,20 +351,19 @@ export default function AdminCms() {
     setBusy(true)
     setError(null)
     try {
-      const res = await fetch('/api/admin/password/', {
+      const res = await adminFetch('/api/admin/password', {
         method: 'POST',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ currentPassword, newPassword, confirmPassword }),
       })
-      const data = await res.json()
+      const data = await readAdminJson(res)
       if (!res.ok) throw new Error(data.error || 'Could not change password')
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
-      flash(data.message || 'Password updated.')
+      flash(typeof data.message === 'string' ? data.message : 'Password updated.')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not change password')
+      setError(friendlyAdminError(err, 'Could not change password'))
     } finally {
       setBusy(false)
     }
@@ -394,17 +373,16 @@ export default function AdminCms() {
     setBusy(true)
     setError(null)
     try {
-      const res = await fetch('/api/admin/content/', {
+      const res = await adminFetch('/api/admin/content', {
         method: 'PUT',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: next }),
       })
-      const data = await res.json()
+      const data = await readAdminJson(res)
       if (!res.ok) throw new Error(data.error || 'Save failed')
       applyApiResult(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed')
+      setError(friendlyAdminError(err, 'Save failed'))
     } finally {
       setBusy(false)
     }
@@ -420,141 +398,145 @@ export default function AdminCms() {
     const j = i + dir
     if (i < 0 || j < 0 || j >= ids.length) return
     ;[ids[i], ids[j]] = [ids[j], ids[i]]
-    setBusy(true)
+    const prevLogos = content.logos
+    const map = new Map(content.logos.map((l) => [l.id, l]))
+    const optimistic = ids
+      .map((logoId, order) => {
+        const row = map.get(logoId)
+        return row ? { ...row, order } : null
+      })
+      .filter(Boolean) as LogoItem[]
+    setContent({ ...content, logos: optimistic })
+    setLogoBusy(id)
     setError(null)
     try {
-      const res = await fetch('/api/admin/logos/reorder/', {
+      const res = await adminFetch('/api/admin/logos/reorder', {
         method: 'PUT',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids }),
       })
-      const data = await res.json()
+      const data = await readAdminJson(res)
       if (!res.ok) throw new Error(data.error || 'Reorder failed')
       applyApiResult(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Reorder failed')
+      setContent({ ...content, logos: prevLogos })
+      setError(friendlyAdminError(err, 'Reorder failed'))
     } finally {
-      setBusy(false)
+      setLogoBusy(null)
     }
   }
 
   const patchLogo = async (id: string, patch: { name?: string; visible?: boolean }) => {
-    setBusy(true)
+    const prevLogos = content.logos
+    if (patch.visible !== undefined || patch.name !== undefined) {
+      setContent({
+        ...content,
+        logos: content.logos.map((l) => (l.id === id ? { ...l, ...patch } : l)),
+      })
+    }
+    setLogoBusy(id)
     setError(null)
     try {
-      const res = await fetch(`/api/admin/logos/${encodeURIComponent(id)}/`, {
+      const res = await adminFetch(`/api/admin/logos/${encodeURIComponent(id)}`, {
         method: 'PATCH',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(patch),
       })
-      const data = await res.json()
+      const data = await readAdminJson(res)
       if (!res.ok) throw new Error(data.error || 'Update failed')
       applyApiResult(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Update failed')
+      setContent({ ...content, logos: prevLogos })
+      setError(friendlyAdminError(err, 'Update failed'))
     } finally {
-      setBusy(false)
+      setLogoBusy(null)
     }
   }
 
   const removeLogo = async (id: string) => {
     if (!confirm('Remove this logo from the website?')) return
-    setBusy(true)
+    const prevLogos = content.logos
+    setContent({
+      ...content,
+      logos: prevLogos.filter((l) => l.id !== id).map((l, order) => ({ ...l, order })),
+    })
+    setLogoBusy(id)
     setError(null)
     try {
-      const res = await fetch(`/api/admin/logos/${encodeURIComponent(id)}/`, {
+      const res = await adminFetch(`/api/admin/logos/${encodeURIComponent(id)}`, {
         method: 'DELETE',
-        credentials: 'include',
       })
-      const data = await res.json()
+      const data = await readAdminJson(res)
       if (!res.ok) throw new Error(data.error || 'Remove failed')
       applyApiResult(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Remove failed')
+      setContent({ ...content, logos: prevLogos })
+      setError(friendlyAdminError(err, 'Remove failed'))
     } finally {
-      setBusy(false)
+      setLogoBusy(null)
     }
   }
 
   const replaceLogo = async (id: string, file: File) => {
-    setBusy(true)
+    setLogoBusy(id)
     setError(null)
     try {
-      const dims = await measureImage(file)
-      const err = validateLogoFile(file, dims.width, dims.height)
-      if (err) throw new Error(err)
-      const dataUrl = await readFileAsDataUrl(file)
-      const res = await fetch(`/api/admin/logos/${encodeURIComponent(id)}/`, {
+      const img = await loadImageFromFile(file)
+      const cropped = exportLogoCrop(img, 1, 0, 0)
+      const res = await adminFetch(`/api/admin/logos/${encodeURIComponent(id)}`, {
         method: 'PATCH',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dataUrl, width: dims.width, height: dims.height }),
+        body: JSON.stringify({
+          dataUrl: cropped.dataUrl,
+          width: cropped.width,
+          height: cropped.height,
+        }),
       })
-      const data = await res.json()
+      const data = await readAdminJson(res)
       if (!res.ok) throw new Error(data.error || 'Replace failed')
       applyApiResult(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Replace failed')
+      setError(friendlyAdminError(err, 'Replace failed'))
     } finally {
-      setBusy(false)
-    }
-  }
-
-  const onPickFile = async (file: File | null) => {
-    setUploadFile(file)
-    setUploadPreview(null)
-    setError(null)
-    if (!file) return
-    try {
-      const dims = await measureImage(file)
-      setUploadPreview(dims)
-      const err = validateLogoFile(file, dims.width, dims.height)
-      if (err) setError(err)
-    } catch {
-      setError('Could not read that image. Try a PNG, JPG, or WebP.')
-      setUploadFile(null)
+      setLogoBusy(null)
     }
   }
 
   const onUpload = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!uploadFile) {
-      setError('Choose a logo file first.')
+    if (!cropPreview) {
+      setError('Choose a logo picture first, then adjust the preview.')
       return
     }
-    setBusy(true)
+    setLogoBusy('upload')
     setError(null)
     try {
-      const dims = uploadPreview || (await measureImage(uploadFile))
-      const err = validateLogoFile(uploadFile, dims.width, dims.height)
-      if (err) throw new Error(err)
-      const dataUrl = await readFileAsDataUrl(uploadFile)
-      const res = await fetch('/api/admin/logos/', {
+      const res = await adminFetch('/api/admin/logos', {
         method: 'POST',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: uploadName.trim() || uploadFile.name.replace(/\.[^.]+$/, ''),
-          dataUrl,
-          width: dims.width,
-          height: dims.height,
+          name: uploadName.trim() || 'Client logo',
+          dataUrl: cropPreview.dataUrl,
+          width: cropPreview.width,
+          height: cropPreview.height,
+          url: uploadUrl.trim() || undefined,
         }),
       })
-      const data = await res.json()
+      const data = await readAdminJson(res)
       if (!res.ok) throw new Error(data.error || 'Upload failed')
       applyApiResult(data)
       setUploadName('')
-      setUploadFile(null)
-      setUploadPreview(null)
-      if (fileRef.current) fileRef.current.value = ''
+      setUploadUrl('')
+      setCropPreview(null)
+      setUploadKey((k) => k + 1)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed')
+      setError(friendlyAdminError(err, 'Upload failed'))
     } finally {
-      setBusy(false)
+      setLogoBusy(null)
     }
   }
+
+  const logoControlsDisabled = Boolean(logoBusy)
 
   return (
     <div className="min-h-[100svh] bg-paper text-ink">
@@ -570,7 +552,7 @@ export default function AdminCms() {
             </h1>
             <p className="mt-2 max-w-2xl font-serif text-base italic text-ink/70">
               Change logos, colors, words, buttons, and contact info. Saves go to GitHub — Cloudflare
-              rebuilds in about 1–3 minutes. This page is private (only at /login).
+              updates live for every visitor within a few seconds. This page is private (only at /login).
             </p>
           </div>
           {phase === 'app' && (
@@ -609,6 +591,11 @@ export default function AdminCms() {
               <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-brass">Admin</p>
               <h2 className="mt-2 font-display text-2xl font-bold">Log in</h2>
             </div>
+            {error && (
+              <p className="rounded-lg border border-red-700/20 bg-red-50 px-4 py-3 text-sm text-red-800">
+                {error}
+              </p>
+            )}
             <PasswordField
               label="Password"
               value={password}
@@ -690,132 +677,143 @@ export default function AdminCms() {
                   className="soft-panel space-y-4 border border-ink/10 bg-white p-6"
                 >
                   <h2 className="font-display text-xl font-bold">Add a logo</h2>
-                  <div className="rounded-lg border border-dashed border-brass/40 bg-paper-deep/30 p-4 text-sm text-ink/75">
-                    <p className="font-semibold text-ink">Required file rules</p>
-                    <ul className="mt-2 list-disc space-y-1 pl-5">
-                      <li>
-                        Type: <strong>{LOGO_EXT_LABEL}</strong> only
-                      </li>
-                      <li>
-                        Best size: <strong>{LOGO_BEST_WIDTH}</strong>,{' '}
-                        <strong>{LOGO_BEST_HEIGHT}</strong>
-                      </li>
-                      <li>
-                        Allowed size: width {LOGO_MIN_WIDTH}–{LOGO_MAX_WIDTH}px · height{' '}
-                        {LOGO_MIN_HEIGHT}–{LOGO_MAX_HEIGHT}px
-                      </li>
-                      <li>Max file size: <strong>2 MB</strong></li>
-                      <li>{LOGO_BEST_TIP}</li>
-                    </ul>
-                  </div>
+                  <p className="text-sm text-ink/65">
+                    Pick any photo — big files are fine. Drag and zoom until it looks right, then
+                    click Add logo.
+                  </p>
                   <Field
                     label="Company name"
                     value={uploadName}
                     onChange={setUploadName}
-                    hint="Shown if the picture fails to load. Example: Coffee Break"
+                    hint="Example: Coffee Break"
                   />
-                  <label className="block text-sm">
-                    <span className="mb-1.5 block font-medium text-ink/70">
-                      Logo file ({LOGO_EXT_LABEL})
-                    </span>
-                    <input
-                      ref={fileRef}
-                      type="file"
-                      accept={LOGO_ACCEPT_ATTR}
-                      onChange={(e) => onPickFile(e.target.files?.[0] || null)}
-                      className="w-full text-sm"
-                    />
-                    {uploadPreview && (
-                      <span className="mt-1 block text-xs text-ink/55">
-                        Selected size: {uploadPreview.width}×{uploadPreview.height}px
-                        {uploadFile ? ` · ${(uploadFile.size / 1024).toFixed(0)} KB` : ''}
-                      </span>
-                    )}
-                  </label>
-                  <button type="submit" disabled={busy || !uploadFile} className="btn btn-primary">
-                    {busy ? 'Uploading…' : 'Add logo'}
+                  <Field
+                    label="Website (optional)"
+                    value={uploadUrl}
+                    onChange={setUploadUrl}
+                    hint="Example: https://coffeebreak.com — visitors can click the logo to visit"
+                  />
+                  <LogoUploadCrop
+                    key={uploadKey}
+                    disabled={logoBusy === 'upload'}
+                    onClear={() => setCropPreview(null)}
+                    onReady={onCropReady}
+                  />
+                  <button
+                    type="submit"
+                    disabled={logoBusy === 'upload' || !cropPreview}
+                    className="btn btn-primary"
+                  >
+                    {logoBusy === 'upload' ? 'Adding logo…' : 'Add logo'}
                   </button>
                 </form>
 
-                <div className="soft-panel space-y-3 border border-ink/10 bg-white p-6">
-                  <h2 className="font-display text-xl font-bold">Your logos (order = left to right)</h2>
+                <SectionSave
+                  busy={busy}
+                  onSave={() => saveContent(content)}
+                  title="Your logos"
+                  note="Change names or website links, then press Save changes. Use ↑ ↓ Hide Remove for quick actions."
+                >
                   <p className="text-sm text-ink/60">
-                    Use ↑ ↓ to change order. Hide removes it from the public bar without deleting.
+                    Order = left to right on the homepage bar. Hide removes a logo from the public
+                    bar without deleting it.
                   </p>
-                  {logos.map((logo, i) => (
-                    <div
-                      key={logo.id}
-                      className="flex flex-wrap items-center gap-3 rounded-xl border border-ink/10 p-3"
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={logo.src}
-                        alt={logo.name}
-                        className="h-12 w-24 object-contain bg-white"
-                      />
-                      <input
-                        className="min-w-[8rem] flex-1 rounded border border-ink/15 px-2 py-1.5 text-sm"
-                        value={logo.name}
-                        onChange={(e) =>
-                          setContent({
-                            ...content,
-                            logos: content.logos.map((l) =>
-                              l.id === logo.id ? { ...l, name: e.target.value } : l,
-                            ),
-                          })
-                        }
-                        onBlur={(e) => patchLogo(logo.id, { name: e.target.value })}
-                      />
-                      <div className="flex flex-wrap gap-1">
-                        <button
-                          type="button"
-                          disabled={busy || i === 0}
-                          onClick={() => moveLogo(logo.id, -1)}
-                          className="btn btn-secondary !px-2 !py-1 text-xs"
-                        >
-                          ↑
-                        </button>
-                        <button
-                          type="button"
-                          disabled={busy || i === logos.length - 1}
-                          onClick={() => moveLogo(logo.id, 1)}
-                          className="btn btn-secondary !px-2 !py-1 text-xs"
-                        >
-                          ↓
-                        </button>
-                        <button
-                          type="button"
-                          disabled={busy}
-                          onClick={() => patchLogo(logo.id, { visible: logo.visible === false })}
-                          className="btn btn-secondary !px-2 !py-1 text-xs"
-                        >
-                          {logo.visible === false ? 'Show' : 'Hide'}
-                        </button>
-                        <label className="btn btn-secondary !px-2 !py-1 text-xs cursor-pointer">
-                          Replace
-                          <input
-                            type="file"
-                            accept={LOGO_ACCEPT_ATTR}
-                            className="hidden"
-                            onChange={(e) => {
-                              const f = e.target.files?.[0]
-                              if (f) replaceLogo(logo.id, f)
-                              e.target.value = ''
-                            }}
-                          />
-                        </label>
-                        <button
-                          type="button"
-                          disabled={busy}
-                          onClick={() => removeLogo(logo.id)}
-                          className="btn btn-secondary !px-2 !py-1 text-xs text-red-700"
-                        >
-                          Remove
-                        </button>
+                  <div className="space-y-3">
+                    {logos.map((logo, i) => (
+                      <div
+                        key={logo.id}
+                        className="flex flex-wrap items-start gap-3 rounded-xl border border-ink/10 p-3"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={logo.src}
+                          alt={logo.name}
+                          className="h-12 w-24 shrink-0 object-contain bg-white"
+                        />
+                        <div className="min-w-[12rem] flex-1 space-y-2">
+                          <label className="block text-xs font-medium text-ink/60">
+                            Name
+                            <input
+                              className="mt-1 w-full rounded border border-ink/15 px-2 py-1.5 text-sm"
+                              value={logo.name}
+                              onChange={(e) =>
+                                setContent({
+                                  ...content,
+                                  logos: content.logos.map((l) =>
+                                    l.id === logo.id ? { ...l, name: e.target.value } : l,
+                                  ),
+                                })
+                              }
+                            />
+                          </label>
+                          <label className="block text-xs font-medium text-ink/60">
+                            Website (optional)
+                            <input
+                              className="mt-1 w-full rounded border border-ink/15 px-2 py-1.5 text-sm"
+                              value={logo.url || ''}
+                              placeholder="https://example.com"
+                              onChange={(e) =>
+                                setContent({
+                                  ...content,
+                                  logos: content.logos.map((l) =>
+                                    l.id === logo.id ? { ...l, url: e.target.value } : l,
+                                  ),
+                                })
+                              }
+                            />
+                          </label>
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          <button
+                            type="button"
+                            disabled={logoControlsDisabled || i === 0}
+                            onClick={() => moveLogo(logo.id, -1)}
+                            className="btn btn-secondary !px-2 !py-1 text-xs"
+                          >
+                            {logoBusy === logo.id ? '…' : '↑'}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={logoControlsDisabled || i === logos.length - 1}
+                            onClick={() => moveLogo(logo.id, 1)}
+                            className="btn btn-secondary !px-2 !py-1 text-xs"
+                          >
+                            {logoBusy === logo.id ? '…' : '↓'}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={logoControlsDisabled}
+                            onClick={() => patchLogo(logo.id, { visible: logo.visible === false })}
+                            className="btn btn-secondary !px-2 !py-1 text-xs"
+                          >
+                            {logo.visible === false ? 'Show' : 'Hide'}
+                          </button>
+                          <label className="btn btn-secondary !px-2 !py-1 text-xs cursor-pointer">
+                            Replace
+                            <input
+                              type="file"
+                              accept={LOGO_ACCEPT_ATTR}
+                              className="hidden"
+                              onChange={(e) => {
+                                const f = e.target.files?.[0]
+                                if (f) replaceLogo(logo.id, f)
+                                e.target.value = ''
+                              }}
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            disabled={logoControlsDisabled}
+                            onClick={() => removeLogo(logo.id)}
+                            className="btn btn-secondary !px-2 !py-1 text-xs text-red-700"
+                          >
+                            {logoBusy === logo.id ? '…' : 'Remove'}
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                </SectionSave>
               </div>
             )}
 
@@ -825,7 +823,7 @@ export default function AdminCms() {
                   title="Change colors and fonts"
                   what="Site-wide colors plus headline, body, and accent fonts."
                   how="Pick colors, choose fonts from the lists, or choose Custom and paste a font name + optional Google Fonts CSS link."
-                  happens="The whole site restyles after Cloudflare rebuilds (about 1–3 minutes). Preview colors/fonts update when you save."
+                  happens="Colors and fonts update live for every visitor within a few seconds after you save."
                   tip="Reset to default restores the original Adwise look."
                 />
                 <SectionSave
@@ -987,7 +985,7 @@ export default function AdminCms() {
                   title="Business name, contact, and menu"
                   what="Your company name, phone, email, website address, menu links, and footer text."
                   how="Edit any box. Menu links use #work style anchors for homepage sections."
-                  happens="Saved to GitHub; the live site updates after rebuild."
+                  happens="Saved to GitHub; every visitor sees the update within a few seconds."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, site: { ...DEFAULT_CONTENT.site } })} title="Site & contact">
                   <Field label="Business name" value={content.site.name} onChange={(v) => setContent({ ...content, site: { ...content.site, name: v } })} />
@@ -1029,7 +1027,7 @@ export default function AdminCms() {
                   title="Top of the homepage (Hero)"
                   what="The big first screen: badge, headline, paragraph, buttons, and opening animation name."
                   how="Edit the boxes. Links can be #work or #contact."
-                  happens="Homepage hero updates after the rebuild."
+                  happens="Homepage hero updates live for every visitor within a few seconds."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, hero: { ...DEFAULT_CONTENT.hero } })} title="Hero">
                   <Field label="Opening name (big letters)" value={content.hero.openName} onChange={(v) => setContent({ ...content, hero: { ...content.hero, openName: v } })} />
@@ -1052,7 +1050,7 @@ export default function AdminCms() {
                   title="Clients section words"
                   what="The titles above the sliding logo bar (not the logos themselves — those are under Logos)."
                   how="Edit eyebrow, title, subtitle, and the empty message."
-                  happens="Section text updates after rebuild."
+                  happens="Section text updates live for every visitor within a few seconds."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, clients: { ...DEFAULT_CONTENT.clients } })} title="Clients section">
                   <Field label="Eyebrow" value={content.clients.eyebrow} onChange={(v) => setContent({ ...content, clients: { ...content.clients, eyebrow: v } })} />
@@ -1069,7 +1067,7 @@ export default function AdminCms() {
                   title="Services cards"
                   what="The “What we do” section: titles, descriptions, bullet points, and card colors."
                   how="Edit each card. Points = one idea per line. Tone = white, ink, or gold background."
-                  happens="Service cards update after rebuild."
+                  happens="Service cards update live for every visitor within a few seconds."
                   tip="You can add or remove a card with the buttons under each card."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, services: structuredClone(DEFAULT_CONTENT.services) })} title="Services">
@@ -1161,7 +1159,7 @@ export default function AdminCms() {
                   title="Spotlight / manifesto block"
                   what="The bold dark section with stacked title lines and two buttons."
                   how="Title lines = one word/line per row in the box."
-                  happens="Spotlight section updates after rebuild."
+                  happens="Spotlight section updates live for every visitor within a few seconds."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, spotlight: structuredClone(DEFAULT_CONTENT.spotlight) })} title="Spotlight">
                   <Field label="Eyebrow" value={content.spotlight.eyebrow} onChange={(v) => setContent({ ...content, spotlight: { ...content.spotlight, eyebrow: v } })} />
@@ -1182,7 +1180,7 @@ export default function AdminCms() {
                   title="Process steps"
                   what="Research → Create → Launch style steps."
                   how="Edit each step’s number, title, body, and color tone. Add or remove steps as needed."
-                  happens="Process section updates after rebuild."
+                  happens="Process section updates live for every visitor within a few seconds."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, process: structuredClone(DEFAULT_CONTENT.process) })} title="Process">
                   <Field label="Eyebrow" value={content.process.eyebrow} onChange={(v) => setContent({ ...content, process: { ...content.process, eyebrow: v } })} />
@@ -1266,7 +1264,7 @@ export default function AdminCms() {
                   title="About section"
                   what="About headline, story, accent line, and principle cards."
                   how="Use {shortName} in the eyebrow to insert your short business name automatically."
-                  happens="About section updates after rebuild."
+                  happens="About section updates live for every visitor within a few seconds."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, about: structuredClone(DEFAULT_CONTENT.about) })} title="About">
                   <Field label="Eyebrow" value={content.about.eyebrow} onChange={(v) => setContent({ ...content, about: { ...content.about, eyebrow: v } })} hint="Tip: write About {shortName}" />
@@ -1345,7 +1343,7 @@ export default function AdminCms() {
                   title="Contact page & form"
                   what="Headings, intro, and every form label / placeholder / button / success message."
                   how="Change the words visitors see when they fill out the form."
-                  happens="Contact section updates after rebuild. Form still emails your site email via FormSubmit."
+                  happens="Contact section updates live for every visitor. Form delivery uses Resend/FormSubmit/GitHub."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, contact: { ...DEFAULT_CONTENT.contact } })} title="Contact">
                   <Field label="Eyebrow" value={content.contact.eyebrow} onChange={(v) => setContent({ ...content, contact: { ...content.contact, eyebrow: v } })} />
@@ -1375,7 +1373,7 @@ export default function AdminCms() {
                   title="Other pages"
                   what="The /projects “coming soon” page and the 404 “page not found” page."
                   how="Edit the titles and paragraphs, then save."
-                  happens="Those pages update after rebuild."
+                  happens="Those pages update live for every visitor within a few seconds."
                 />
                 <SectionSave busy={busy} onSave={() => saveContent(content)} onReset={() => setContent({ ...content, projectsPage: { ...DEFAULT_CONTENT.projectsPage } })} title="Projects page">
                   <Field label="Eyebrow" value={content.projectsPage?.eyebrow || ''} onChange={(v) => setContent({ ...content, projectsPage: { ...content.projectsPage, eyebrow: v } })} />

@@ -8,6 +8,8 @@ export type LogoItem = {
   src: string
   order: number
   visible: boolean
+  /** Optional client website — logo becomes clickable when set */
+  url?: string
 }
 
 export type NavItem = { href: string; label: string }
@@ -67,12 +69,15 @@ export type CmsContent = {
     ctaSecondaryLabel: string
     ctaSecondaryHref: string
     orbitCaption: string
+    showOpening?: boolean
+    showOrbit?: boolean
   }
   clients: {
     eyebrow: string
     title: string
     subtitle: string
     emptyMessage: string
+    marqueeSpeed?: number
   }
   services: {
     eyebrow: string
@@ -139,6 +144,11 @@ export type CmsContent = {
     emailPlaceholder: string
     phonePlaceholder: string
     messagePlaceholder: string
+    captchaLabel?: string
+    captchaIdle?: string
+    captchaChecking?: string
+    captchaVerified?: string
+    background?: string
   }
   projectsPage: {
     eyebrow: string
