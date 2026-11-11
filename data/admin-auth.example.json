@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "algo": "pbkdf2-sha256",
+  "iterations": 100000,
+  "salt": "REPLACE_WITH_BOOTSTRAP",
+  "hash": "REPLACE_WITH_BOOTSTRAP",
+  "sessionKey": "REPLACE_WITH_BOOTSTRAP",
+  "updatedAt": "1970-01-01T00:00:00.000Z",
+  "_comment": "Run npm run bootstrap:admin. Real credentials live in .data/ (gitignored) and optionally Worker secret ADMIN_AUTH_JSON."
+}

@@ -48,3 +48,6 @@ bun-debug.log*
 public/uploads/logos/*
 !public/uploads/logos/.gitkeep
 data/content.json
+
+# Admin auth — never ship secrets with the app
+data/admin-auth.json

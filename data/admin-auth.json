@@ -1,9 +1,0 @@
-{
-  "version": 1,
-  "algo": "pbkdf2-sha256",
-  "iterations": 100000,
-  "salt": "j7zViFuV06/koPtcl+eONw==",
-  "hash": "Qk86C5p01dZxvtZW24cR4y6FHxR/Q6v6WymdHnlxcB8=",
-  "sessionKey": "tW8HjARYE4C351/6DV65jTJ34dm8qMcoEQ0MdVD1J9A=",
-  "updatedAt": "2026-08-24T23:55:59.744Z"
-}

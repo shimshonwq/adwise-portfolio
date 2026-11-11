@@ -120,28 +120,48 @@ function hasGithub(env) {
   )
 }
 
+function parseAuthJson(raw) {
+  if (!raw) return null
+  try {
+    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw
+    if (parsed?.hash && parsed.sessionKey && !String(parsed.sessionKey).includes('REPLACE')) {
+      return parsed
+    }
+  } catch {
+    /* ignore */
+  }
+  return null
+}
+
 async function getAuthRecord(env) {
   if (authCache.record && Date.now() - authCache.at < 60_000) {
     return authCache.record
   }
 
-  // Production auth always comes from GitHub so password changes take effect
-  // immediately and old/bootstrap passwords cannot bypass a rotation.
+  // Prefer Worker secret so the HMAC session key is never shipped in app files.
+  const fromSecret = parseAuthJson(env.ADMIN_AUTH_JSON || env.admin_auth_json)
+  if (fromSecret) {
+    authCache = { record: fromSecret, at: Date.now() }
+    return fromSecret
+  }
+
+  // Fallback: GitHub (legacy). Prefer migrating to ADMIN_AUTH_JSON.
   if (!hasGithub(env)) {
     throw new Error(
-      'Admin auth requires ADWISE_GITHUB_TOKEN (or GITHUB_TOKEN) and GITHUB_REPO Worker secrets.',
+      'Admin auth requires Worker secret ADMIN_AUTH_JSON (or GitHub data/admin-auth.json).',
     )
   }
 
   const row = await readJsonFile(env, AUTH_REPO_PATH)
-  if (!row?.data?.hash || !row.data.sessionKey) {
+  const fromGit = parseAuthJson(row?.data)
+  if (!fromGit) {
     throw new Error(
-      'Missing data/admin-auth.json in GitHub. Run npm run bootstrap:admin locally and push.',
+      'Missing admin auth. Set Worker secret ADMIN_AUTH_JSON, or run npm run bootstrap:admin.',
     )
   }
 
-  authCache = { record: row.data, at: Date.now() }
-  return row.data
+  authCache = { record: fromGit, at: Date.now() }
+  return fromGit
 }
 
 function invalidateAuthCache() {

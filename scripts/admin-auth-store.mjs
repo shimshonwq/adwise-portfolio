@@ -69,8 +69,8 @@ export function writeSeedAuth(root, record) {
 }
 
 export async function persistAuthRecord(root, record, message = 'CMS: update admin credentials') {
+  // Local only (.data/) — never write live secrets into the shipped tree.
   writeLocalAuth(root, record)
-  writeSeedAuth(root, record)
   if (githubConfigured()) {
     await writeJsonFile(AUTH_REPO_PATH, record, message)
   }
