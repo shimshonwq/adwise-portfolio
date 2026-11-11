@@ -143,6 +143,14 @@ function writeLocalContent(content) {
 }
 
 async function readContent() {
+  // Prefer local content when developing a redesign / content pass.
+  if (process.env.CMS_LOCAL_ONLY === '1' && fs.existsSync(PUBLIC_CONTENT)) {
+    try {
+      return JSON.parse(fs.readFileSync(PUBLIC_CONTENT, 'utf8'))
+    } catch (err) {
+      console.warn('[cms-api] local content read failed:', err.message)
+    }
+  }
   if (githubConfigured()) {
     try {
       const fromGh = await readSiteContentFromGitHub()

@@ -26,7 +26,7 @@ export default function ProjectCard({ project }: { project: Project }) {
         <h2 className="font-display text-xl font-bold tracking-tight text-white md:text-2xl">
           {project.title}
         </h2>
-        <p className="font-serif text-sm italic text-white/65">{project.description}</p>
+        <p className="text-sm text-white/60">{project.description}</p>
         <p className="text-xs text-white/45">
           {project.client} · {project.year}
         </p>

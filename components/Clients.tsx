@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSiteContent } from '../lib/SiteContentContext'
 
-/** White partnerships strip — auto-slides, draggable; logos + copy from CMS */
+/** Partnerships strip — light stage, auto-slide, optional logo links */
 export default function Clients() {
   const { content, logos } = useSiteContent()
   const trackRef = useRef<HTMLDivElement>(null)
@@ -88,23 +88,21 @@ export default function Clients() {
   }
 
   return (
-    <section id="work" className="scroll-mt-24 relative overflow-hidden clients-strip py-12 text-ink md:py-16">
-      <div className="color-rail" aria-hidden />
-
-      <div className="site-shell relative z-10 text-center">
-        <p className="text-xs font-extrabold uppercase tracking-[0.28em] text-brass">
-          {copy.eyebrow}
-        </p>
-        <h2 className="mt-3 font-display text-[clamp(1.55rem,5.4vw,2.4rem)] font-bold tracking-tight text-ink">
-          {copy.title}
-        </h2>
-        <p className="mx-auto mt-3 max-w-lg font-serif text-base italic text-ink/70 md:text-lg">
-          {copy.subtitle}
-        </p>
+    <section id="work" className="clients-stage scroll-mt-24 relative overflow-hidden py-14 md:py-20">
+      <div className="site-shell relative z-10">
+        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="eyebrow !text-ink/50">{copy.eyebrow}</p>
+            <h2 className="mt-3 font-display text-[clamp(1.7rem,4.5vw,2.8rem)] font-extrabold tracking-tight text-ink">
+              {copy.title}
+            </h2>
+          </div>
+          <p className="max-w-sm text-sm text-ink/55 md:text-right">{copy.subtitle}</p>
+        </div>
       </div>
 
       <div
-        className={`clients-track relative z-10 mt-8 select-none overflow-hidden md:mt-10 ${
+        className={`relative z-10 mt-10 select-none overflow-hidden ${
           clients.length ? (dragging ? 'cursor-grabbing' : 'cursor-grab') : ''
         }`}
         onPointerDown={onPointerDown}
@@ -113,10 +111,7 @@ export default function Clients() {
         onPointerCancel={endDrag}
       >
         {loop.length > 0 ? (
-          <div
-            ref={trackRef}
-            className="logo-marquee-track flex w-max items-center px-6 md:px-10"
-          >
+          <div ref={trackRef} className="clients-track px-6 md:px-10">
             {loop.map((client, i) => {
               const logoImg = (
                 /* eslint-disable-next-line @next/next/no-img-element */
@@ -126,38 +121,37 @@ export default function Clients() {
                   draggable={false}
                   width={300}
                   height={96}
-                  className="clients-logo h-14 w-full max-w-[14rem] object-contain object-center select-none md:h-16 md:max-w-[15rem]"
+                  className="clients-logo"
                 />
               )
               const href = String(client.url || '').trim()
               const external = href.startsWith('http://') || href.startsWith('https://')
               return (
-              <div
-                key={`${client.id}-${i}`}
-                className="logo-box flex h-[5.25rem] w-[15rem] shrink-0 items-center justify-center md:h-[5.75rem] md:w-[16rem]"
-                title={client.name}
-              >
-                {external ? (
-                  <a
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex h-full w-full items-center justify-center px-2 transition opacity-90 hover:opacity-100"
-                    aria-label={`Visit ${client.name}`}
-                  >
-                    {logoImg}
-                  </a>
-                ) : (
-                  logoImg
-                )}
-              </div>
-            )})}
+                <div
+                  key={`${client.id}-${i}`}
+                  className="flex h-16 w-40 shrink-0 items-center justify-center md:h-20 md:w-48"
+                  title={client.name}
+                >
+                  {external ? (
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex h-full w-full items-center justify-center"
+                      aria-label={`Visit ${client.name}`}
+                    >
+                      {logoImg}
+                    </a>
+                  ) : (
+                    logoImg
+                  )}
+                </div>
+              )
+            })}
           </div>
         ) : (
-          <div className="flex h-[5.25rem] items-center justify-center px-6 md:h-[5.75rem]">
-            <p className="font-serif text-sm italic text-ink/45 md:text-base">
-              {copy.emptyMessage}
-            </p>
+          <div className="flex h-16 items-center justify-center px-6">
+            <p className="text-sm text-ink/45">{copy.emptyMessage}</p>
           </div>
         )}
       </div>

@@ -13,8 +13,14 @@ export type FontPreset = {
 
 export const DISPLAY_FONTS: FontPreset[] = [
   {
+    id: 'syne',
+    label: 'Syne (default)',
+    stack: 'Syne, ui-sans-serif, sans-serif',
+    google: 'Syne:wght@600;700;800',
+  },
+  {
     id: 'bricolage',
-    label: 'Bricolage Grotesque (default)',
+    label: 'Bricolage Grotesque',
     stack: '"Bricolage Grotesque", ui-sans-serif, sans-serif',
     google: 'Bricolage+Grotesque:wght@600;700',
   },
@@ -47,8 +53,14 @@ export const DISPLAY_FONTS: FontPreset[] = [
 
 export const BODY_FONTS: FontPreset[] = [
   {
+    id: 'outfit',
+    label: 'Outfit (default)',
+    stack: 'Outfit, ui-sans-serif, sans-serif',
+    google: 'Outfit:wght@400;500;600;700',
+  },
+  {
     id: 'sora',
-    label: 'Sora (default)',
+    label: 'Sora',
     stack: 'Sora, ui-sans-serif, sans-serif',
     google: 'Sora:wght@400;500;600;700',
   },

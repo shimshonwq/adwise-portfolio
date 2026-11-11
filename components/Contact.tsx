@@ -184,13 +184,9 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact" className="scroll-mt-24 relative overflow-hidden brand-field py-24 md:py-32">
+    <section id="contact" className="contact-stage scroll-mt-24 relative overflow-hidden py-24 md:py-32">
       <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            'radial-gradient(circle at 15% 20%, rgba(255,255,255,0.45), transparent 35%), radial-gradient(circle at 85% 75%, rgba(14,14,14,0.1), transparent 30%)',
-        }}
+        className="pointer-events-none absolute -left-24 bottom-0 h-80 w-80 rounded-full bg-brand/15 blur-3xl"
         aria-hidden
       />
 
@@ -201,27 +197,27 @@ export default function Contact() {
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.45 }}
         >
-          <p className="eyebrow !text-ink/80">{copy.eyebrow}</p>
+          <p className="eyebrow !text-brand">{copy.eyebrow}</p>
           <AnimatedText
             as="h2"
             text={copy.title}
-            className="mt-3 font-display text-[clamp(1.65rem,6vw,3.25rem)] font-bold tracking-tight text-ink"
+            className="mt-4 font-display text-[clamp(1.9rem,5.5vw,3.6rem)] font-extrabold tracking-tight text-white"
           />
-          <p className="mt-5 max-w-md font-serif text-base italic text-ink/80 md:text-lg">
+          <p className="mt-5 max-w-md text-base leading-relaxed text-white/60 md:text-lg">
             {copy.intro}
           </p>
 
-          <div className="mt-8 space-y-2 text-ink">
-            <a href={channels.email} className="block font-semibold hover:underline">
+          <div className="mt-8 space-y-2 text-white">
+            <a href={channels.email} className="block font-semibold hover:text-brand">
               {site.email}
             </a>
-            <a href={channels.call} className="block font-semibold hover:underline">
+            <a href={channels.call} className="block font-semibold hover:text-brand">
               {site.phoneDisplay}
             </a>
-            <p className="text-ink/70">{site.location}</p>
+            <p className="text-white/50">{site.location}</p>
           </div>
 
-          <ContactChannels variant="light" className="mt-8" />
+          <ContactChannels variant="onDark" className="mt-8" />
         </motion.div>
 
         <motion.form
@@ -230,13 +226,13 @@ export default function Contact() {
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.45, delay: 0.06 }}
           onSubmit={onSubmit}
-          className="soft-panel space-y-5 border border-white/10 bg-ink p-7 text-white md:p-10"
+          className="contact-form space-y-5 text-white"
         >
           <div className="mb-2">
             <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-brand">
               {copy.formEyebrow}
             </p>
-            <p className="mt-2 font-serif text-sm italic text-white/70">{copy.formNote}</p>
+            <p className="mt-2 text-sm text-white/55">{copy.formNote}</p>
           </div>
 
           {/* Server-only honeypot name that password managers rarely autofill */}
@@ -260,7 +256,6 @@ export default function Contact() {
                 value={formData.name}
                 onChange={onChange}
                 autoComplete="name"
-                className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
                 placeholder={copy.namePlaceholder}
               />
             </label>
@@ -273,7 +268,6 @@ export default function Contact() {
                 value={formData.email}
                 onChange={onChange}
                 autoComplete="email"
-                className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
                 placeholder={copy.emailPlaceholder}
               />
             </label>
@@ -286,7 +280,6 @@ export default function Contact() {
               value={formData.phone}
               onChange={onChange}
               autoComplete="tel"
-              className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
               placeholder={copy.phonePlaceholder}
             />
           </label>
@@ -298,7 +291,7 @@ export default function Contact() {
               rows={5}
               value={formData.message}
               onChange={onChange}
-              className="w-full resize-none rounded-lg border border-white/20 bg-white/5 px-4 py-3.5 text-white outline-none transition focus:border-brand"
+              className="resize-none"
               placeholder={copy.messagePlaceholder}
             />
           </label>
@@ -311,7 +304,7 @@ export default function Contact() {
               {!captchaConfigLoaded ? (
                 <p className="text-sm text-white/55">Loading security check…</p>
               ) : turnstileSiteKey ? (
-                <div className="max-w-sm rounded-lg bg-white p-3">
+                <div className="max-w-sm bg-white p-3">
                   <TurnstileField
                     ref={turnstileRef}
                     siteKey={turnstileSiteKey}
@@ -332,7 +325,7 @@ export default function Contact() {
           <button
             type="submit"
             disabled={status === 'submitting'}
-            className="btn btn-on-dark mt-2 disabled:opacity-70"
+            className="btn btn-primary mt-2 disabled:opacity-70"
           >
             {status === 'submitting' ? copy.sendingLabel || 'Sending…' : copy.submitLabel}
           </button>

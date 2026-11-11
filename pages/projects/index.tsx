@@ -54,10 +54,10 @@ export default function ProjectsPage() {
                 key={cat}
                 type="button"
                 onClick={() => setActive(cat)}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                className={`px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] transition ${
                   active === cat
                     ? 'bg-brand text-ink'
-                    : 'border border-white/15 text-white/70 hover:border-brand/40 hover:text-white'
+                    : 'border border-white/15 text-white/70 hover:border-brand hover:text-brand'
                 }`}
               >
                 {cat}

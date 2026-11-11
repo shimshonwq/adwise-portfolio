@@ -7,74 +7,48 @@ export default function Services() {
   const copy = content.services
 
   return (
-    <section id="services" className="scroll-mt-24 brand-field py-20 md:py-32">
+    <section id="services" className="scroll-mt-24 bg-ink py-20 text-white md:py-28">
       <div className="site-shell">
-        <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between md:gap-6">
-          <div className="max-w-2xl">
-            <p className="eyebrow !text-ink/60">{copy.eyebrow}</p>
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-xl">
+            <p className="eyebrow !text-brand/80">{copy.eyebrow}</p>
             <AnimatedText
               as="h2"
               text={copy.title}
-              className="mt-3 font-display text-[clamp(1.65rem,6vw,3.25rem)] font-bold tracking-tight text-ink"
+              className="mt-4 font-display text-[clamp(2rem,6vw,4rem)] font-extrabold tracking-tight text-white"
             />
           </div>
-          <p className="max-w-sm font-serif text-lg italic leading-relaxed text-ink/80 md:text-right md:text-xl">
+          <p className="max-w-sm text-sm leading-relaxed text-white/55 md:text-right md:text-base">
             {copy.subtitle}
           </p>
         </div>
 
-        <div className="mt-12 grid gap-5 md:mt-14 md:grid-cols-3 md:gap-6">
-          {copy.items.map((service, index) => {
-            const ink = service.tone === 'ink'
-            const gold = service.tone === 'gold'
-            return (
-              <motion.article
-                key={service.id}
-                initial={{ y: 18 }}
-                whileInView={{ y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.45, delay: index * 0.08 }}
-                whileHover={{ y: -6, transition: { duration: 0.25 } }}
-                className={`soft-panel relative overflow-hidden border p-7 md:p-9 ${
-                  ink
-                    ? 'border-ink/20 bg-ink text-white md:-translate-y-2'
-                    : gold
-                      ? 'border-ink/10 bg-paper text-ink'
-                      : 'border-ink/10 bg-white text-ink'
-                }`}
-              >
-                <span
-                  className={`inline-flex h-11 w-11 items-center justify-center rounded-lg font-display text-sm font-bold ${
-                    ink ? 'bg-brand text-ink' : gold ? 'bg-ink text-brand' : 'bg-brand text-ink'
-                  }`}
-                >
-                  {service.num}
-                </span>
-                <h3 className="mt-5 font-display text-[clamp(1.6rem,4vw,1.9rem)] font-bold tracking-tight">
+        <div className="mt-12 md:mt-16">
+          {copy.items.map((service, index) => (
+            <motion.article
+              key={service.id}
+              initial={{ y: 12, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              viewport={{ once: true, amount: 0.35 }}
+              transition={{ duration: 0.4, delay: index * 0.06 }}
+              className="service-row group"
+            >
+              <span className="service-num">{service.num}</span>
+              <div>
+                <h3 className="font-display text-[clamp(1.5rem,3.5vw,2.4rem)] font-extrabold tracking-tight">
                   {service.title}
                 </h3>
-                <p className={`mt-4 font-serif leading-relaxed ${ink ? 'text-white/80' : 'text-ink/75'}`}>
+                <p className="service-muted mt-2 max-w-xl text-sm leading-relaxed text-white/55 md:text-base">
                   {service.description}
                 </p>
-                <ul className="mt-8 space-y-2.5">
-                  {service.points.map((point) => (
-                    <li
-                      key={point}
-                      className={`flex items-center gap-3 text-sm font-medium ${
-                        ink ? 'text-white/80' : 'text-ink/75'
-                      }`}
-                    >
-                      <span
-                        className={`h-1.5 w-1.5 rounded-full ${ink ? 'bg-brand' : 'bg-ink'}`}
-                        aria-hidden
-                      />
-                      {point}
-                    </li>
-                  ))}
-                </ul>
-              </motion.article>
-            )
-          })}
+              </div>
+              <ul className="service-muted flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold uppercase tracking-[0.14em] text-white/45 md:justify-end">
+                {service.points.map((point) => (
+                  <li key={point}>{point}</li>
+                ))}
+              </ul>
+            </motion.article>
+          ))}
         </div>
       </div>
     </section>
