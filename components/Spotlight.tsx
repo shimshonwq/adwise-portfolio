@@ -8,14 +8,10 @@ export default function Spotlight() {
 
   return (
     <section className="spotlight-stage relative overflow-hidden py-24 md:py-36">
-      <div
-        className="pointer-events-none absolute -right-20 top-10 h-72 w-72 rounded-full bg-brand/20 blur-3xl"
-        aria-hidden
-      />
-
+      <div className="spotlight-glow" aria-hidden />
       <div className="site-shell relative z-10">
         <motion.p
-          className="eyebrow !text-brand justify-center"
+          className="eyebrow !text-brand"
           initial={{ y: 10, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true }}
@@ -23,25 +19,26 @@ export default function Spotlight() {
           {copy.eyebrow}
         </motion.p>
 
-        <div className="mx-auto mt-8 max-w-5xl">
-          <h2 className="text-center font-display text-[clamp(2.4rem,11vw,7.5rem)] font-extrabold leading-[0.9] tracking-tight">
-            {copy.titleLines.map((line, i) => (
+        <h2 className="mt-8 max-w-5xl font-display text-[clamp(2.8rem,12vw,8rem)] font-extrabold leading-[0.88] tracking-tight text-white">
+          {copy.titleLines.map((line, i) => {
+            const serif = i === 1 || i === copy.titleLines.length - 1
+            return (
               <motion.span
                 key={`${line}-${i}`}
-                className="block brand-shimmer"
-                initial={{ y: 40, opacity: 0 }}
+                className={`block ${serif ? 'font-serif italic text-brand' : ''}`}
+                initial={{ y: 48, opacity: 0 }}
                 whileInView={{ y: 0, opacity: 1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.65, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.7, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
               >
                 {line}
               </motion.span>
-            ))}
-          </h2>
-        </div>
+            )
+          })}
+        </h2>
 
         <motion.div
-          className="spotlight-slash mt-10 md:mt-12"
+          className="spotlight-slash mt-10"
           initial={{ scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
           viewport={{ once: true }}
@@ -49,7 +46,7 @@ export default function Spotlight() {
         />
 
         <motion.p
-          className="mx-auto mt-8 max-w-lg text-center text-base leading-relaxed text-white/60 md:text-lg"
+          className="mt-8 max-w-md text-base text-white/55 md:text-lg"
           initial={{ y: 12, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true }}
@@ -59,7 +56,7 @@ export default function Spotlight() {
         </motion.p>
 
         <motion.div
-          className="mt-10 flex flex-wrap items-center justify-center gap-3"
+          className="mt-10 flex flex-wrap items-center gap-3"
           initial={{ y: 12, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true }}

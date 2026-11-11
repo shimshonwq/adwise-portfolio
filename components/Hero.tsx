@@ -4,11 +4,11 @@ import { useSiteContent } from '../lib/SiteContentContext'
 
 type Phase = 'void' | 'burst' | 'assemble' | 'lock' | 'exit' | 'done'
 
-/** Full-bleed black hero — yellow signal, sharp type, less copy */
+/** Full-bleed SIGNAL hero — massive type, yellow field, red spark */
 export default function Hero() {
   const { content } = useSiteContent()
   const { hero } = content
-  const { tagline, shortName } = content.site
+  const { tagline, shortName, name } = content.site
   const openName = hero.openName
   const headline = hero.headline
   const showOpening = hero.showOpening !== false
@@ -16,8 +16,6 @@ export default function Hero() {
 
   const [phase, setPhase] = useState<Phase>('void')
   const [ready, setReady] = useState(false)
-  const [typed, setTyped] = useState('')
-  const [typingDone, setTypingDone] = useState(false)
 
   const scatters = useMemo(
     () =>
@@ -37,8 +35,6 @@ export default function Hero() {
     if (reduce || !showOpening) {
       setPhase('done')
       setReady(true)
-      setTyped(headline)
-      setTypingDone(true)
       return
     }
 
@@ -58,24 +54,10 @@ export default function Hero() {
       window.clearTimeout(t4)
       window.clearTimeout(t5)
     }
-  }, [showOpening, headline])
-
-  useEffect(() => {
-    if (!ready || typingDone) return
-    let i = 0
-    setTyped('')
-    const id = window.setInterval(() => {
-      i += 1
-      setTyped(headline.slice(0, i))
-      if (i >= headline.length) {
-        window.clearInterval(id)
-        setTypingDone(true)
-      }
-    }, 26)
-    return () => window.clearInterval(id)
-  }, [ready, typingDone, headline])
+  }, [showOpening])
 
   const showVeil = showOpening && phase !== 'done'
+  const words = headline.trim().split(/\s+/)
 
   return (
     <section id="top" className="hero-stage relative min-h-[100svh] overflow-hidden">
@@ -86,7 +68,7 @@ export default function Hero() {
             <span className="hero-shock-core" />
           )}
           <div className="hero-shock-copy">
-            <p className="hero-shock-letters" aria-label={content.site.name}>
+            <p className="hero-shock-letters" aria-label={name}>
               {letters.map((ch, i) => {
                 const s = scatters[i]
                 const assembled = phase === 'assemble' || phase === 'lock' || phase === 'exit'
@@ -118,29 +100,43 @@ export default function Hero() {
         </div>
       )}
 
+      <div className="hero-field" aria-hidden />
       <div className="hero-signal" aria-hidden>
         <span className="hero-signal-ring" />
         <span className="hero-signal-ring-2" />
+        <span className="hero-signal-core" />
       </div>
-      <span className="hero-slash" aria-hidden />
+      <p className="hero-watermark" aria-hidden>
+        {shortName}
+      </p>
 
-      <div className="site-shell relative z-10 grid min-h-[100svh] items-end gap-10 pb-16 pt-28 md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] md:items-center md:pb-24 md:pt-32">
+      <div className="site-shell relative z-10 grid min-h-[100svh] items-end gap-8 pb-20 pt-28 md:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)] md:items-end md:pb-24 md:pt-32">
         <div className={ready ? 'hero-content-ready' : 'hero-content-wait'}>
-          <p className="eyebrow !text-brand/90">{hero.eyebrow}</p>
+          <p className="eyebrow !text-brand">{hero.eyebrow}</p>
 
-          <h1
-            className="mt-6 font-display text-[clamp(2.4rem,9vw,6.4rem)] font-extrabold leading-[0.92] tracking-tight text-white"
-            aria-label={headline}
-          >
-            {typed}
-            {!typingDone && ready && <span className="hero-type-caret" aria-hidden />}
+          <h1 className="hero-headline mt-5" aria-label={headline}>
+            {words.map((word, i) => {
+              const accent = i === words.length - 1 && words.length > 1
+              return (
+                <motion.span
+                  key={`${word}-${i}`}
+                  className={`hero-word ${accent ? 'is-accent' : ''}`}
+                  initial={{ y: '0.35em', opacity: 0 }}
+                  animate={{ y: ready ? 0 : '0.35em', opacity: ready ? 1 : 0 }}
+                  transition={{ delay: ready ? 0.08 + i * 0.08 : 0, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  {word}
+                  {i < words.length - 1 ? '\u00A0' : ''}
+                </motion.span>
+              )
+            })}
           </h1>
 
           <motion.p
-            className="mt-7 max-w-md text-base leading-relaxed text-white/65 md:text-lg"
+            className="mt-8 max-w-sm text-lg font-medium tracking-wide text-white/70 md:text-xl"
             initial={{ y: 14, opacity: 0 }}
             animate={{ y: ready ? 0 : 14, opacity: ready ? 1 : 0 }}
-            transition={{ delay: ready ? 0.28 : 0, duration: 0.5 }}
+            transition={{ delay: ready ? 0.35 : 0, duration: 0.5 }}
           >
             {hero.body}
           </motion.p>
@@ -149,38 +145,44 @@ export default function Hero() {
             className="mt-10 flex flex-wrap items-center gap-3"
             initial={{ y: 14, opacity: 0 }}
             animate={{ y: ready ? 0 : 14, opacity: ready ? 1 : 0 }}
-            transition={{ delay: ready ? 0.38 : 0, duration: 0.5 }}
+            transition={{ delay: ready ? 0.42 : 0, duration: 0.5 }}
           >
             <a href={hero.ctaPrimaryHref} className="btn btn-primary">
               {hero.ctaPrimaryLabel}
             </a>
-            <a href={hero.ctaSecondaryHref} className="btn btn-secondary">
+            <a href={hero.ctaSecondaryHref} className="btn btn-signal">
               {hero.ctaSecondaryLabel}
             </a>
           </motion.div>
         </div>
 
-        <motion.div
-          className="relative hidden md:block"
-          initial={{ opacity: 0, scale: 0.92 }}
-          animate={{ opacity: ready ? 1 : 0, scale: ready ? 1 : 0.92 }}
-          transition={{ delay: ready ? 0.25 : 0, duration: 0.7 }}
-          aria-hidden
+        <motion.aside
+          className="hero-side"
+          initial={{ opacity: 0, x: 24 }}
+          animate={{ opacity: ready ? 1 : 0, x: ready ? 0 : 24 }}
+          transition={{ delay: ready ? 0.3 : 0, duration: 0.65 }}
+          aria-hidden={!ready}
         >
-          <div className="ml-auto max-w-sm border border-white/10 bg-white/[0.03] p-8 backdrop-blur-sm">
-            <p className="font-display text-[clamp(2.5rem,5vw,3.5rem)] font-extrabold leading-none tracking-tight text-brand">
+          <div className="hero-side-card">
+            <p className="font-display text-[clamp(2.8rem,5vw,4rem)] font-extrabold leading-none tracking-tight text-ink">
               {shortName}
             </p>
-            <p className="mt-4 text-xs font-semibold uppercase tracking-[0.22em] text-white/50">
-              {tagline}
+            <p className="mt-3 font-serif text-xl italic text-ink/70">{tagline}</p>
+            <div className="mt-8 flex items-center gap-3">
+              <span className="h-3 w-3 bg-signal" />
+              <span className="h-3 w-10 bg-ink" />
+              <span className="h-3 w-16 bg-brand" />
+            </div>
+            <p className="mt-8 text-xs font-bold uppercase tracking-[0.22em] text-ink/50">
+              {hero.bodyAccent}
             </p>
-            <div className="mt-8 h-px w-16 bg-brand" />
-            <p className="mt-6 text-sm leading-relaxed text-white/55">{hero.bodyAccent}</p>
           </div>
-        </motion.div>
+        </motion.aside>
       </div>
 
-      <span className="sr-only">{tagline}</span>
+      <a href="#craft" className="hero-scroll" aria-label="Scroll to brand craft">
+        <span className="hero-scroll-arrow" />
+      </a>
     </section>
   )
 }
