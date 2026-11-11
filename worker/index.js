@@ -378,16 +378,41 @@ function mimeForUploadPath(pathname) {
 }
 
 /**
+ * Only allow safe /uploads/... paths for the GitHub contents proxy.
+ * Rejects encoded traversal (%2e%2e%2f), null bytes, and anything outside uploads.
+ */
+function safeUploadPath(pathname) {
+  if (typeof pathname !== 'string' || !pathname.startsWith('/uploads/')) return null
+  // Reject encoded separators / dots before decoding so %2F and %2e cannot sneak through.
+  if (/%2f|%2e|%5c|%00/i.test(pathname)) return null
+  let decoded
+  try {
+    decoded = decodeURIComponent(pathname)
+  } catch {
+    return null
+  }
+  if (decoded !== pathname && /%/.test(decoded)) return null // reject double-encoding
+  if (decoded.includes('\0') || decoded.includes('\\') || decoded.includes('..')) return null
+  const segments = decoded.split('/').filter(Boolean)
+  if (segments[0] !== 'uploads' || segments.length < 2) return null
+  if (segments.some((s) => s === '.' || s === '..' || !/^[A-Za-z0-9._-]+$/.test(s))) return null
+  return `/${segments.join('/')}`
+}
+
+/**
  * Serve CMS uploads: prefer static assets, else live from GitHub (so new logos
  * appear for everyone immediately without a redeploy).
  */
 async function serveUpload(request, env, pathname) {
+  const safePath = safeUploadPath(pathname)
+  if (!safePath) return new Response('Not found', { status: 404 })
+
   if (env.ASSETS) {
     const assetRes = await env.ASSETS.fetch(request)
     if (assetRes.status !== 404) return assetRes
   }
 
-  const cached = uploadCache.get(pathname)
+  const cached = uploadCache.get(safePath)
   if (cached && Date.now() - cached.at < 5 * 60_000) {
     return new Response(cached.bytes, {
       headers: {
@@ -399,12 +424,12 @@ async function serveUpload(request, env, pathname) {
 
   if (!hasGithub(env)) return new Response('Not found', { status: 404 })
 
-  const repoPath = `public${pathname}`
+  const repoPath = `public${safePath}`
   try {
     const file = await readTextOrBytes(env, repoPath)
     if (!file?.bytes?.length) return new Response('Not found', { status: 404 })
-    const mime = mimeForUploadPath(pathname)
-    uploadCache.set(pathname, { bytes: file.bytes, mime, at: Date.now() })
+    const mime = mimeForUploadPath(safePath)
+    uploadCache.set(safePath, { bytes: file.bytes, mime, at: Date.now() })
     return new Response(file.bytes, {
       headers: {
         'Content-Type': mime,
