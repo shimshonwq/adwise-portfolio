@@ -30,6 +30,7 @@ import {
 } from './github-store.mjs'
 import { validateLogoUpload, extForLogoMime, LOGO_MAX_BYTES } from './logo-rules.mjs'
 import { sanitizeDeep } from './text-sanitize.mjs'
+import { deliverContactMessage, validateContactPayload } from './contact-mail.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -44,6 +45,8 @@ const PORT = Number(process.env.ADMIN_API_PORT || 8787)
 const MAX_BYTES = LOGO_MAX_BYTES
 const LOGIN_MAX_ATTEMPTS = 5
 const LOGIN_WINDOW_MS = 15 * 60 * 1000
+const CONTACT_MAX_ATTEMPTS = 8
+const CONTACT_WINDOW_MS = 15 * 60 * 1000
 
 const PUBLISH_MSG =
   'Saved to GitHub — Cloudflare will rebuild the site in about 1–3 minutes.'
@@ -51,6 +54,7 @@ const PUBLISH_MSG =
 /** @type {{ record: import('./admin-auth.mjs').hashPassword extends (...args: any) => infer R ? R : never } | null} */
 let authRecord = null
 const loginAttempts = new Map()
+const contactAttempts = new Map()
 
 function ensureDirs() {
   fs.mkdirSync(DATA_DIR, { recursive: true })
@@ -98,6 +102,26 @@ function recordLoginFailure(ip) {
 
 function clearLoginFailures(ip) {
   loginAttempts.delete(ip)
+}
+
+function contactRateLimited(ip) {
+  const now = Date.now()
+  let entry = contactAttempts.get(ip)
+  if (!entry || now > entry.resetAt) {
+    entry = { count: 0, resetAt: now + CONTACT_WINDOW_MS }
+    contactAttempts.set(ip, entry)
+  }
+  return entry.count >= CONTACT_MAX_ATTEMPTS
+}
+
+function recordContactAttempt(ip) {
+  const now = Date.now()
+  let entry = contactAttempts.get(ip)
+  if (!entry || now > entry.resetAt) {
+    entry = { count: 0, resetAt: now + CONTACT_WINDOW_MS }
+  }
+  entry.count += 1
+  contactAttempts.set(ip, entry)
 }
 
 function defaultContent() {
@@ -253,6 +277,52 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === 'GET' && pathname === '/api/logos') {
       return json(res, 200, { logos: visibleLogos(await readContent()) })
+    }
+
+    if (req.method === 'POST' && pathname === '/api/contact') {
+      const ip = clientIp(req)
+      if (contactRateLimited(ip)) {
+        return json(res, 429, {
+          error: 'Too many messages from this connection. Please wait a bit and try again.',
+        })
+      }
+      recordContactAttempt(ip)
+      const body = JSON.parse((await readBody(req)).toString('utf8') || '{}')
+      const checked = validateContactPayload(body)
+      if (checked.spam) return json(res, 200, { ok: true })
+      if (!checked.ok) return json(res, checked.status, { error: checked.error })
+
+      try {
+        const content = await readContent()
+        const to = String(content?.site?.email || '').trim()
+        const result = await deliverContactMessage({
+          to,
+          payload: checked.data,
+          siteName: content?.site?.name || 'Adwise Media',
+          resendApiKey: process.env.RESEND_API_KEY || '',
+          resendFrom: process.env.RESEND_FROM || '',
+        })
+        if (result.needsActivation) {
+          return json(res, 200, {
+            ok: false,
+            needsActivation: true,
+            error: result.message,
+          })
+        }
+        return json(res, 200, { ok: true, provider: result.provider })
+      } catch (err) {
+        const message = err?.message || 'Could not send message right now.'
+        if (String(message).includes('FORMSUBMIT_CF_BLOCKED') || String(message).includes('Just a moment')) {
+          return json(res, 502, {
+            ok: false,
+            error: 'FORMSUBMIT_CF_BLOCKED',
+            fallback: 'client',
+          })
+        }
+        return json(res, 502, {
+          error: message,
+        })
+      }
     }
 
     if (req.method === 'GET' && pathname === '/api/admin/status') {
