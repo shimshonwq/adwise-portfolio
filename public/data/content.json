@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-25T23:57:53.698Z",
+  "updatedAt": "2026-09-09T04:55:14.031Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -65,9 +65,7 @@
     "eyebrow": "Some of our partnerships",
     "title": "Brands we work with",
     "subtitle": "Logos and campaigns for the brands we help grow.",
-    "emptyMessage": "Original brand marks, coming soon.",
-    "background": "white",
-    "marqueeSpeed": 0.42
+    "emptyMessage": "Original brand marks, coming soon."
   },
   "services": {
     "eyebrow": "How we move you forward",
@@ -139,7 +137,7 @@
         "num": "01",
         "title": "Research",
         "body": "We learn the business, audience, and goal - so creative isn't a guess.",
-        "tone": "white"
+        "tone": "ink"
       },
       {
         "id": "create",
@@ -211,44 +209,44 @@
   },
   "logos": [
     {
-      "id": "kalmys",
-      "name": "Kalmys",
-      "src": "/clients/kalmys.png",
+      "id": "greenpower",
+      "name": "Green Power Electric",
+      "src": "/uploads/logos/greenpower.png",
       "order": 0,
       "visible": true
     },
     {
-      "id": "shloimy",
-      "name": "Shloimy Friedlander",
-      "src": "/uploads/logos/shloimy.png",
+      "id": "mendel-style",
+      "name": "Mendel Style Events",
+      "src": "/uploads/logos/mendel-style.png",
       "order": 1,
       "visible": true
     },
     {
-      "id": "coffee-break",
-      "name": "Coffee Break",
-      "src": "/clients/coffee-break.png",
+      "id": "shvitz",
+      "name": "The Shvitz",
+      "src": "/clients/shvitz.png",
       "order": 2,
       "visible": true
     },
     {
-      "id": "flavor-max",
-      "name": "Flavor Max",
-      "src": "/clients/flavor-max.png",
+      "id": "vish-vash",
+      "name": "Vish Vash",
+      "src": "/uploads/logos/vish-vash.png",
       "order": 3,
       "visible": true
     },
     {
-      "id": "ride-24",
-      "name": "Ride 24",
-      "src": "/clients/ride-24.png",
+      "id": "hvn",
+      "name": "HVN",
+      "src": "/clients/hvn.png",
       "order": 4,
       "visible": true
     },
     {
-      "id": "planit",
-      "name": "Planit Architecture",
-      "src": "/uploads/logos/planit.png",
+      "id": "garden-gourmet",
+      "name": "Garden Gourmet",
+      "src": "/uploads/logos/garden-gourmet.png",
       "order": 5,
       "visible": true
     },
@@ -260,44 +258,44 @@
       "visible": true
     },
     {
-      "id": "garden-gourmet",
-      "name": "Garden Gourmet",
-      "src": "/clients/garden-gourmet.png",
+      "id": "planit",
+      "name": "Planit Architecture",
+      "src": "/uploads/logos/planit.png",
       "order": 7,
       "visible": true
     },
     {
-      "id": "hvn",
-      "name": "HVN",
-      "src": "/clients/hvn.png",
+      "id": "ride-24",
+      "name": "Ride 24",
+      "src": "/uploads/logos/ride-24.png",
       "order": 8,
       "visible": true
     },
     {
-      "id": "vish-vash",
-      "name": "Vish Vash",
-      "src": "/clients/vish-vash.png",
+      "id": "flavor-max",
+      "name": "Flavor Max",
+      "src": "/uploads/logos/flavor-max.png",
       "order": 9,
       "visible": true
     },
     {
-      "id": "shvitz",
-      "name": "The Shvitz",
-      "src": "/clients/shvitz.png",
+      "id": "coffee-break",
+      "name": "Coffee Break",
+      "src": "/uploads/logos/coffee-break.png",
       "order": 10,
       "visible": true
     },
     {
-      "id": "greenpower",
-      "name": "Green Power Electric",
-      "src": "/clients/greenpower.png",
+      "id": "shloimy",
+      "name": "Shloimy Friedlander",
+      "src": "/uploads/logos/shloimy.png",
       "order": 11,
       "visible": true
     },
     {
-      "id": "mendel-style",
-      "name": "Mendel Style Events",
-      "src": "/clients/mendel-style.png",
+      "id": "kalmys",
+      "name": "Kalmys",
+      "src": "/clients/kalmys.png",
       "order": 12,
       "visible": true
     }
