@@ -12,14 +12,29 @@ export function looksLikeChallenge(text: string): boolean {
   )
 }
 
+/** Only fall back to workers.dev on the real custom domain (CF may challenge /api/*). */
+export function shouldUseWorkersFallback(hostname?: string): boolean {
+  const host =
+    hostname ||
+    (typeof window !== 'undefined' ? window.location.hostname : '')
+  if (!host) return false
+  return (
+    host === 'adwisemedia.co' ||
+    host === 'www.adwisemedia.co' ||
+    host.endsWith('.adwisemedia.co')
+  )
+}
+
 /**
  * Fetch JSON from same-origin first, then workers.dev if CF challenges the zone.
+ * Preview tunnels / localhost stay same-origin only so production CMS copy cannot
+ * overwrite a redesign being reviewed off-domain.
  */
 export async function fetchJsonWithFallback<T>(
   path: string,
   init?: RequestInit,
 ): Promise<T | null> {
-  const urls = [path, `${WORKERS_API}${path}`]
+  const urls = shouldUseWorkersFallback() ? [path, `${WORKERS_API}${path}`] : [path]
   for (const url of urls) {
     try {
       const res = await fetch(url, {
