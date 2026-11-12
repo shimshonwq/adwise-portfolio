@@ -127,8 +127,8 @@ export default function Hero() {
                 <motion.span
                   key={`${word}-${i}`}
                   className={`hero-word ${accent ? 'is-accent' : ''}`}
-                  initial={{ y: '0.35em', opacity: 0 }}
-                  animate={{ y: ready ? 0 : '0.35em', opacity: ready ? 1 : 0 }}
+                  initial={false}
+                  animate={{ y: ready ? 0 : 0, opacity: 1 }}
                   transition={{ delay: ready ? 0.08 + i * 0.08 : 0, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
                 >
                   {word}
@@ -140,8 +140,8 @@ export default function Hero() {
 
           <motion.p
             className="mt-8 max-w-sm text-lg font-medium tracking-wide text-white/70 md:text-xl"
-            initial={{ y: 14, opacity: 0 }}
-            animate={{ y: ready ? 0 : 14, opacity: ready ? 1 : 0 }}
+            initial={false}
+            animate={{ y: 0, opacity: 1 }}
             transition={{ delay: ready ? 0.35 : 0, duration: 0.5 }}
           >
             {hero.body}
@@ -149,8 +149,8 @@ export default function Hero() {
 
           <motion.div
             className="mt-10 flex flex-wrap items-center gap-3"
-            initial={{ y: 14, opacity: 0 }}
-            animate={{ y: ready ? 0 : 14, opacity: ready ? 1 : 0 }}
+            initial={false}
+            animate={{ y: 0, opacity: 1 }}
             transition={{ delay: ready ? 0.42 : 0, duration: 0.5 }}
           >
             <a href={hero.ctaPrimaryHref} className="btn btn-primary">
