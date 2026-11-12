@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-09T04:55:14.031Z",
+  "updatedAt": "2026-11-11T09:10:00.000Z",
   "site": {
     "name": "Adwise Media",
     "shortName": "Adwise",
@@ -14,24 +14,20 @@
     "navCta": "Start a project",
     "nav": [
       {
-        "href": "#work",
-        "label": "Clients"
+        "href": "#craft",
+        "label": "Craft"
       },
       {
         "href": "#services",
         "label": "Services"
       },
       {
-        "href": "#process",
-        "label": "Process"
+        "href": "#work",
+        "label": "Clients"
       },
       {
         "href": "/projects/",
         "label": "Work"
-      },
-      {
-        "href": "#about",
-        "label": "About"
       },
       {
         "href": "#contact",
@@ -47,11 +43,11 @@
     "seoKeywords": "logo design, graphic design, marketing, brand identity, Adwise Media"
   },
   "hero": {
-    "openName": "ADWISE MEDIA",
-    "eyebrow": "Made to be noticed",
-    "headline": "Turn heads. Grow brands.",
-    "body": "Logo design, brand graphics, and marketing that make businesses look sharp - and get noticed.",
-    "bodyAccent": "Creative that actually works.",
+    "openName": "ADWISE",
+    "eyebrow": "Branding \u00b7 Marketing \u00b7 Design",
+    "headline": "Look twice.",
+    "body": "Logos. Graphics. Campaigns.",
+    "bodyAccent": "Made to be noticed",
     "ctaPrimaryLabel": "Our clients",
     "ctaPrimaryHref": "#work",
     "ctaSecondaryLabel": "Start a project",

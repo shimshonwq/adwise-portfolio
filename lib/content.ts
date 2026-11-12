@@ -8,6 +8,8 @@ export type LogoItem = {
   src: string
   order: number
   visible: boolean
+  /** Optional client website — logo becomes clickable when set */
+  url?: string
 }
 
 export type NavItem = { href: string; label: string }
@@ -67,12 +69,15 @@ export type CmsContent = {
     ctaSecondaryLabel: string
     ctaSecondaryHref: string
     orbitCaption: string
+    showOpening?: boolean
+    showOrbit?: boolean
   }
   clients: {
     eyebrow: string
     title: string
     subtitle: string
     emptyMessage: string
+    marqueeSpeed?: number
   }
   services: {
     eyebrow: string
@@ -139,6 +144,11 @@ export type CmsContent = {
     emailPlaceholder: string
     phonePlaceholder: string
     messagePlaceholder: string
+    captchaLabel?: string
+    captchaIdle?: string
+    captchaChecking?: string
+    captchaVerified?: string
+    background?: string
   }
   projectsPage: {
     eyebrow: string
@@ -160,17 +170,17 @@ export const ADMIN_COOKIE = 'adwise_admin'
 export const SESSION_MAX_AGE_SEC = 60 * 60 * 24 * 14
 
 export const DEFAULT_THEME: ThemeColors = {
-  ink: '#14130f',
-  inkSoft: '#1f1c16',
-  paper: '#e8dfd0',
-  paperDeep: '#d9cdb8',
+  ink: '#050505',
+  inkSoft: '#111111',
+  paper: '#f7f7f5',
+  paperDeep: '#ecece8',
   brand: '#fdc621',
-  brandDeep: '#c49200',
-  brass: '#8f7343',
-  muted: '#5c5548',
-  fontDisplay: 'bricolage',
-  fontBody: 'sora',
-  fontSerif: 'eb-garamond',
+  brandDeep: '#e0a800',
+  brass: '#a8892a',
+  muted: '#6b6b66',
+  fontDisplay: 'syne',
+  fontBody: 'outfit',
+  fontSerif: 'outfit',
   fontDisplayCustom: '',
   fontBodyCustom: '',
   fontSerifCustom: '',

@@ -39,7 +39,7 @@ export default function ContactChannels({
             rel={channel.key === 'whatsapp' ? 'noopener noreferrer' : undefined}
             aria-label={channel.label}
             title={channel.label}
-            className={`inline-flex h-12 w-12 items-center justify-center rounded-lg border text-lg transition-all hover:-translate-y-0.5 ${shell}`}
+            className={`inline-flex h-12 w-12 items-center justify-center border text-lg transition-all hover:-translate-y-0.5 ${shell}`}
           >
             <Icon />
           </a>

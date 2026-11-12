@@ -22,6 +22,14 @@
         "label": "Services"
       },
       {
+        "href": "#process",
+        "label": "Process"
+      },
+      {
+        "href": "/projects/",
+        "label": "Work"
+      },
+      {
         "href": "#about",
         "label": "About"
       },
@@ -40,26 +48,31 @@
   },
   "hero": {
     "openName": "ADWISE MEDIA",
-    "eyebrow": "Made to be noticed",
-    "headline": "Turn heads. Grow brands.",
-    "body": "Logo design, brand graphics, and marketing that make businesses look sharp - and get noticed.",
-    "bodyAccent": "Creative that actually works.",
-    "ctaPrimaryLabel": "Our clients",
+    "eyebrow": "Branding \u00b7 Marketing \u00b7 Design",
+    "headline": "Make them look twice.",
+    "body": "Bold logos, sharp graphics, and campaigns that get noticed.",
+    "bodyAccent": "Creative with a business edge.",
+    "ctaPrimaryLabel": "See clients",
     "ctaPrimaryHref": "#work",
     "ctaSecondaryLabel": "Start a project",
     "ctaSecondaryHref": "#contact",
-    "orbitCaption": "Scroll - ideas in motion."
+    "orbitCaption": "Scroll",
+    "showOpening": true,
+    "showOrbit": false,
+    "background": "ink"
   },
   "clients": {
-    "eyebrow": "Some of our partnerships",
-    "title": "Brands we work with",
-    "subtitle": "Logos and campaigns for the brands we help grow.",
-    "emptyMessage": "Original brand marks, coming soon."
+    "eyebrow": "Partnerships",
+    "title": "Brands that trust us",
+    "subtitle": "Marks and campaigns built to travel.",
+    "emptyMessage": "Original brand marks, coming soon.",
+    "background": "white",
+    "marqueeSpeed": 0.42
   },
   "services": {
-    "eyebrow": "How we move you forward",
+    "eyebrow": "Capabilities",
     "title": "What we do",
-    "subtitle": "One studio from first logo to launch campaign.",
+    "subtitle": "From first mark to full campaign.",
     "items": [
       {
         "id": "marketing",
@@ -97,81 +110,85 @@
         ],
         "tone": "gold"
       }
-    ]
+    ],
+    "background": "brand"
   },
   "spotlight": {
-    "eyebrow": "Our manifesto",
+    "eyebrow": "Manifesto",
     "titleLines": [
       "Thinking",
       "Your",
       "Next",
       "Thing"
     ],
-    "body": "Safe design gets safe results. We build logos, graphics, and campaigns that turn heads - and move the business forward.",
+    "body": "Safe work gets safe results. We build brands that turn heads \u2014 and move the business.",
     "accent": "Unexpected on purpose.",
-    "ctaPrimaryLabel": "Begin the unexpected",
+    "ctaPrimaryLabel": "Start a project",
     "ctaPrimaryHref": "/#contact",
-    "ctaSecondaryLabel": "See how we work",
-    "ctaSecondaryHref": "/#process"
+    "ctaSecondaryLabel": "How we work",
+    "ctaSecondaryHref": "/#process",
+    "background": "ink"
   },
   "process": {
-    "eyebrow": "This is how we do it",
-    "title": "A structured approach to creative.",
-    "subtitle": "Research. Planning. Execution. Creative that works like a business.",
+    "eyebrow": "Method",
+    "title": "How we work",
+    "subtitle": "Research. Create. Launch.",
     "steps": [
       {
         "id": "research",
         "num": "01",
         "title": "Research",
-        "body": "We learn the business, audience, and goal - so creative isn't a guess.",
+        "body": "Business, audience, goal \u2014 so creative isn't a guess.",
         "tone": "white"
       },
       {
         "id": "create",
         "num": "02",
         "title": "Create",
-        "body": "Strategy becomes logos, visuals, and campaigns that look sharp and stay on-brand.",
+        "body": "Logos, visuals, and campaigns that stay sharp on every channel.",
         "tone": "gold"
       },
       {
         "id": "launch",
         "num": "03",
         "title": "Launch",
-        "body": "We ship, measure, and refine - so the work keeps earning attention after go-live.",
+        "body": "Ship, measure, refine \u2014 so the work keeps earning attention.",
         "tone": "ink"
       }
-    ]
+    ],
+    "background": "paper"
   },
   "about": {
     "eyebrow": "About {shortName}",
     "title": "Local roots. Global reach.",
-    "body": "We help ambitious businesses look professional and stay consistent - from the first logo sketch to finished signage and campaign rollout.",
+    "body": "We help ambitious businesses look sharp and stay consistent \u2014 from first sketch to campaign rollout.",
     "accent": "Made to be noticed.",
     "principles": [
       {
         "id": "strategy",
         "title": "Strategy first",
-        "body": "Every decision ties back to a goal - not decoration for its own sake.",
+        "body": "Every decision ties back to a goal.",
         "tone": "ink"
       },
       {
         "id": "craft",
         "title": "Craft obsessed",
-        "body": "Clean details that make a brand feel considered and consistent.",
+        "body": "Details that make a brand feel considered.",
         "tone": "gold"
       },
       {
         "id": "lasting",
         "title": "Built to last",
-        "body": "Work that reads on a sign, a screen, a truck, and a business card.",
+        "body": "Work that reads on a sign, a screen, and a card.",
         "tone": "paper"
       }
-    ]
+    ],
+    "background": "ink"
   },
   "contact": {
     "eyebrow": "Contact",
-    "title": "Get in touch",
-    "intro": "Tell us what you're building - or reach us on WhatsApp, email, call, or text.",
+    "title": "Let's build.",
+    "intro": "Tell us what you're building \u2014 or reach us on WhatsApp, email, call, or text.",
     "formEyebrow": "Project inquiry",
     "formNote": "Usually reply within one business day.",
     "successMessage": "Thanks! We'll be in touch shortly.",
@@ -185,7 +202,12 @@
     "namePlaceholder": "Your name",
     "emailPlaceholder": "you@company.com",
     "phonePlaceholder": "Optional",
-    "messagePlaceholder": "What are you building?"
+    "messagePlaceholder": "What are you building?",
+    "background": "brand",
+    "captchaLabel": "Verify you're human",
+    "captchaIdle": "I'm not a robot",
+    "captchaChecking": "Checking...",
+    "captchaVerified": "Verified"
   },
   "logos": [
     {
@@ -281,17 +303,17 @@
     }
   ],
   "theme": {
-    "ink": "#14130f",
-    "inkSoft": "#1f1c16",
-    "paper": "#e8dfd0",
-    "paperDeep": "#d9cdb8",
+    "ink": "#050505",
+    "inkSoft": "#111111",
+    "paper": "#f7f7f5",
+    "paperDeep": "#ecece8",
     "brand": "#fdc621",
-    "brandDeep": "#c49200",
-    "brass": "#8f7343",
-    "muted": "#5c5548",
-    "fontDisplay": "bricolage",
-    "fontBody": "sora",
-    "fontSerif": "eb-garamond",
+    "brandDeep": "#e0a800",
+    "brass": "#a8892a",
+    "muted": "#6b6b66",
+    "fontDisplay": "syne",
+    "fontBody": "outfit",
+    "fontSerif": "outfit",
     "fontDisplayCustom": "",
     "fontBodyCustom": "",
     "fontSerifCustom": "",
@@ -301,8 +323,8 @@
   },
   "projectsPage": {
     "eyebrow": "Portfolio",
-    "title": "Our work",
-    "body": "Case studies and project stories are coming soon. Meanwhile, explore the brands on our homepage."
+    "title": "Selected work",
+    "body": "Logos, branding, and campaigns from Adwise Media."
   },
   "notFoundPage": {
     "title": "This page took a wrong turn",

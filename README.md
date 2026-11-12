@@ -36,14 +36,17 @@ This is the same idea as editing the repo yourself, but through a simple form.
 
 ### Production setup
 
-Cloudflare Worker handles `/login` and `/api/*`. Set secrets:
+Use a **classic GitHub PAT** with `repo` scope and **no expiration** (short-lived `ghs_` tokens expire in hours and break admin login).
 
 ```bash
-npx wrangler secret put GITHUB_TOKEN
-npx wrangler secret put GITHUB_REPO    # shimshonwq/adwise-portfolio
+# Create PAT: https://github.com/settings/tokens → Generate new token (classic) → repo → No expiration
+ADWISE_GITHUB_TOKEN=ghp_your_token npm run secrets:worker
+npm run deploy && npx wrangler deploy
 ```
 
-Ensure `data/admin-auth.json` is in the repo (`npm run bootstrap:admin` locally, then push). Passwords are stored as PBKDF2 hashes only — changing your password rotates the session key and signs out all other browsers.
+Admin login reads **only** `data/admin-auth.json` from GitHub — when you change your password in `/login`, the old password stops working immediately (no bundled fallback).
+
+Ensure `data/admin-auth.json` is in the repo (`npm run bootstrap:admin` locally, then push). Passwords are stored as PBKDF2 hashes only.
 
 Ensure Cloudflare Pages is connected to GitHub and rebuilds on push to `main`.
 

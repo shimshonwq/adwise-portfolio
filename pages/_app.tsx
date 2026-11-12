@@ -1,20 +1,27 @@
 import type { AppProps } from 'next/app'
-import { Bricolage_Grotesque, EB_Garamond, Sora } from 'next/font/google'
+import { EB_Garamond, Outfit, Syne } from 'next/font/google'
+import SkipLink from '../components/SkipLink'
 import { SiteContentProvider } from '../lib/SiteContentContext'
+import type { CmsContent } from '../lib/content'
 import '../styles/globals.css'
 
+type PageProps = {
+  initialContent?: CmsContent | null
+}
+
 /**
- * Bricolage Grotesque — distinctive display.
- * Sora — clean geometric body.
- * EB Garamond italic — editorial accent voice.
+ * Syne — bold geometric display.
+ * EB Garamond — italic editorial accent.
+ * Outfit — clean modern body.
  */
-const displayFont = Bricolage_Grotesque({
+const displayFont = Syne({
   subsets: ['latin'],
   variable: '--font-display-face',
   display: 'swap',
+  weight: ['600', '700', '800'],
 })
 
-const bodyFont = Sora({
+const bodyFont = Outfit({
   subsets: ['latin'],
   variable: '--font-body-face',
   display: 'swap',
@@ -25,11 +32,11 @@ const serifFont = EB_Garamond({
   subsets: ['latin'],
   variable: '--font-serif-face',
   display: 'swap',
-  weight: ['400', '500', '600'],
-  style: 'italic',
+  style: ['normal', 'italic'],
+  weight: ['400', '700'],
 })
 
-export default function App({ Component, pageProps }: AppProps) {
+export default function App({ Component, pageProps }: AppProps & { pageProps: PageProps }) {
   return (
     <div
       className={`${displayFont.variable} ${bodyFont.variable} ${serifFont.variable} ${bodyFont.className}`}
@@ -41,7 +48,8 @@ export default function App({ Component, pageProps }: AppProps) {
         } as React.CSSProperties
       }
     >
-      <SiteContentProvider>
+      <SkipLink />
+      <SiteContentProvider initialContent={pageProps.initialContent}>
         <Component {...pageProps} />
       </SiteContentProvider>
     </div>

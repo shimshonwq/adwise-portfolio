@@ -1,99 +1,33 @@
 import { useEffect, useMemo, useState } from 'react'
-import { motion, useScroll, useSpring, useTransform } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useSiteContent } from '../lib/SiteContentContext'
 
 type Phase = 'void' | 'burst' | 'assemble' | 'lock' | 'exit' | 'done'
 
-/** Lightbulb + craft marks that react to page scroll */
-function HeroOrbit({ active }: { active: boolean }) {
-  const { scrollY } = useScroll()
-  const yRaw = useTransform(scrollY, [0, 640], [0, 195])
-  const xRaw = useTransform(scrollY, [0, 640], [0, 48])
-  const rotateRaw = useTransform(scrollY, [0, 720], [0, 50])
-  const bulbRaw = useTransform(scrollY, [0, 720], [0, -78])
-  const ringRaw = useTransform(scrollY, [0, 720], [0, 260])
-  const scaleRaw = useTransform(scrollY, [0, 600], [1, 0.82])
-
-  const y = useSpring(yRaw, { stiffness: 70, damping: 22, mass: 0.6 })
-  const x = useSpring(xRaw, { stiffness: 70, damping: 22, mass: 0.6 })
-  const rotate = useSpring(rotateRaw, { stiffness: 55, damping: 20 })
-  const bulbRotate = useSpring(bulbRaw, { stiffness: 50, damping: 18 })
-  const ringRotate = useSpring(ringRaw, { stiffness: 40, damping: 18 })
-  const ringRev = useTransform(ringRotate, (v) => -v * 0.7)
-  const scale = useSpring(scaleRaw, { stiffness: 70, damping: 22 })
-
-  return (
-    <motion.div
-      className="hero-orbit"
-      aria-hidden
-      initial={{ opacity: 0, scale: 0.88, x: 28 }}
-      animate={active ? { opacity: 1 } : { opacity: 0 }}
-      style={active ? { y, x, rotate, scale } : undefined}
-      transition={{ duration: 0.85, delay: active ? 0.15 : 0, ease: [0.22, 1, 0.36, 1] }}
-    >
-      <div className="hero-orbit-glow" />
-      <div className="hero-orbit-core">
-        <motion.span className="hero-orbit-ring hero-orbit-ring-outer" style={{ rotate: ringRotate }} />
-        <motion.span className="hero-orbit-ring hero-orbit-ring-mid" style={{ rotate: ringRev }} />
-        <span className="hero-orbit-ring hero-orbit-ring-inner" />
-        <span className="hero-orbit-cross hero-orbit-cross-h" />
-        <span className="hero-orbit-cross hero-orbit-cross-v" />
-        <motion.span className="hero-orbit-mark" style={{ rotate: bulbRotate }}>
-          <svg viewBox="0 0 120 120" className="hero-orbit-ink" aria-hidden>
-            <path
-              d="M60 18c-16 0-28 12.5-28 28 0 10.5 5.5 19.5 14 24.2V80c0 3.3 2.7 6 6 6h16c3.3 0 6-2.7 6-6V70.2c8.5-4.7 14-13.7 14-24.2C88 30.5 76 18 60 18z"
-              fill="currentColor"
-            />
-            <path
-              d="M48 92h24M51 100h18"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="6"
-              strokeLinecap="round"
-            />
-            <path
-              d="M60 28v14M48 34l8 10M72 34l-8 10"
-              fill="none"
-              stroke="#111111"
-              strokeWidth="4"
-              strokeLinecap="round"
-              opacity="0.35"
-            />
-          </svg>
-        </motion.span>
-      </div>
-
-      <span className="hero-orbit-chip hero-orbit-chip-a" />
-      <span className="hero-orbit-chip hero-orbit-chip-b" />
-      <span className="hero-orbit-chip hero-orbit-chip-c" />
-      <span className="hero-orbit-dot hero-orbit-dot-a" />
-      <span className="hero-orbit-dot hero-orbit-dot-b" />
-      <span className="hero-orbit-dot hero-orbit-dot-c" />
-      <span className="hero-orbit-arc" />
-      <span className="hero-orbit-nib" />
-    </motion.div>
-  )
-}
-
-/** Cinematic opening — gold shock, then a quick typewriter headline */
+/** Full-bleed SIGNAL hero — massive type, yellow field, red spark */
 export default function Hero() {
   const { content } = useSiteContent()
   const { hero } = content
-  const { tagline } = content.site
+  const { tagline, shortName, name } = content.site
   const openName = hero.openName
   const headline = hero.headline
+  const showOpening = hero.showOpening !== false
   const letters = useMemo(() => openName.split(''), [openName])
 
   const [phase, setPhase] = useState<Phase>('void')
   const [ready, setReady] = useState(false)
-  const [typed, setTyped] = useState('')
-  const [typingDone, setTypingDone] = useState(false)
+  // Don't SSR the opening veil — if JS fails to hydrate (e.g. flaky tunnels),
+  // a server-rendered veil would leave visitors on a blank black page.
+  const [client, setClient] = useState(false)
+  useEffect(() => {
+    setClient(true)
+  }, [])
 
   const scatters = useMemo(
     () =>
       letters.map((_, i) => ({
         x: 0,
-        y: 14 + (i % 3) * 2,
+        y: 16 + (i % 3) * 2,
         r: 0,
         delay: 0.012 * i,
       })),
@@ -104,22 +38,20 @@ export default function Hero() {
     const reduce =
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (reduce) {
+    if (reduce || !showOpening) {
       setPhase('done')
       setReady(true)
-      setTyped(headline)
-      setTypingDone(true)
       return
     }
 
     const t1 = window.setTimeout(() => setPhase('burst'), 40)
-    const t2 = window.setTimeout(() => setPhase('assemble'), 80)
+    const t2 = window.setTimeout(() => setPhase('assemble'), 90)
     const t3 = window.setTimeout(() => setPhase('lock'), 520)
     const t4 = window.setTimeout(() => setPhase('exit'), 780)
     const t5 = window.setTimeout(() => {
       setPhase('done')
       setReady(true)
-    }, 1150)
+    }, 1120)
 
     return () => {
       window.clearTimeout(t1)
@@ -128,36 +60,21 @@ export default function Hero() {
       window.clearTimeout(t4)
       window.clearTimeout(t5)
     }
-  }, [])
+  }, [showOpening])
 
-  useEffect(() => {
-    if (!ready || typingDone) return
-    let i = 0
-    setTyped('')
-    const id = window.setInterval(() => {
-      i += 1
-      setTyped(headline.slice(0, i))
-      if (i >= headline.length) {
-        window.clearInterval(id)
-        setTypingDone(true)
-      }
-    }, 28)
-    return () => window.clearInterval(id)
-  }, [ready, typingDone, headline])
-
-  const showVeil = phase !== 'done'
+  const showVeil = client && showOpening && phase !== 'done'
+  const words = headline.trim().split(/\s+/)
 
   return (
-    <section id="top" className="relative min-h-[100svh] overflow-hidden section-aurora text-ink">
+    <section id="top" className="hero-stage relative min-h-[100svh] overflow-hidden">
       {showVeil && (
         <div className={`hero-shock ${phase === 'exit' ? 'hero-shock-exit' : ''}`} aria-hidden>
           <div className="hero-shock-void" />
           {(phase === 'burst' || phase === 'assemble' || phase === 'lock' || phase === 'exit') && (
             <span className="hero-shock-core" />
           )}
-
           <div className="hero-shock-copy">
-            <p className="hero-shock-letters" aria-label={content.site.name}>
+            <p className="hero-shock-letters" aria-label={name}>
               {letters.map((ch, i) => {
                 const s = scatters[i]
                 const assembled = phase === 'assemble' || phase === 'lock' || phase === 'exit'
@@ -182,67 +99,80 @@ export default function Hero() {
                 )
               })}
             </p>
-            <p
-              className={`hero-shock-tag ${
-                phase === 'lock' || phase === 'exit' ? 'is-visible' : ''
-              }`}
-            >
+            <p className={`hero-shock-tag ${phase === 'lock' || phase === 'exit' ? 'is-visible' : ''}`}>
               {tagline}
             </p>
           </div>
         </div>
       )}
 
-      <div className="pointer-events-none absolute inset-0 -z-0" aria-hidden>
-        <div className="hero-gold-glow absolute right-[-6%] top-[18%] h-[48vmin] w-[48vmin] blur-3xl md:right-[4%] md:top-[22%]" />
+      <div className="hero-field" aria-hidden />
+      <div className="hero-signal" aria-hidden>
+        <span className="hero-signal-ring" />
+        <span className="hero-signal-ring-2" />
+        <span className="hero-signal-core" />
       </div>
+      <p className="hero-watermark" aria-hidden>
+        {shortName}
+      </p>
 
-      <div className="site-shell relative z-10 grid min-h-[100svh] items-center gap-8 pb-14 pt-24 md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] md:gap-8 md:pb-20 md:pt-32 lg:gap-12">
-        <div className={`${ready ? 'hero-content-ready' : 'hero-content-wait'}`}>
-          <p className="mb-5 text-xs font-extrabold uppercase tracking-[0.22em] text-ink sm:tracking-[0.28em]">
-            <span className="inline-block rounded-md bg-brand px-2.5 py-1">{hero.eyebrow}</span>
-          </p>
+      <div className="site-shell relative z-10 grid min-h-[100svh] items-end gap-8 pb-20 pt-28 md:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)] md:items-end md:pb-24 md:pt-32">
+        <div className="hero-content-ready">
+          <p className="eyebrow !text-brand">{hero.eyebrow}</p>
 
-          <h1
-            className="font-display text-[clamp(1.9rem,8.4vw,5.2rem)] font-bold leading-[1.08] tracking-tight text-ink"
-            aria-label={headline}
-          >
-            {typed}
-            {!typingDone && ready && <span className="hero-type-caret" aria-hidden />}
+          <h1 className="hero-headline mt-5" aria-label={headline}>
+            {words.map((word, i) => {
+              const accent = i === words.length - 1 && words.length > 1
+              return (
+                <span key={`${word}-${i}`} className={`hero-word ${accent ? 'is-accent' : ''}`}>
+                  {word}
+                  {i < words.length - 1 ? '\u00A0' : ''}
+                </span>
+              )
+            })}
           </h1>
 
-          <motion.p
-            className="mt-6 max-w-md font-serif text-[0.98rem] leading-relaxed text-ink/80 md:text-xl"
-            initial={{ y: 14, opacity: 0 }}
-            animate={{ y: ready ? 0 : 14, opacity: ready ? 1 : 0 }}
-            transition={{ delay: ready ? 0.35 : 0, duration: 0.55 }}
-          >
-            {hero.body}{' '}
-            <span className="font-serif italic text-brass">{hero.bodyAccent}</span>
-          </motion.p>
+          <p className="mt-8 max-w-sm text-lg font-medium tracking-wide text-white/70 md:text-xl">
+            {hero.body}
+          </p>
 
-          <motion.div
-            className="mt-9 flex flex-wrap items-center gap-4"
-            initial={{ y: 14, opacity: 0 }}
-            animate={{ y: ready ? 0 : 14, opacity: ready ? 1 : 0 }}
-            transition={{ delay: ready ? 0.45 : 0, duration: 0.55 }}
-          >
+          <div className="mt-10 flex flex-wrap items-center gap-3">
             <a href={hero.ctaPrimaryHref} className="btn btn-primary">
               {hero.ctaPrimaryLabel}
             </a>
-            <a href={hero.ctaSecondaryHref} className="btn btn-brand">
+            <a href={hero.ctaSecondaryHref} className="btn btn-signal">
               {hero.ctaSecondaryLabel}
             </a>
-          </motion.div>
+          </div>
         </div>
 
-        <div className="relative mx-auto flex w-full max-w-[34rem] flex-col items-center justify-center md:max-w-none md:items-end md:justify-end">
-          <HeroOrbit active={ready} />
-          <p className="mt-3 font-serif italic text-brass md:mr-8">{hero.orbitCaption}</p>
-        </div>
+        <motion.aside
+          className="hero-side"
+          initial={{ opacity: 0, x: 24 }}
+          animate={{ opacity: ready ? 1 : 0, x: ready ? 0 : 24 }}
+          transition={{ delay: ready ? 0.3 : 0, duration: 0.65 }}
+          aria-hidden={!ready}
+        >
+          <div className="hero-side-card">
+            <p className="font-display text-[clamp(2.8rem,5vw,4rem)] font-extrabold leading-none tracking-tight text-ink">
+              {shortName}
+            </p>
+            <p className="mt-3 font-serif text-xl italic text-ink/70">{tagline}</p>
+            <div className="mt-8 flex items-center gap-3">
+              <span className="h-3 w-3 bg-signal" />
+              <span className="h-3 w-10 bg-ink" />
+              <span className="h-3 w-16 bg-brand" />
+            </div>
+            <p className="mt-8 text-xs font-bold uppercase tracking-[0.22em] text-ink/50">
+              {hero.bodyAccent}
+            </p>
+          </div>
+        </motion.aside>
       </div>
 
-      <span className="sr-only">{tagline}</span>
+      <a href="#craft" className="hero-scroll" aria-label="Scroll to brand craft">
+        <span className="hero-scroll-arrow" />
+      </a>
     </section>
   )
 }

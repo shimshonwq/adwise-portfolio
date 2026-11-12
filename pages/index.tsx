@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import Navigation from '../components/Navigation'
 import Hero from '../components/Hero'
+import BrandCraft from '../components/BrandCraft'
 import Clients from '../components/Clients'
 import Services from '../components/Services'
 import Spotlight from '../components/Spotlight'
@@ -10,7 +11,8 @@ import Contact from '../components/Contact'
 import Footer from '../components/Footer'
 import JsonLd from '../components/JsonLd'
 import { useSiteContent } from '../lib/SiteContentContext'
-import { DEFAULT_CONTENT } from '../lib/content'
+import { DEFAULT_CONTENT, type CmsContent } from '../lib/content'
+import { loadBuildContent } from '../lib/load-build-content'
 
 export default function Home() {
   const { content } = useSiteContent()
@@ -38,8 +40,9 @@ export default function Home() {
 
       <JsonLd />
       <Navigation />
-      <main>
+      <main id="main-content">
         <Hero />
+        <BrandCraft />
         <Services />
         <Clients />
         <Spotlight />
@@ -50,4 +53,9 @@ export default function Home() {
       <Footer />
     </>
   )
+}
+
+export async function getStaticProps() {
+  const initialContent: CmsContent = loadBuildContent()
+  return { props: { initialContent } }
 }
