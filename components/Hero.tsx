@@ -16,6 +16,12 @@ export default function Hero() {
 
   const [phase, setPhase] = useState<Phase>('void')
   const [ready, setReady] = useState(false)
+  // Don't SSR the opening veil — if JS fails to hydrate (e.g. flaky tunnels),
+  // a server-rendered veil would leave visitors on a blank black page.
+  const [client, setClient] = useState(false)
+  useEffect(() => {
+    setClient(true)
+  }, [])
 
   const scatters = useMemo(
     () =>
@@ -56,7 +62,7 @@ export default function Hero() {
     }
   }, [showOpening])
 
-  const showVeil = showOpening && phase !== 'done'
+  const showVeil = client && showOpening && phase !== 'done'
   const words = headline.trim().split(/\s+/)
 
   return (
