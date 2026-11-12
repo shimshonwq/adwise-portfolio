@@ -69,7 +69,7 @@ export default function Hero() {
   const words = headline.trim().split(/\s+/)
 
   return (
-    <section id="top" className="hero-stage relative min-h-[100svh] overflow-hidden">
+    <section id="top" className="hero-stage relative min-h-[78svh] overflow-hidden md:min-h-[100svh]">
       {showVeil && (
         <div className={`hero-shock ${phase === 'exit' ? 'hero-shock-exit' : ''}`} aria-hidden>
           <div className="hero-shock-void" />
@@ -119,15 +119,18 @@ export default function Hero() {
         {shortName}
       </p>
 
-      <div className="site-shell relative z-10 grid min-h-[100svh] items-center gap-6 pb-16 pt-24 md:grid-cols-[minmax(0,1.2fr)_minmax(240px,0.75fr)] md:items-end md:pb-20 md:pt-28">
-        <div className="hero-content-ready">
+      <div className="site-shell relative z-10 grid min-h-[78svh] items-start gap-6 pb-16 pt-24 md:min-h-[100svh] md:grid-cols-[minmax(0,1.2fr)_minmax(240px,0.75fr)] md:items-end md:pb-20 md:pt-28">
+        <div className="hero-content-ready relative z-20">
           <p className="eyebrow !text-brand">{hero.eyebrow}</p>
 
-          <h1 className="hero-headline mt-4" aria-label={headline}>
+          <h1 className="hero-headline mt-4 !text-white" aria-label={headline}>
             {words.map((word, i) => {
               const accent = i === words.length - 1 && words.length > 1
               return (
-                <span key={`${word}-${i}`} className={`hero-word ${accent ? 'is-accent' : ''}`}>
+                <span
+                  key={`${word}-${i}`}
+                  className={`hero-word ${accent ? 'is-accent' : '!text-white'}`}
+                >
                   {word}
                   {i < words.length - 1 ? '\u00A0' : ''}
                 </span>

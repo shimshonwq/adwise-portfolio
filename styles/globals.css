@@ -345,18 +345,25 @@ video {
 @media (max-width: 767px) {
   .hero-field {
     /* Keep yellow accent off the main copy on phones */
-    clip-path: polygon(55% 0, 100% 0, 100% 42%, 78% 28%);
-    opacity: 0.55;
+    clip-path: polygon(62% 0, 100% 0, 100% 34%, 82% 22%);
+    opacity: 0.4;
   }
   .hero-signal {
     top: 8%;
     right: -12%;
     width: min(32vmin, 160px);
     height: min(32vmin, 160px);
-    opacity: 0.7;
+    opacity: 0.55;
   }
   .hero-watermark {
     display: none;
+  }
+  .hero-headline {
+    font-size: clamp(1.85rem, 9vw, 2.6rem);
+    color: #ffffff !important;
+  }
+  .hero-shock {
+    display: none !important;
   }
 }
 
