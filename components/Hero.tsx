@@ -116,7 +116,7 @@ export default function Hero() {
         {shortName}
       </p>
 
-      <div className="site-shell relative z-10 grid min-h-[100svh] items-end gap-8 pb-20 pt-28 md:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)] md:items-end md:pb-24 md:pt-32">
+      <div className="site-shell relative z-10 grid min-h-[100svh] items-end gap-6 pb-14 pt-24 md:grid-cols-[minmax(0,1.2fr)_minmax(240px,0.75fr)] md:items-end md:pb-20 md:pt-28">
         <div className="hero-content-ready">
           <p className="eyebrow !text-brand">{hero.eyebrow}</p>
 
@@ -132,7 +132,7 @@ export default function Hero() {
             })}
           </h1>
 
-          <p className="mt-8 max-w-sm text-lg font-medium tracking-wide text-white/70 md:text-xl">
+          <p className="mt-8 max-w-sm text-sm font-medium tracking-wide text-white/70 md:text-base">
             {hero.body}
           </p>
 
@@ -154,7 +154,7 @@ export default function Hero() {
           aria-hidden={!ready}
         >
           <div className="hero-side-card">
-            <p className="font-display text-[clamp(2.8rem,5vw,4rem)] font-extrabold leading-none tracking-tight text-ink">
+            <p className="font-display text-[clamp(1.85rem,3.5vw,2.6rem)] font-extrabold leading-none tracking-tight text-ink">
               {shortName}
             </p>
             <p className="mt-3 font-serif text-xl italic text-ink/70">{tagline}</p>

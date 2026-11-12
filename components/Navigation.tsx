@@ -95,7 +95,7 @@ export default function Navigation() {
                 <motion.a
                   key={item.href}
                   href={`/${item.href}`}
-                  className="font-display text-3xl font-extrabold tracking-tight text-white"
+                  className="font-display text-2xl font-extrabold tracking-tight text-white"
                   initial={{ y: 12, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.04 * i }}

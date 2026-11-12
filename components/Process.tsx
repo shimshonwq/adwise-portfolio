@@ -6,10 +6,10 @@ export default function Process() {
   const copy = content.process
 
   return (
-    <section id="process" className="process-stage scroll-mt-24 py-20 md:py-28">
+    <section id="process" className="process-stage scroll-mt-24 py-14 md:py-20">
       <div className="site-shell">
         <p className="eyebrow !text-ink/45">{copy.eyebrow}</p>
-        <h2 className="mt-4 font-display text-[clamp(2rem,6vw,3.8rem)] font-extrabold tracking-tight text-ink">
+        <h2 className="mt-4 font-display text-[clamp(1.5rem,4.5vw,2.5rem)] font-extrabold tracking-tight text-ink">
           {copy.title}{' '}
           <span className="font-serif italic text-signal">{copy.subtitle}</span>
         </h2>
@@ -27,7 +27,7 @@ export default function Process() {
               <span className="font-display text-sm font-bold tracking-[0.22em] opacity-60">
                 {step.num}
               </span>
-              <h3 className="mt-8 whitespace-nowrap font-display text-[clamp(1.85rem,3.2vw,2.75rem)] font-extrabold leading-none tracking-tight">
+              <h3 className="mt-8 whitespace-nowrap font-display text-[clamp(1.35rem,2.8vw,1.9rem)] font-extrabold leading-none tracking-tight">
                 {step.title}
               </h3>
             </motion.article>

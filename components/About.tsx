@@ -9,14 +9,14 @@ export default function About() {
 
   return (
     <section id="about" className="about-band scroll-mt-24 overflow-hidden">
-      <div className="site-shell py-16 md:py-20">
+      <div className="site-shell py-12 md:py-16">
         <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
           <div className="max-w-3xl">
             <p className="eyebrow !text-ink/50">{eyebrow}</p>
-            <h2 className="mt-4 font-display text-[clamp(2.2rem,7vw,4.8rem)] font-extrabold leading-[0.92] tracking-tight text-ink">
+            <h2 className="mt-4 font-display text-[clamp(1.6rem,5vw,2.85rem)] font-extrabold leading-[0.92] tracking-tight text-ink">
               {copy.title}
             </h2>
-            <p className="mt-5 max-w-lg font-serif text-xl italic text-ink/70 md:text-2xl">
+            <p className="mt-5 max-w-lg font-serif text-base italic text-ink/70 md:text-lg">
               {copy.accent}
             </p>
           </div>
