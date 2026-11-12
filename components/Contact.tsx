@@ -184,7 +184,7 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact" className="contact-stage scroll-mt-24 relative overflow-hidden py-24 md:py-32">
+    <section id="contact" className="contact-stage scroll-mt-24 relative overflow-hidden py-14 md:py-20">
       <div
         className="pointer-events-none absolute -left-24 bottom-0 h-80 w-80 rounded-full bg-brand/15 blur-3xl"
         aria-hidden
@@ -201,7 +201,7 @@ export default function Contact() {
           <AnimatedText
             as="h2"
             text={copy.title}
-            className="mt-4 font-display text-[clamp(1.9rem,5.5vw,3.6rem)] font-extrabold tracking-tight text-white"
+            className="mt-4 font-display text-[clamp(1.5rem,4vw,2.5rem)] font-extrabold tracking-tight text-white"
           />
           <p className="mt-5 max-w-md text-base leading-relaxed text-white/60 md:text-lg">
             {copy.intro}

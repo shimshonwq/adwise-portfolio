@@ -7,7 +7,7 @@ export default function Spotlight() {
   const copy = content.spotlight
 
   return (
-    <section className="spotlight-stage relative overflow-hidden py-24 md:py-36">
+    <section className="spotlight-stage relative overflow-hidden py-16 md:py-24">
       <div className="spotlight-glow" aria-hidden />
       <div className="site-shell relative z-10">
         <motion.p
@@ -19,7 +19,7 @@ export default function Spotlight() {
           {copy.eyebrow}
         </motion.p>
 
-        <h2 className="mt-8 max-w-5xl font-display text-[clamp(2.8rem,12vw,8rem)] font-extrabold leading-[0.88] tracking-tight text-white">
+        <h2 className="mt-8 max-w-5xl font-display text-[clamp(2rem,7.5vw,4.5rem)] font-extrabold leading-[0.88] tracking-tight text-white">
           {copy.titleLines.map((line, i) => {
             const serif = i === 1 || i === copy.titleLines.length - 1
             return (

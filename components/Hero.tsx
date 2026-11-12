@@ -38,7 +38,10 @@ export default function Hero() {
     const reduce =
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (reduce || !showOpening) {
+    const narrow =
+      typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
+    // Skip the full-screen opening veil on phones — it was blanking the hero.
+    if (reduce || !showOpening || narrow) {
       setPhase('done')
       setReady(true)
       return
@@ -66,7 +69,7 @@ export default function Hero() {
   const words = headline.trim().split(/\s+/)
 
   return (
-    <section id="top" className="hero-stage relative min-h-[100svh] overflow-hidden">
+    <section id="top" className="hero-stage relative min-h-[78svh] overflow-hidden md:min-h-[100svh]">
       {showVeil && (
         <div className={`hero-shock ${phase === 'exit' ? 'hero-shock-exit' : ''}`} aria-hidden>
           <div className="hero-shock-void" />
@@ -116,15 +119,18 @@ export default function Hero() {
         {shortName}
       </p>
 
-      <div className="site-shell relative z-10 grid min-h-[100svh] items-end gap-8 pb-20 pt-28 md:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)] md:items-end md:pb-24 md:pt-32">
-        <div className="hero-content-ready">
+      <div className="site-shell relative z-10 grid min-h-[78svh] items-start gap-6 pb-16 pt-24 md:min-h-[100svh] md:grid-cols-[minmax(0,1.2fr)_minmax(240px,0.75fr)] md:items-end md:pb-20 md:pt-28">
+        <div className="hero-content-ready relative z-20">
           <p className="eyebrow !text-brand">{hero.eyebrow}</p>
 
-          <h1 className="hero-headline mt-5" aria-label={headline}>
+          <h1 className="hero-headline mt-4 !text-white" aria-label={headline}>
             {words.map((word, i) => {
               const accent = i === words.length - 1 && words.length > 1
               return (
-                <span key={`${word}-${i}`} className={`hero-word ${accent ? 'is-accent' : ''}`}>
+                <span
+                  key={`${word}-${i}`}
+                  className={`hero-word ${accent ? 'is-accent' : '!text-white'}`}
+                >
                   {word}
                   {i < words.length - 1 ? '\u00A0' : ''}
                 </span>
@@ -132,11 +138,11 @@ export default function Hero() {
             })}
           </h1>
 
-          <p className="mt-8 max-w-sm text-lg font-medium tracking-wide text-white/70 md:text-xl">
+          <p className="mt-5 max-w-sm text-sm font-medium tracking-wide text-white/70 md:mt-8 md:text-base">
             {hero.body}
           </p>
 
-          <div className="mt-10 flex flex-wrap items-center gap-3">
+          <div className="mt-7 flex flex-wrap items-center gap-3 md:mt-10">
             <a href={hero.ctaPrimaryHref} className="btn btn-primary">
               {hero.ctaPrimaryLabel}
             </a>
@@ -147,14 +153,14 @@ export default function Hero() {
         </div>
 
         <motion.aside
-          className="hero-side"
+          className="hero-side hidden md:block"
           initial={{ opacity: 0, x: 24 }}
           animate={{ opacity: ready ? 1 : 0, x: ready ? 0 : 24 }}
           transition={{ delay: ready ? 0.3 : 0, duration: 0.65 }}
           aria-hidden={!ready}
         >
           <div className="hero-side-card">
-            <p className="font-display text-[clamp(2.8rem,5vw,4rem)] font-extrabold leading-none tracking-tight text-ink">
+            <p className="font-display text-[clamp(1.85rem,3.5vw,2.6rem)] font-extrabold leading-none tracking-tight text-ink">
               {shortName}
             </p>
             <p className="mt-3 font-serif text-xl italic text-ink/70">{tagline}</p>

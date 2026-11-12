@@ -88,12 +88,12 @@ export default function Clients() {
   }
 
   return (
-    <section id="work" className="clients-stage scroll-mt-24 relative overflow-hidden py-14 md:py-20">
+    <section id="work" className="clients-stage scroll-mt-24 relative overflow-hidden py-10 md:py-14">
       <div className="site-shell relative z-10">
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="eyebrow !text-brand">{copy.eyebrow}</p>
-            <h2 className="mt-3 font-display text-[clamp(1.7rem,4.5vw,2.8rem)] font-extrabold tracking-tight text-white">
+            <h2 className="mt-3 font-display text-[clamp(1.35rem,3.5vw,2rem)] font-extrabold tracking-tight text-white">
               {copy.title}
             </h2>
           </div>

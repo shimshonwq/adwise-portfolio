@@ -123,8 +123,8 @@ video {
   align-items: center;
   justify-content: center;
   gap: 0.55rem;
-  padding: 0.95rem 1.6rem;
-  font-size: 0.82rem;
+  padding: 0.8rem 1.25rem;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -344,8 +344,26 @@ video {
 }
 @media (max-width: 767px) {
   .hero-field {
-    clip-path: polygon(20% 62%, 100% 38%, 100% 100%, 0 100%);
-    opacity: 0.88;
+    /* Keep yellow accent off the main copy on phones */
+    clip-path: polygon(62% 0, 100% 0, 100% 34%, 82% 22%);
+    opacity: 0.4;
+  }
+  .hero-signal {
+    top: 8%;
+    right: -12%;
+    width: min(32vmin, 160px);
+    height: min(32vmin, 160px);
+    opacity: 0.55;
+  }
+  .hero-watermark {
+    display: none;
+  }
+  .hero-headline {
+    font-size: clamp(1.85rem, 9vw, 2.6rem);
+    color: #ffffff !important;
+  }
+  .hero-shock {
+    display: none !important;
   }
 }
 
@@ -353,8 +371,8 @@ video {
   position: absolute;
   right: clamp(-6%, 2vw, 8%);
   top: 14%;
-  width: min(56vmin, 460px);
-  height: min(56vmin, 460px);
+  width: min(36vmin, 280px);
+  height: min(36vmin, 280px);
   border-radius: 999px;
   pointer-events: none;
   z-index: 1;
@@ -429,7 +447,7 @@ video {
   z-index: 0;
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(6rem, 28vw, 22rem);
+  font-size: clamp(4rem, 16vw, 11rem);
   font-weight: 800;
   line-height: 0.8;
   letter-spacing: -0.08em;
@@ -440,13 +458,12 @@ video {
 }
 
 .hero-headline {
-  display: flex;
-  flex-wrap: wrap;
+  display: block;
   max-width: 14ch;
   font-family: var(--font-display);
-  font-size: clamp(3.2rem, 11vw, 7.5rem);
+  font-size: clamp(2.15rem, 7.5vw, 4.5rem);
   font-weight: 800;
-  line-height: 0.9;
+  line-height: 0.95;
   letter-spacing: -0.055em;
   color: #ffffff;
 }
@@ -465,21 +482,21 @@ video {
 
 .hero-side {
   justify-self: end;
-  width: min(100%, 22rem);
+  width: min(100%, 17rem);
 }
 
 .hero-side-card {
   position: relative;
   background: var(--color-brand);
   color: var(--color-ink);
-  padding: 1.75rem 1.6rem 1.5rem;
+  padding: 1.25rem 1.15rem 1.1rem;
   border: 1.5px solid var(--color-ink);
-  box-shadow: 10px 10px 0 0 var(--color-signal);
+  box-shadow: 8px 8px 0 0 var(--color-signal);
 }
 @media (min-width: 768px) {
   .hero-side-card {
-    padding: 2rem 1.85rem 1.75rem;
-    box-shadow: 12px 12px 0 0 var(--color-signal);
+    padding: 1.5rem 1.35rem 1.25rem;
+    box-shadow: 10px 10px 0 0 var(--color-signal);
   }
 }
 
@@ -626,7 +643,7 @@ video {
   justify-content: center;
   gap: 0.02em;
   font-family: var(--font-display);
-  font-size: clamp(1.8rem, 8vw, 5rem);
+  font-size: clamp(1.35rem, 5.5vw, 3rem);
   font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1;
@@ -745,7 +762,7 @@ video {
 
 .craft-board-wide {
   grid-column: 1 / -1;
-  min-height: 14rem;
+  min-height: 10.5rem;
   justify-content: center;
   align-items: flex-start;
 }
@@ -885,20 +902,20 @@ video {
 .service-panel-inner {
   display: grid;
   gap: 1.25rem;
-  padding-block: 2rem;
+  padding-block: 1.35rem;
 }
 @media (min-width: 768px) {
   .service-panel-inner {
-    grid-template-columns: 6.5rem minmax(0, 1fr);
+    grid-template-columns: 5rem minmax(0, 1fr);
     align-items: start;
-    gap: 2.5rem;
-    padding-block: 2.75rem;
+    gap: 1.75rem;
+    padding-block: 1.85rem;
   }
 }
 
 .service-num {
   font-family: var(--font-display);
-  font-size: clamp(2.5rem, 6vw, 4.2rem);
+  font-size: clamp(1.75rem, 4.5vw, 2.75rem);
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.06em;
@@ -1014,7 +1031,7 @@ video {
 
 .process-card {
   position: relative;
-  min-height: 14rem;
+  min-height: 10.5rem;
   padding: 1.5rem 1.35rem 1.75rem;
   border: 1.5px solid rgb(5 5 5 / 0.1);
   overflow: hidden;
@@ -1028,7 +1045,7 @@ video {
 
 .process-card h3 {
   white-space: nowrap;
-  font-size: clamp(1.85rem, 3.2vw, 2.75rem);
+  font-size: clamp(1.35rem, 2.6vw, 1.9rem);
   line-height: 1;
   letter-spacing: -0.045em;
 }

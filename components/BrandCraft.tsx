@@ -49,12 +49,12 @@ export default function BrandCraft() {
   const featured = logos.slice(0, 6)
 
   return (
-    <section id="craft" className="craft-stage scroll-mt-24 overflow-hidden py-16 md:py-24">
+    <section id="craft" className="craft-stage scroll-mt-24 overflow-hidden py-12 md:py-16">
       <div className="site-shell">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="eyebrow !text-ink/45">Brand craft</p>
-            <h2 className="mt-3 max-w-xl font-display text-[clamp(2.2rem,7vw,4.6rem)] font-extrabold leading-[0.92] tracking-tight text-ink">
+            <h2 className="mt-3 max-w-xl font-display text-[clamp(1.6rem,5vw,2.85rem)] font-extrabold leading-[0.92] tracking-tight text-ink">
               Logos that{' '}
               <span className="font-serif italic text-signal">land</span>
             </h2>
@@ -103,7 +103,7 @@ export default function BrandCraft() {
             transition={{ duration: 0.55, delay: 0.2 }}
             className="craft-board craft-board-signal craft-board-wide"
           >
-            <p className="font-display text-[clamp(1.8rem,4vw,3rem)] font-extrabold leading-none tracking-tight text-white">
+            <p className="font-display text-[clamp(1.35rem,3vw,2rem)] font-extrabold leading-none tracking-tight text-white">
               Thinking your
               <br />
               <span className="font-serif italic text-brand">next thing</span>
