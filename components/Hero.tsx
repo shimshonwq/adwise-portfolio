@@ -116,11 +116,11 @@ export default function Hero() {
         {shortName}
       </p>
 
-      <div className="site-shell relative z-10 grid min-h-[100svh] items-end gap-6 pb-14 pt-24 md:grid-cols-[minmax(0,1.2fr)_minmax(240px,0.75fr)] md:items-end md:pb-20 md:pt-28">
+      <div className="site-shell relative z-10 grid min-h-[100svh] items-center gap-6 pb-16 pt-24 md:grid-cols-[minmax(0,1.2fr)_minmax(240px,0.75fr)] md:items-end md:pb-20 md:pt-28">
         <div className="hero-content-ready">
           <p className="eyebrow !text-brand">{hero.eyebrow}</p>
 
-          <h1 className="hero-headline mt-5" aria-label={headline}>
+          <h1 className="hero-headline mt-4" aria-label={headline}>
             {words.map((word, i) => {
               const accent = i === words.length - 1 && words.length > 1
               return (
@@ -132,11 +132,11 @@ export default function Hero() {
             })}
           </h1>
 
-          <p className="mt-8 max-w-sm text-sm font-medium tracking-wide text-white/70 md:text-base">
+          <p className="mt-5 max-w-sm text-sm font-medium tracking-wide text-white/70 md:mt-8 md:text-base">
             {hero.body}
           </p>
 
-          <div className="mt-10 flex flex-wrap items-center gap-3">
+          <div className="mt-7 flex flex-wrap items-center gap-3 md:mt-10">
             <a href={hero.ctaPrimaryHref} className="btn btn-primary">
               {hero.ctaPrimaryLabel}
             </a>
@@ -147,7 +147,7 @@ export default function Hero() {
         </div>
 
         <motion.aside
-          className="hero-side"
+          className="hero-side hidden md:block"
           initial={{ opacity: 0, x: 24 }}
           animate={{ opacity: ready ? 1 : 0, x: ready ? 0 : 24 }}
           transition={{ delay: ready ? 0.3 : 0, duration: 0.65 }}

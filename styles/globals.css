@@ -344,8 +344,19 @@ video {
 }
 @media (max-width: 767px) {
   .hero-field {
-    clip-path: polygon(20% 62%, 100% 38%, 100% 100%, 0 100%);
-    opacity: 0.88;
+    /* Keep yellow accent off the main copy on phones */
+    clip-path: polygon(55% 0, 100% 0, 100% 42%, 78% 28%);
+    opacity: 0.55;
+  }
+  .hero-signal {
+    top: 8%;
+    right: -12%;
+    width: min(32vmin, 160px);
+    height: min(32vmin, 160px);
+    opacity: 0.7;
+  }
+  .hero-watermark {
+    display: none;
   }
 }
 
