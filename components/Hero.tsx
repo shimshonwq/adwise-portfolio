@@ -117,49 +117,33 @@ export default function Hero() {
       </p>
 
       <div className="site-shell relative z-10 grid min-h-[100svh] items-end gap-8 pb-20 pt-28 md:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)] md:items-end md:pb-24 md:pt-32">
-        <div className={ready ? 'hero-content-ready' : 'hero-content-wait'}>
+        <div className="hero-content-ready">
           <p className="eyebrow !text-brand">{hero.eyebrow}</p>
 
           <h1 className="hero-headline mt-5" aria-label={headline}>
             {words.map((word, i) => {
               const accent = i === words.length - 1 && words.length > 1
               return (
-                <motion.span
-                  key={`${word}-${i}`}
-                  className={`hero-word ${accent ? 'is-accent' : ''}`}
-                  initial={false}
-                  animate={{ y: ready ? 0 : 0, opacity: 1 }}
-                  transition={{ delay: ready ? 0.08 + i * 0.08 : 0, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-                >
+                <span key={`${word}-${i}`} className={`hero-word ${accent ? 'is-accent' : ''}`}>
                   {word}
                   {i < words.length - 1 ? '\u00A0' : ''}
-                </motion.span>
+                </span>
               )
             })}
           </h1>
 
-          <motion.p
-            className="mt-8 max-w-sm text-lg font-medium tracking-wide text-white/70 md:text-xl"
-            initial={false}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: ready ? 0.35 : 0, duration: 0.5 }}
-          >
+          <p className="mt-8 max-w-sm text-lg font-medium tracking-wide text-white/70 md:text-xl">
             {hero.body}
-          </motion.p>
+          </p>
 
-          <motion.div
-            className="mt-10 flex flex-wrap items-center gap-3"
-            initial={false}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: ready ? 0.42 : 0, duration: 0.5 }}
-          >
+          <div className="mt-10 flex flex-wrap items-center gap-3">
             <a href={hero.ctaPrimaryHref} className="btn btn-primary">
               {hero.ctaPrimaryLabel}
             </a>
             <a href={hero.ctaSecondaryHref} className="btn btn-signal">
               {hero.ctaSecondaryLabel}
             </a>
-          </motion.div>
+          </div>
         </div>
 
         <motion.aside
