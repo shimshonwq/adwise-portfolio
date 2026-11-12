@@ -38,7 +38,10 @@ export default function Hero() {
     const reduce =
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (reduce || !showOpening) {
+    const narrow =
+      typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
+    // Skip the full-screen opening veil on phones — it was blanking the hero.
+    if (reduce || !showOpening || narrow) {
       setPhase('done')
       setReady(true)
       return
